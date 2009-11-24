@@ -168,6 +168,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_uint_t                      hash_key;
     ngx_http_memc_cmd_t             memc_cmd;
 
+    /* XXX optimization ... */
     if (r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD)) {
         rc = ngx_http_discard_request_body(r);
 
@@ -188,11 +189,44 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         vv->not_found = 0;
         vv->valid = 1;
         vv->no_cacheable = 0;
-        vv->len = sizeof("get") - 1;
-        vv->data = (u_char*) "get";
-        memc_cmd = ngx_http_memc_cmd_get;
+
+        if (r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD)) {
+            vv->len = sizeof("get") - 1;
+            vv->data = (u_char*) "get";
+            memc_cmd = ngx_http_memc_cmd_get;
+
+        } else if (r->method == NGX_HTTP_POST) {
+            vv->len = sizeof("add") - 1;
+            vv->data = (u_char*) "add";
+            memc_cmd = ngx_http_memc_cmd_add;
+
+        } else if (r->method == NGX_HTTP_PUT) {
+            vv->len = sizeof("set") - 1;
+            vv->data = (u_char*) "set";
+            memc_cmd = ngx_http_memc_cmd_set;
+
+        } else if (r->method == NGX_HTTP_DELETE) {
+            vv->len = sizeof("delete") - 1;
+            vv->data = (u_char*) "delete";
+            memc_cmd = ngx_http_memc_cmd_delete;
+
+        } else {
+            ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+             "ngx_memc: $memc_cmd variable requires explicit "
+             "assignment for HTTP request method %V",
+             &r->method_name);
+
+            return NGX_HTTP_BAD_REQUEST;
+        }
     } else {
         memc_cmd = ngx_http_memc_parse_cmd(vv->data, vv->len);
+
+        if (memc_cmd == ngx_http_memc_cmd_unknown) {
+            ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+             "ngx_memc: unknown $memc_cmd \"%v\"", vv);
+
+            return NGX_HTTP_BAD_REQUEST;
+        }
     }
 
     if (ngx_http_set_content_type(r) != NGX_OK) {
@@ -244,6 +278,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     return NGX_DONE;
 }
+
 
 static ngx_int_t
 ngx_http_memc_reinit_request(ngx_http_request_t *r)

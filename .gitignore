@@ -27,3 +27,4 @@ reset
 genmobi.sh
 *.mobi
 misc/chunked
+reindex
