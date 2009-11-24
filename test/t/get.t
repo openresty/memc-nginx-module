@@ -15,6 +15,7 @@ __DATA__
 preset foo to bar...
 --- config
     location /foo {
+        #set $memc_cmd get;
         set $memc_key foo;
         memc_pass 127.0.0.1:11984;
     }

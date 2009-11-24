@@ -4,9 +4,36 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
+typedef enum {
+    ngx_http_memc_cmd_set,
+    ngx_http_memc_cmd_add,
+    ngx_http_memc_cmd_replace,
+    ngx_http_memc_cmd_append,
+    ngx_http_memc_cmd_prepend,
+    ngx_http_memc_cmd_cas,
+
+    ngx_http_memc_cmd_get,
+    ngx_http_memc_cmd_gets,
+
+    ngx_http_memc_cmd_delete,
+
+    ngx_http_memc_cmd_incr,
+    ngx_http_memc_cmd_decr,
+
+    ngx_http_memc_cmd_stats,
+
+    ngx_http_memc_cmd_flush_all,
+    ngx_http_memc_cmd_version,
+    ngx_http_memc_cmd_verbosity,
+    /* we do not want to support the "quit" command here */
+
+    ngx_http_memc_cmd_unknown
+} ngx_http_memc_cmd_t;
+
 typedef struct {
     ngx_http_upstream_conf_t   upstream;
-    ngx_int_t                  index;
+    ngx_int_t                  key_var_index;
+    ngx_int_t                  cmd_var_index;
 } ngx_http_memc_loc_conf_t;
 
 typedef struct {

@@ -12,7 +12,7 @@ ngx_http_memc_process_header(ngx_http_request_t *r)
     u_char                    *p, *len;
     ngx_str_t                  line;
     ngx_http_upstream_t       *u;
-    ngx_http_memc_ctx_t  *ctx;
+    ngx_http_memc_ctx_t       *ctx;
 
     u = r->upstream;
 

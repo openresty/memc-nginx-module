@@ -13,11 +13,11 @@ ngx_http_memc_create_request(ngx_http_request_t *r)
     ngx_chain_t                    *cl;
     ngx_http_memc_ctx_t            *ctx;
     ngx_http_variable_value_t      *vv;
-    ngx_http_memc_loc_conf_t  *mlcf;
+    ngx_http_memc_loc_conf_t       *mlcf;
 
     mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
 
-    vv = ngx_http_get_indexed_variable(r, mlcf->index);
+    vv = ngx_http_get_indexed_variable(r, mlcf->key_var_index);
 
     if (vv == NULL || vv->not_found || vv->len == 0) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,

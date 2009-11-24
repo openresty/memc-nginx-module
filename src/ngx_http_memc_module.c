@@ -1,3 +1,5 @@
+#define DDEBUG 1
+#include "ddebug.h"
 
 /*
  * Copyright (C) Igor Sysoev
@@ -7,17 +9,20 @@
  * Copyright (C) agentzh (章亦春)
  */
 
-#define DDEBUG 1
-#include "ddebug.h"
-
 #include "ngx_http_memc_module.h"
 #include "ngx_http_memc_request.h"
 #include "ngx_http_memc_response.h"
+#include "ngx_http_memc_util.h"
 
 #include <ngx_config.h>
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <nginx.h>
+
+static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
+static ngx_str_t  ngx_http_memc_cmd = ngx_string("memc_cmd");
+
+static ngx_http_memc_cmd_t ngx_http_memc_parse_cmd(u_char *data, size_t len);
 
 static ngx_int_t ngx_http_memc_reinit_request(ngx_http_request_t *r);
 static void ngx_http_memc_abort_request(ngx_http_request_t *r);
@@ -151,25 +156,43 @@ ngx_module_t  ngx_http_memc_module = {
 };
 
 
-static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
-
-
 static ngx_int_t
 ngx_http_memc_handler(ngx_http_request_t *r)
 {
     ngx_int_t                       rc;
     ngx_http_upstream_t            *u;
-    ngx_http_memc_ctx_t       *ctx;
-    ngx_http_memc_loc_conf_t  *mlcf;
+    ngx_http_memc_ctx_t            *ctx;
+    ngx_http_memc_loc_conf_t       *mlcf;
+    /* ngx_int_t                       index; */
+    ngx_http_variable_value_t      *vv;
+    ngx_uint_t                      hash_key;
+    ngx_http_memc_cmd_t             memc_cmd;
 
-    if (!(r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD))) {
-        return NGX_HTTP_NOT_ALLOWED;
+    if (r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD)) {
+        rc = ngx_http_discard_request_body(r);
+
+        if (rc != NGX_OK) {
+            return rc;
+        }
     }
 
-    rc = ngx_http_discard_request_body(r);
+    hash_key = ngx_hash_key(ngx_http_memc_cmd.data, ngx_http_memc_cmd.len);
 
-    if (rc != NGX_OK) {
-        return rc;
+    vv = ngx_http_get_variable(r, &ngx_http_memc_cmd, hash_key, 1);
+    if (vv == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    if (vv->not_found) {
+        dd("variable $memc_cmd not found");
+        vv->not_found = 0;
+        vv->valid = 1;
+        vv->no_cacheable = 0;
+        vv->len = sizeof("get") - 1;
+        vv->data = (u_char*) "get";
+        memc_cmd = ngx_http_memc_cmd_get;
+    } else {
+        memc_cmd = ngx_http_memc_parse_cmd(vv->data, vv->len);
     }
 
     if (ngx_http_set_content_type(r) != NGX_OK) {
@@ -287,7 +310,8 @@ ngx_http_memc_create_loc_conf(ngx_conf_t *cf)
     conf->upstream.pass_request_headers = 0;
     conf->upstream.pass_request_body = 0;
 
-    conf->index = NGX_CONF_UNSET;
+    conf->key_var_index = NGX_CONF_UNSET;
+    conf->cmd_var_index = NGX_CONF_UNSET;
 
     return conf;
 }
@@ -327,8 +351,12 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
         conf->upstream.upstream = prev->upstream.upstream;
     }
 
-    if (conf->index == NGX_CONF_UNSET) {
-        conf->index = prev->index;
+    if (conf->key_var_index == NGX_CONF_UNSET) {
+        conf->key_var_index = prev->key_var_index;
+    }
+
+    if (conf->cmd_var_index == NGX_CONF_UNSET) {
+        conf->cmd_var_index = prev->cmd_var_index;
     }
 
     return NGX_CONF_OK;
@@ -368,9 +396,9 @@ ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         clcf->auto_redirect = 1;
     }
 
-    mlcf->index = ngx_http_get_variable_index(cf, &ngx_http_memc_key);
+    mlcf->key_var_index = ngx_http_get_variable_index(cf, &ngx_http_memc_key);
 
-    if (mlcf->index == NGX_ERROR) {
+    if (mlcf->key_var_index == NGX_ERROR) {
         return NGX_CONF_ERROR;
     }
 
@@ -402,3 +430,96 @@ ngx_http_memc_upstream_fail_timeout_unsupported(ngx_conf_t *cf,
 
     return NGX_CONF_ERROR;
 }
+
+
+static ngx_http_memc_cmd_t
+ngx_http_memc_parse_cmd(u_char *data, size_t len)
+{
+    switch (len) {
+        case 3:
+            if (ngx_str3cmp(data, 's', 'e', 't')) {
+                return ngx_http_memc_cmd_set;
+            }
+
+            if (ngx_str3cmp(data, 'a', 'd', 'd')) {
+                return ngx_http_memc_cmd_add;
+            }
+
+            if (ngx_str3cmp(data, 'c', 'a', 's')) {
+                return ngx_http_memc_cmd_cas;
+            }
+
+            if (ngx_str3cmp(data, 'g', 'e', 't')) {
+                return ngx_http_memc_cmd_get;
+            }
+
+            break;
+
+        case 4:
+            if (ngx_str4cmp(data, 'g', 'e', 't', 's')) {
+                return ngx_http_memc_cmd_gets;
+            }
+
+            if (ngx_str4cmp(data, 'i', 'n', 'c', 'r')) {
+                return ngx_http_memc_cmd_incr;
+            }
+
+            if (ngx_str4cmp(data, 'd', 'e', 'c', 'r')) {
+                return ngx_http_memc_cmd_decr;
+            }
+
+            break;
+
+        case 5:
+            if (ngx_str5cmp(data, 's', 't', 'a', 't', 's')) {
+                return ngx_http_memc_cmd_decr;
+            }
+
+            break;
+
+        case 6:
+            if (ngx_str6cmp(data, 'a', 'p', 'p', 'e', 'n', 'd')) {
+                return ngx_http_memc_cmd_append;
+            }
+
+            if (ngx_str6cmp(data, 'd', 'e', 'l', 'e', 't', 'e')) {
+                return ngx_http_memc_cmd_delete;
+            }
+
+            break;
+
+        case 7:
+            if (ngx_str7cmp(data, 'r', 'e', 'p', 'l', 'a', 'c', 'e')) {
+                return ngx_http_memc_cmd_replace;
+            }
+
+            if (ngx_str7cmp(data, 'p', 'r', 'e', 'p', 'e', 'n', 'd')) {
+                return ngx_http_memc_cmd_prepend;
+            }
+
+            if (ngx_str7cmp(data, 'v', 'e', 'r', 's', 'i', 'o', 'n')) {
+                return ngx_http_memc_cmd_version;
+            }
+
+            break;
+
+        case 9:
+            if (ngx_str9cmp(data, 'f', 'l', 'u', 's', 'h', '_', 'a', 'l', 'l'))
+            {
+                return ngx_http_memc_cmd_flush_all;
+            }
+
+            if (ngx_str9cmp(data, 'v', 'e', 'r', 'b', 'o', 's', 'i', 't', 'y'))
+            {
+                return ngx_http_memc_cmd_verbosity;
+            }
+
+            break;
+
+        default:
+            break;
+    }
+
+    return ngx_http_memc_cmd_unknown;
+}
+
