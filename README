@@ -4,6 +4,29 @@ get/set/add/delete and more memcached commands.
 Status
     Not working yet.
 
+Examples
+
+    location /foo {
+        set $memc_key $arg_key;
+
+        # $memc_cmd defaults to get for GET,
+        #   add for POST, set for PUT, and
+        #   delete for the DELETE request method.
+
+        memc_pass 127.0.0.1:11984;
+    }
+
+    # GET /bar?cmd=get&key=cat
+    # POST /bar?cmd=set&key=dog
+    # DELETE /bar?cmd=delete&key=dog
+    # GET /bar?cmd=delete&key=dog
+    location /bar {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+
+        memc_pass 127.0.0.1:11984;
+    }
+
 Installation
     Grab the nginx source code from nginx.net (<http://nginx.net/>), for
     example, the version 0.8.28 (see nginx compatibility), and then build
