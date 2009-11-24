@@ -202,7 +202,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    ctx->rest = NGX_HTTP_MEMCACHED_END;
+    ctx->rest = NGX_HTTP_MEMC_END;
     ctx->request = r;
 
     ngx_http_set_ctx(r, ctx, ngx_http_memc_module);

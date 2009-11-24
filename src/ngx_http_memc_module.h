@@ -17,7 +17,7 @@ typedef struct {
 
 extern ngx_module_t  ngx_http_memc_module;
 
-#define NGX_HTTP_MEMCACHED_END   (sizeof(CRLF "END" CRLF) - 1)
+#define NGX_HTTP_MEMC_END   (sizeof(CRLF "END" CRLF) - 1)
 
 #endif /* NGX_HTTP_MEMC_MODULE_H */
 

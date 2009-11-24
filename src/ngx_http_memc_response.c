@@ -119,7 +119,7 @@ ngx_http_memc_filter_init(void *data)
 
     u = ctx->request->upstream;
 
-    u->length += NGX_HTTP_MEMCACHED_END;
+    u->length += NGX_HTTP_MEMC_END;
 
     return NGX_OK;
 }
@@ -141,7 +141,7 @@ ngx_http_memc_filter(void *data, ssize_t bytes)
     if (u->length == ctx->rest) {
 
         if (ngx_strncmp(b->last,
-                   ngx_http_memc_end + NGX_HTTP_MEMCACHED_END - ctx->rest,
+                   ngx_http_memc_end + NGX_HTTP_MEMC_END - ctx->rest,
                    ctx->rest)
             != 0)
         {
@@ -179,12 +179,12 @@ ngx_http_memc_filter(void *data, ssize_t bytes)
                    "memcached filter bytes:%z size:%z length:%z rest:%z",
                    bytes, b->last - b->pos, u->length, ctx->rest);
 
-    if (bytes <= (ssize_t) (u->length - NGX_HTTP_MEMCACHED_END)) {
+    if (bytes <= (ssize_t) (u->length - NGX_HTTP_MEMC_END)) {
         u->length -= bytes;
         return NGX_OK;
     }
 
-    last += u->length - NGX_HTTP_MEMCACHED_END;
+    last += u->length - NGX_HTTP_MEMC_END;
 
     if (ngx_strncmp(last, ngx_http_memc_end, b->last - last) != 0) {
         ngx_log_error(NGX_LOG_ERR, ctx->request->connection->log, 0,
