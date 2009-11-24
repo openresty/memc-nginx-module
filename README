@@ -6,6 +6,10 @@ Status
 
 Examples
 
+    # GET /foo?key=dog
+    # POST /foo?key=cat
+    # PUT /foo?key=bird
+    # DELETE /foo?key=Tiger
     location /foo {
         set $memc_key $arg_key;
 
