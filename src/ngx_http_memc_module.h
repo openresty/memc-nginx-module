@@ -39,6 +39,12 @@ typedef struct {
     size_t                     rest;
     ngx_http_request_t        *request;
     ngx_str_t                  key;
+
+    ngx_str_t                  cmd_str;
+    ngx_http_memc_cmd_t        cmd;
+    ngx_http_variable_value_t  *memc_value_vv;
+
+    int                        parser_state;
 } ngx_http_memc_ctx_t;
 
 extern ngx_module_t  ngx_http_memc_module;

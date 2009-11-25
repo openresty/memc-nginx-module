@@ -12,7 +12,6 @@ run_tests();
 __DATA__
 
 === TEST 1: bad cmd
-preset foo to bar...
 --- config
     location /foo {
         set $memc_cmd blah;
@@ -27,7 +26,6 @@ preset foo to bar...
 
 
 === TEST 2: bad cmd (case sensitive)
-preset foo to bar...
 --- config
     location /foo {
         set $memc_cmd GET;
@@ -42,7 +40,6 @@ preset foo to bar...
 
 
 === TEST 3: no default value for $memc_cmd for method COPY
-preset foo to bar...
 --- config
     location /foo {
         set $memc_key foo;
@@ -55,16 +52,41 @@ preset foo to bar...
 
 
 
-=== TEST 4: sanity
-preset foo to bar...
+=== TEST 4: set only
 --- config
-    location /foo {
-        #set $memc_cmd get;
-        set $memc_key foo;
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
         memc_pass 127.0.0.1:11984;
     }
 --- request
-    GET /foo
---- response_body chomp
-bar
+    GET /memc?key=foo&cmd=set&val=blah
+--- response_body eval
+"STORED\r\n"
+
+
+
+=== TEST 5: set and get
+--- config
+    location /main {
+        echo 'set foo blah';
+        echo_location '/memc?key=foo&cmd=set&val=blah';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"set foo blah
+STORED\r
+get foo
+blah"
 
