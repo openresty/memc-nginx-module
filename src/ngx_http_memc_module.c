@@ -358,7 +358,6 @@ ngx_http_memc_create_loc_conf(ngx_conf_t *cf)
     conf->upstream.pass_request_body = 0;
 
     conf->key_var_index = NGX_CONF_UNSET;
-    conf->cmd_var_index = NGX_CONF_UNSET;
 
     return conf;
 }
@@ -400,10 +399,6 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 
     if (conf->key_var_index == NGX_CONF_UNSET) {
         conf->key_var_index = prev->key_var_index;
-    }
-
-    if (conf->cmd_var_index == NGX_CONF_UNSET) {
-        conf->cmd_var_index = prev->cmd_var_index;
     }
 
     return NGX_CONF_OK;
