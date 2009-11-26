@@ -551,7 +551,7 @@ ngx_http_memc_empty_filter(void *data, ssize_t bytes)
 
 
 ngx_int_t
-ngx_http_memc_filter_init(void *data)
+ngx_http_memc_get_cmd_filter_init(void *data)
 {
     ngx_http_memc_ctx_t  *ctx = data;
 
@@ -570,7 +570,7 @@ ngx_http_memc_filter_init(void *data)
 
 
 ngx_int_t
-ngx_http_memc_filter(void *data, ssize_t bytes)
+ngx_http_memc_get_cmd_filter(void *data, ssize_t bytes)
 {
     ngx_http_memc_ctx_t  *ctx = data;
 
@@ -645,7 +645,7 @@ ngx_http_memc_filter(void *data, ssize_t bytes)
 
 
 ngx_int_t
-ngx_http_memc_process_header(ngx_http_request_t *r)
+ngx_http_memc_process_get_cmd_header(ngx_http_request_t *r)
 {
     u_char                    *p, *len;
     ngx_str_t                  line;

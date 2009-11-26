@@ -4,11 +4,11 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
-ngx_int_t ngx_http_memc_process_header(ngx_http_request_t *r);
+ngx_int_t ngx_http_memc_process_get_cmd_header(ngx_http_request_t *r);
 
-ngx_int_t ngx_http_memc_filter_init(void *data);
+ngx_int_t ngx_http_memc_get_cmd_filter_init(void *data);
 
-ngx_int_t ngx_http_memc_filter(void *data, ssize_t bytes);
+ngx_int_t ngx_http_memc_get_cmd_filter(void *data, ssize_t bytes);
 
 ngx_int_t ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r);
 

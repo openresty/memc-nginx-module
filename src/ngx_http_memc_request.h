@@ -4,7 +4,7 @@
 #include <ngx_core.h>
 #include <ngx_http.h>
 
-ngx_int_t ngx_http_memc_create_request(ngx_http_request_t *r);
+ngx_int_t ngx_http_memc_create_get_cmd_request(ngx_http_request_t *r);
 
 ngx_int_t ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r);
 

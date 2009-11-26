@@ -269,12 +269,12 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         u->input_filter_init = ngx_http_memc_empty_filter_init;
         u->input_filter = ngx_http_memc_empty_filter;
 
-    } else {
-        u->create_request = ngx_http_memc_create_request;
-        u->process_header = ngx_http_memc_process_header;
+    } else if (memc_cmd == ngx_http_memc_cmd_get) {
+        u->create_request = ngx_http_memc_create_get_cmd_request;
+        u->process_header = ngx_http_memc_process_get_cmd_header;
 
-        u->input_filter_init = ngx_http_memc_filter_init;
-        u->input_filter = ngx_http_memc_filter;
+        u->input_filter_init = ngx_http_memc_get_cmd_filter_init;
+        u->input_filter = ngx_http_memc_get_cmd_filter;
     }
 
     u->reinit_request = ngx_http_memc_reinit_request;
