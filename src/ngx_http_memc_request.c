@@ -297,3 +297,37 @@ ngx_http_memc_create_get_cmd_request(ngx_http_request_t *r)
     return NGX_OK;
 }
 
+ngx_int_t
+ngx_http_memc_create_noarg_cmd_request(ngx_http_request_t *r)
+{
+    size_t                          len;
+    ngx_buf_t                      *b;
+    ngx_http_memc_ctx_t            *ctx;
+    ngx_chain_t                    *cl;
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    len = ctx->cmd_str.len + sizeof(CRLF) - 1;
+
+    b = ngx_create_temp_buf(r->pool, len);
+    if (b == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl = ngx_alloc_chain_link(r->pool);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf = b;
+    cl->next = NULL;
+
+    r->upstream->request_bufs = cl;
+
+    b->last = ngx_copy(b->last, ctx->cmd_str.data, ctx->cmd_str.len);
+
+    *b->last++ = CR; *b->last++ = LF;
+
+    return NGX_OK;
+}
+

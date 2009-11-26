@@ -275,6 +275,20 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
         u->input_filter_init = ngx_http_memc_get_cmd_filter_init;
         u->input_filter = ngx_http_memc_get_cmd_filter;
+
+    } else if (memc_cmd == ngx_http_memc_cmd_flush_all) {
+        u->create_request = ngx_http_memc_create_noarg_cmd_request;
+        u->process_header = ngx_http_memc_process_flush_all_cmd_header;
+
+        u->input_filter_init = ngx_http_memc_empty_filter_init;
+        u->input_filter = ngx_http_memc_empty_filter;
+
+    } else {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+            "assertion failed: command \"%V\" does not have proper "
+            "handlers.", &memc_cmd);
+
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     u->reinit_request = ngx_http_memc_reinit_request;

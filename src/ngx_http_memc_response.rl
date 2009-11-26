@@ -4,7 +4,10 @@
 #include "ngx_http_memc_response.h"
 #include "ngx_http_memc_module.h"
 
-%% machine memcached;
+%% machine memc_storage;
+%% write data;
+
+%% machine memc_flush_all;
 %% write data;
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
@@ -39,6 +42,8 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     pe = b->last;
 
     %%{
+        machine memc_storage;
+
         action catch_err {
             status = NGX_HTTP_BAD_GATEWAY;
         }
@@ -66,7 +71,7 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
 
     dd("memcached response: %s", resp.data);
 
-    if (cs >= memcached_first_final) {
+    if (cs >= memc_storage_first_final) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
         r->headers_out.content_length_n = resp.len;
@@ -92,7 +97,7 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
         return NGX_OK;
     }
 
-    if (cs == memcached_error) {
+    if (cs == memc_storage_error) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                       "memcached sent invalid response for storange commands: "
                       "%V", &resp);
@@ -357,5 +362,103 @@ no_valid:
                   "memcached sent invalid response: \"%V\"", &line);
 
     return NGX_HTTP_UPSTREAM_INVALID_HEADER;
+}
+
+ngx_int_t
+ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
+{
+    int                     cs;
+    u_char                  *p;
+    u_char                  *pe;
+    u_char                  *eof = NULL;
+    ngx_str_t               resp;
+    ngx_http_upstream_t     *u;
+    ngx_http_memc_ctx_t     *ctx;
+    ngx_buf_t               *b;
+    ngx_chain_t             *cl, **ll;
+    ngx_uint_t              status = NGX_HTTP_OK;
+
+    dd("process flush_all cmd header");
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    if (ctx->parser_state == NGX_ERROR) {
+        %% write init;
+    }
+
+    u = r->upstream;
+
+    b = &u->buffer;
+
+    p  = b->pos;
+    pe = b->last;
+
+    %%{
+        machine memc_flush_all;
+
+        action catch_err {
+            status = NGX_HTTP_BAD_GATEWAY;
+        }
+
+        msg = any* -- "\r\n";
+
+        error = "ERROR\r\n"
+              | "CLIENT_ERROR " msg "\r\n"
+              | "SERVER_ERROR " msg "\r\n"
+              ;
+
+        main := "OK\r\n"
+              | error %catch_err
+              ;
+    }%%
+
+    %% write exec;
+
+    ctx->parser_state = cs;
+
+    resp.data = b->pos;
+    resp.len  = p - resp.data;
+
+    dd("memcached response: %s", resp.data);
+
+    if (cs >= memc_flush_all_first_final) {
+        dd("memcached response parsed (resp.len: %d)", resp.len);
+
+        r->headers_out.content_length_n = resp.len;
+        u->headers_in.status_n = status;
+        u->state->status = status;
+
+        for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
+            ll = &cl->next;
+        }
+
+        cl = ngx_chain_get_free_buf(ctx->request->pool, &u->free_bufs);
+        if (cl == NULL) {
+            return NGX_ERROR;
+        }
+
+        cl->buf->flush = 1;
+        cl->buf->memory = 1;
+        cl->buf->pos = b->pos;
+        cl->buf->last = b->last;
+
+        *ll = cl;
+
+        return NGX_OK;
+    }
+
+    if (cs == memc_flush_all_error) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                      "memcached sent invalid response for the flush_all commands: "
+                      "%V", &resp);
+
+        status = NGX_HTTP_BAD_GATEWAY;
+        u->headers_in.status_n = status;
+        u->state->status = status;
+
+        return status;
+    }
+
+    return NGX_AGAIN;
 }
 
