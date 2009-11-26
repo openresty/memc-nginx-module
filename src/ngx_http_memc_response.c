@@ -44,7 +44,13 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
-    ngx_uint_t              status = NGX_HTTP_OK;
+    ngx_uint_t              status;
+
+    if (r->headers_out.status) {
+        status = r->headers_out.status;
+    } else {
+        status = NGX_HTTP_OK;
+    }
 
     dd("process storage cmd header");
 
@@ -52,11 +58,11 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
 
     if (ctx->parser_state == NGX_ERROR) {
         
-#line 56 "src/ngx_http_memc_response.c"
+#line 62 "src/ngx_http_memc_response.c"
 	{
 	cs = memc_flush_all_start;
 	}
-#line 38 "src/ngx_http_memc_response.rl"
+#line 44 "src/ngx_http_memc_response.rl"
     }
 
     u = r->upstream;
@@ -66,11 +72,11 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     p  = b->pos;
     pe = b->last;
 
-    #line 67 "src/ngx_http_memc_response.rl"
+    #line 78 "src/ngx_http_memc_response.rl"
 
 
     
-#line 74 "src/ngx_http_memc_response.c"
+#line 80 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -81,7 +87,7 @@ case 1:
 		case 67: goto st2;
 		case 69: goto st16;
 		case 78: goto st28;
-		case 83: goto st40;
+		case 83: goto tr4;
 	}
 	goto st0;
 st0:
@@ -369,10 +375,18 @@ case 39:
 	if ( (*p) == 69 )
 		goto st35;
 	goto st0;
+tr4:
+#line 56 "src/ngx_http_memc_response.rl"
+	{
+            dd("status set to 201");
+            status = NGX_HTTP_CREATED;
+        }
+	goto st40;
 st40:
 	if ( ++p == pe )
 		goto _test_eof40;
 case 40:
+#line 390 "src/ngx_http_memc_response.c"
 	switch( (*p) ) {
 		case 69: goto st41;
 		case 84: goto st37;
@@ -458,18 +472,18 @@ case 44:
 	{
 	switch ( cs ) {
 	case 45: 
-#line 50 "src/ngx_http_memc_response.rl"
+#line 61 "src/ngx_http_memc_response.rl"
 	{
             status = NGX_HTTP_BAD_GATEWAY;
         }
 	break;
-#line 467 "src/ngx_http_memc_response.c"
+#line 481 "src/ngx_http_memc_response.c"
 	}
 	}
 
 	_out: {}
 	}
-#line 70 "src/ngx_http_memc_response.rl"
+#line 81 "src/ngx_http_memc_response.rl"
 
     ctx->parser_state = cs;
 
@@ -770,11 +784,11 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
 
     if (ctx->parser_state == NGX_ERROR) {
         
-#line 774 "src/ngx_http_memc_response.c"
+#line 788 "src/ngx_http_memc_response.c"
 	{
 	cs = memc_storage_start;
 	}
-#line 370 "src/ngx_http_memc_response.rl"
+#line 381 "src/ngx_http_memc_response.rl"
     }
 
     u = r->upstream;
@@ -783,11 +797,11 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
     p  = b->pos;
     pe = b->last;
 
-    #line 395 "src/ngx_http_memc_response.rl"
+    #line 406 "src/ngx_http_memc_response.rl"
 
 
     
-#line 791 "src/ngx_http_memc_response.c"
+#line 805 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -1049,18 +1063,18 @@ case 29:
 	{
 	switch ( cs ) {
 	case 30: 
-#line 381 "src/ngx_http_memc_response.rl"
+#line 392 "src/ngx_http_memc_response.rl"
 	{
             status = NGX_HTTP_BAD_GATEWAY;
         }
 	break;
-#line 1058 "src/ngx_http_memc_response.c"
+#line 1072 "src/ngx_http_memc_response.c"
 	}
 	}
 
 	_out: {}
 	}
-#line 398 "src/ngx_http_memc_response.rl"
+#line 409 "src/ngx_http_memc_response.rl"
 
     ctx->parser_state = cs;
 

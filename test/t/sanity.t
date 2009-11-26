@@ -64,6 +64,7 @@ __DATA__
     GET /memc?key=foo&cmd=set&val=blah
 --- response_body eval
 "STORED\r\n"
+--- error_code: 201
 
 
 
@@ -131,7 +132,7 @@ blah"
     GET /main
 --- response_body_like
 ^set foo blah
-status: 200
+status: 201
 STORED\r
 flush_all
 status: 200
@@ -199,7 +200,7 @@ get foo
 status: 200
 OK\r
 add foo blah
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
@@ -236,7 +237,7 @@ hello, world
 status: 200
 OK\r
 set foo
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
@@ -272,13 +273,13 @@ hello, world"
 GET /main
 --- response_body eval
 "set foo FOO
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
 FOO
 set foo BAR
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
@@ -316,13 +317,13 @@ POST /main
 rock
 --- response_body eval
 "set foo <client req body>
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
 rock
 set foo BAR
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
@@ -361,7 +362,7 @@ POST /main
 howdy
 --- response_body eval
 "set foo <client req body>
-status: 200
+status: 201
 STORED\r
 get foo
 status: 200
@@ -373,4 +374,80 @@ get foo
 status: 200
 howdy
 "
+
+
+=== TEST 9: test replace (stored)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'add foo blah';
+        echo_location '/memc?key=foo&cmd=add&val=added';
+
+        echo 'replace foo bah';
+        echo_location '/memc?key=foo&cmd=replace&val=bah';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush all
+status: 200
+OK\r
+add foo blah
+status: 201
+STORED\r
+replace foo bah
+status: 201
+STORED\r
+get foo
+status: 200
+bah"
+
+
+
+=== TEST 9: test replace (not stored)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'replace foo bah';
+        echo_location '/memc?key=foo&cmd=replace&val=bah';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body_like
+flush all
+status: 200
+OK\r
+replace foo bah
+status: 200
+NOT_STORED\r
+get foo
+status: 404.*?404 Not Found.*$
 

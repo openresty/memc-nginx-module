@@ -27,7 +27,13 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
-    ngx_uint_t              status = NGX_HTTP_OK;
+    ngx_uint_t              status;
+
+    if (r->headers_out.status) {
+        status = r->headers_out.status;
+    } else {
+        status = NGX_HTTP_OK;
+    }
 
     dd("process storage cmd header");
 
@@ -47,6 +53,11 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     %%{
         machine memc_storage;
 
+        action handle_stored {
+            dd("status set to 201");
+            status = NGX_HTTP_CREATED;
+        }
+
         action catch_err {
             status = NGX_HTTP_BAD_GATEWAY;
         }
@@ -58,7 +69,7 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
               | "SERVER_ERROR " msg "\r\n"
               ;
 
-        main := "STORED\r\n"
+        main := "STORED\r\n" >handle_stored
               | "NOT_STORED\r\n"
               | "EXISTS\r\n"
               | "NOT_FOUND\r\n"
