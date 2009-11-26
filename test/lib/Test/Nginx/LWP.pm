@@ -1,6 +1,7 @@
 package Test::Nginx::LWP;
 
 our $NoNginxManager = 0;
+our $RepeatEach = 1;
 
 use lib 'lib';
 use lib 'inc';
@@ -37,7 +38,20 @@ our $ConfDir    = File::Spec->catfile($ServRoot, 'conf');
 our $ConfFile   = File::Spec->catfile($ConfDir, 'nginx.conf');
 our $PidFile    = File::Spec->catfile($LogDir, 'nginx.pid');
 
-our @EXPORT = qw( run_tests run_test );
+our @EXPORT = qw( plan run_tests run_test );
+
+=begin cmt
+
+sub plan (@) {
+    if (@_ == 2 && $_[0] eq 'tests' && defined $RepeatEach) {
+        #$_[1] *= $RepeatEach;
+    }
+    super;
+}
+
+=end cmt
+
+=cut
 
 sub trim ($);
 
@@ -47,7 +61,9 @@ sub parse_headers ($);
 
 sub run_tests () {
     for my $block (shuffle blocks()) {
-        run_test($block);
+        #for (1..3) {
+            run_test($block);
+        #}
     }
 }
 
@@ -189,7 +205,7 @@ sub run_test ($) {
                 if (kill(1, $pid) == 0) { # send HUP signal
                     Test::More::BAIL_OUT("$name - Failed to send signal to the nginx process with PID $pid using signal HUP");
                 }
-                sleep 0.02;
+                sleep 0.05;
             } else {
                 unlink $PidFile or
                     die "Failed to remove pid file $PidFile\n";
@@ -273,59 +289,62 @@ sub run_test ($) {
     }
     #warn "DONE!!!!!!!!!!!!!!!!!!!!";
 
-    my $res = $UserAgent->request($req);
+    my $i = 0;
+    while ($i++ < $RepeatEach) {
+        my $res = $UserAgent->request($req);
 
-    #warn "res returned!!!";
+        #warn "res returned!!!";
 
-    if (defined $block->error_code) {
-        is($res->code, $block->error_code, "$name - status code ok");
-    } else {
-        is($res->code, 200, "$name - status code ok");
-    }
+        if (defined $block->error_code) {
+            is($res->code, $block->error_code, "$name - status code ok");
+        } else {
+            is($res->code, 200, "$name - status code ok");
+        }
 
-    if (defined $block->response_headers) {
-        my $headers = parse_headers($block->response_headers);
-        while (my ($key, $val) = each %$headers) {
-            my $expected_val = $res->header($key);
-            if (!defined $expected_val) {
-                $expected_val = '';
+        if (defined $block->response_headers) {
+            my $headers = parse_headers($block->response_headers);
+            while (my ($key, $val) = each %$headers) {
+                my $expected_val = $res->header($key);
+                if (!defined $expected_val) {
+                    $expected_val = '';
+                }
+                is_string $expected_val, $val,
+                    "$name - header $key ok";
             }
-            is_string $expected_val, $val,
-                "$name - header $key ok";
-        }
-    } elsif (defined $block->response_headers_like) {
-        my $headers = parse_headers($block->response_headers_like);
-        while (my ($key, $val) = each %$headers) {
-            my $expected_val = $res->header($key);
-            if (!defined $expected_val) {
-                $expected_val = '';
+        } elsif (defined $block->response_headers_like) {
+            my $headers = parse_headers($block->response_headers_like);
+            while (my ($key, $val) = each %$headers) {
+                my $expected_val = $res->header($key);
+                if (!defined $expected_val) {
+                    $expected_val = '';
+                }
+                like $expected_val, qr/^$val$/,
+                    "$name - header $key like ok";
             }
-            like $expected_val, qr/^$val$/,
-                "$name - header $key like ok";
-        }
-    }
-
-    if (defined $block->response_body) {
-        my $content = $res->content;
-        if (defined $content) {
-            $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
         }
 
-        $content =~ s/^Connection: TE, close\r\n//gms;
-        my $expected = $block->response_body;
-        $expected =~ s/\$ServerPort\b/$ServerPort/g;
-        #warn show_all_chars($content);
-        is($content, $expected, "$name - response_body - response is expected");
-    } elsif (defined $block->response_body_like) {
-        my $content = $res->content;
-        if (defined $content) {
-            $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
+        if (defined $block->response_body) {
+            my $content = $res->content;
+            if (defined $content) {
+                $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
+            }
+
+            $content =~ s/^Connection: TE, close\r\n//gms;
+            my $expected = $block->response_body;
+            $expected =~ s/\$ServerPort\b/$ServerPort/g;
+            #warn show_all_chars($content);
+            is($content, $expected, "$name - response_body - response is expected");
+        } elsif (defined $block->response_body_like) {
+            my $content = $res->content;
+            if (defined $content) {
+                $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
+            }
+            $content =~ s/^Connection: TE, close\r\n//gms;
+            my $expected_pat = $block->response_body_like;
+            $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
+            my $summary = trim($content);
+            like($content, qr/$expected_pat/sm, "$name - response_body_like - response is expected ($summary)");
         }
-        $content =~ s/^Connection: TE, close\r\n//gms;
-        my $expected_pat = $block->response_body_like;
-        $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
-        my $summary = trim($content);
-        like($content, qr/$expected_pat/sm, "$name - response_body_like - response is expected ($summary)");
     }
 }
 
@@ -362,7 +381,7 @@ __END__
 
 =head1 NAME
 
-Test::Nginx::LWP - Test scaffold for the echo Nginx module
+Test::Nginx::LWP - Test scaffold for the Nginx C modules
 
 =head1 AUTHOR
 

@@ -12,6 +12,10 @@
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
+static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
+        ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp);
+
+
 ngx_int_t
 ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
 {
@@ -23,7 +27,6 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
-    ngx_chain_t             *cl, **ll;
     ngx_uint_t              status = NGX_HTTP_OK;
 
     dd("process storage cmd header");
@@ -56,6 +59,7 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
               ;
 
         main := "STORED\r\n"
+              | "NOT_STORED\r\n"
               | "EXISTS\r\n"
               | "NOT_FOUND\r\n"
               | error %catch_err
@@ -74,27 +78,7 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     if (cs >= memc_storage_first_final) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
-        r->headers_out.content_length_n = resp.len;
-        u->headers_in.status_n = status;
-        u->state->status = status;
-
-        for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
-            ll = &cl->next;
-        }
-
-        cl = ngx_chain_get_free_buf(ctx->request->pool, &u->free_bufs);
-        if (cl == NULL) {
-            return NGX_ERROR;
-        }
-
-        cl->buf->flush = 1;
-        cl->buf->memory = 1;
-        cl->buf->pos = b->pos;
-        cl->buf->last = b->last;
-
-        *ll = cl;
-
-        return NGX_OK;
+        return ngx_http_memc_write_simple_response(r, u, status, &resp);
     }
 
     if (cs == memc_storage_error) {
@@ -136,12 +120,12 @@ ngx_http_memc_empty_filter(void *data, ssize_t bytes)
     ngx_chain_t          *cl, **ll;
     ngx_http_upstream_t  *u;
 
-    dd("empty memcached filter");
+    /* dd("empty memcached filter"); */
 
     u = ctx->request->upstream;
     b = &u->buffer;
 
-    dd("buffer len %d", b->last - b->pos);
+    /* dd("buffer len %d", b->last - b->pos); */
 
     if (b->last - b->pos == 0) {
         return NGX_OK;
@@ -375,7 +359,6 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
-    ngx_chain_t             *cl, **ll;
     ngx_uint_t              status = NGX_HTTP_OK;
 
     dd("process flush_all cmd header");
@@ -389,7 +372,6 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
     u = r->upstream;
 
     b = &u->buffer;
-
     p  = b->pos;
     pe = b->last;
 
@@ -424,33 +406,13 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
     if (cs >= memc_flush_all_first_final) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
-        r->headers_out.content_length_n = resp.len;
-        u->headers_in.status_n = status;
-        u->state->status = status;
-
-        for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
-            ll = &cl->next;
-        }
-
-        cl = ngx_chain_get_free_buf(ctx->request->pool, &u->free_bufs);
-        if (cl == NULL) {
-            return NGX_ERROR;
-        }
-
-        cl->buf->flush = 1;
-        cl->buf->memory = 1;
-        cl->buf->pos = b->pos;
-        cl->buf->last = b->last;
-
-        *ll = cl;
-
-        return NGX_OK;
+        return ngx_http_memc_write_simple_response(r, u, status, &resp);
     }
 
     if (cs == memc_flush_all_error) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                      "memcached sent invalid response for the flush_all commands: "
-                      "%V", &resp);
+                      "memcached sent invalid response for the \"%V\" command: "
+                      "%V", &ctx->cmd_str, &resp);
 
         status = NGX_HTTP_BAD_GATEWAY;
         u->headers_in.status_n = status;
@@ -460,5 +422,34 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
     }
 
     return NGX_AGAIN;
+}
+
+static ngx_int_t
+ngx_http_memc_write_simple_response(ngx_http_request_t *r,
+        ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp)
+{
+    ngx_chain_t             *cl, **ll;
+
+    r->headers_out.content_length_n = resp->len;
+    u->headers_in.status_n = status;
+    u->state->status = status;
+
+    for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
+        ll = &cl->next;
+    }
+
+    cl = ngx_chain_get_free_buf(r->pool, &u->free_bufs);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf->flush = 1;
+    cl->buf->memory = 1;
+    cl->buf->pos = u->buffer.pos;
+    cl->buf->last = u->buffer.last;
+
+    *ll = cl;
+
+    return NGX_OK;
 }
 

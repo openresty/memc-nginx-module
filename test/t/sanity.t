@@ -3,9 +3,9 @@
 use lib 'lib';
 use Test::Nginx::LWP;
 
-plan tests => 2 * blocks();
+plan tests => $Test::Nginx::LWP::RepeatEach * 2 * blocks();
 
-no_diff;
+#no_diff;
 
 run_tests();
 
@@ -89,4 +89,288 @@ __DATA__
 STORED\r
 get foo
 blah"
+
+
+
+=== TEST 6: flush_all
+--- config
+    location /flush {
+        set $memc_cmd flush_all;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /flush
+--- response_body eval
+"OK\r
+"
+
+
+
+=== TEST 7: set and flush and get
+--- config
+    location /main {
+        echo 'set foo blah';
+        echo_location '/memc?key=foo&cmd=set&val=blah';
+
+        echo 'flush_all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body_like
+^set foo blah
+status: 200
+STORED\r
+flush_all
+status: 200
+OK\r
+get foo
+status: 404.*?404 Not Found.*$
+
+
+
+=== TEST 8: set and get empty values
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'set foo blah';
+        echo_location '/memc?key=foo&cmd=set&val=';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush all
+OK\r
+set foo blah
+STORED\r
+get foo
+"
+
+
+
+=== TEST 9: add
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'add foo blah';
+        echo_location '/memc?key=foo&cmd=add&val=added';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush all
+status: 200
+OK\r
+add foo blah
+status: 200
+STORED\r
+get foo
+status: 200
+added"
+
+
+
+=== TEST 9: set using POST
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'set foo';
+        echo_subrequest POST '/memc?key=foo&cmd=set';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        #set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+POST /main
+hello, world
+--- response_body eval
+"flush all
+status: 200
+OK\r
+set foo
+status: 200
+STORED\r
+get foo
+status: 200
+hello, world"
+
+
+=== TEST 9: default REST interface when no $memc_cmd is set
+--- config
+    location /main {
+        echo 'set foo FOO';
+        echo_subrequest PUT '/memc?key=foo' -b FOO;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+        echo;
+
+        echo 'set foo BAR';
+        echo_subrequest PUT '/memc?key=foo' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+        echo;
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_key $arg_key;
+        #set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+GET /main
+--- response_body eval
+"set foo FOO
+status: 200
+STORED\r
+get foo
+status: 200
+FOO
+set foo BAR
+status: 200
+STORED\r
+get foo
+status: 200
+BAR
+"
+
+
+=== TEST 9: default REST interface when no $memc_cmd is set (read client req body)
+--- config
+    location /main {
+        echo 'set foo <client req body>';
+        echo_subrequest PUT '/memc?key=foo';
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+        echo;
+
+        echo 'set foo BAR';
+        echo_subrequest PUT '/memc?key=foo' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+        echo;
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_key $arg_key;
+        #set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+POST /main
+rock
+--- response_body eval
+"set foo <client req body>
+status: 200
+STORED\r
+get foo
+status: 200
+rock
+set foo BAR
+status: 200
+STORED\r
+get foo
+status: 200
+BAR
+"
+
+
+
+=== TEST 9: default REST interface when no $memc_cmd is set (read client req body)
+--- config
+    location /main {
+        echo 'set foo <client req body>';
+        echo_subrequest PUT '/memc?key=foo';
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+        echo;
+
+        echo 'add foo BAR';
+        echo_subrequest POST '/memc?key=foo' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+        echo;
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_key $arg_key;
+        #set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+POST /main
+howdy
+--- response_body eval
+"set foo <client req body>
+status: 200
+STORED\r
+get foo
+status: 200
+howdy
+add foo BAR
+status: 200
+NOT_STORED\r
+get foo
+status: 200
+howdy
+"
 

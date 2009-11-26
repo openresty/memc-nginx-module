@@ -9,7 +9,7 @@
 
 #line 11 "src/ngx_http_memc_response.c"
 static const int memc_storage_start = 1;
-static const int memc_storage_first_final = 44;
+static const int memc_storage_first_final = 45;
 static const int memc_storage_error = 0;
 
 static const int memc_storage_en_main = 1;
@@ -29,6 +29,10 @@ static const int memc_flush_all_en_main = 1;
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
+static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
+        ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp);
+
+
 ngx_int_t
 ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
 {
@@ -40,7 +44,6 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
-    ngx_chain_t             *cl, **ll;
     ngx_uint_t              status = NGX_HTTP_OK;
 
     dd("process storage cmd header");
@@ -49,11 +52,11 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
 
     if (ctx->parser_state == NGX_ERROR) {
         
-#line 53 "src/ngx_http_memc_response.c"
+#line 56 "src/ngx_http_memc_response.c"
 	{
 	cs = memc_flush_all_start;
 	}
-#line 35 "src/ngx_http_memc_response.rl"
+#line 38 "src/ngx_http_memc_response.rl"
     }
 
     u = r->upstream;
@@ -63,11 +66,11 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     p  = b->pos;
     pe = b->last;
 
-    #line 63 "src/ngx_http_memc_response.rl"
+    #line 67 "src/ngx_http_memc_response.rl"
 
 
     
-#line 71 "src/ngx_http_memc_response.c"
+#line 74 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -78,7 +81,7 @@ case 1:
 		case 67: goto st2;
 		case 69: goto st16;
 		case 78: goto st28;
-		case 83: goto st36;
+		case 83: goto st40;
 	}
 	goto st0;
 st0:
@@ -180,14 +183,14 @@ st15:
 		goto _test_eof15;
 case 15:
 	switch( (*p) ) {
-		case 10: goto st44;
+		case 10: goto st45;
 		case 13: goto st15;
 	}
 	goto st14;
-st44:
+st45:
 	if ( ++p == pe )
-		goto _test_eof44;
-case 44:
+		goto _test_eof45;
+case 45:
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -231,7 +234,7 @@ st21:
 		goto _test_eof21;
 case 21:
 	if ( (*p) == 10 )
-		goto st44;
+		goto st45;
 	goto st0;
 st22:
 	if ( ++p == pe )
@@ -273,12 +276,12 @@ st27:
 		goto _test_eof27;
 case 27:
 	if ( (*p) == 10 )
-		goto st45;
+		goto st46;
 	goto st0;
-st45:
+st46:
 	if ( ++p == pe )
-		goto _test_eof45;
-case 45:
+		goto _test_eof46;
+case 46:
 	goto st0;
 st28:
 	if ( ++p == pe )
@@ -305,8 +308,10 @@ st31:
 	if ( ++p == pe )
 		goto _test_eof31;
 case 31:
-	if ( (*p) == 70 )
-		goto st32;
+	switch( (*p) ) {
+		case 70: goto st32;
+		case 83: goto st36;
+	}
 	goto st0;
 st32:
 	if ( ++p == pe )
@@ -340,23 +345,21 @@ st36:
 	if ( ++p == pe )
 		goto _test_eof36;
 case 36:
-	switch( (*p) ) {
-		case 69: goto st37;
-		case 84: goto st41;
-	}
+	if ( (*p) == 84 )
+		goto st37;
 	goto st0;
 st37:
 	if ( ++p == pe )
 		goto _test_eof37;
 case 37:
-	if ( (*p) == 82 )
+	if ( (*p) == 79 )
 		goto st38;
 	goto st0;
 st38:
 	if ( ++p == pe )
 		goto _test_eof38;
 case 38:
-	if ( (*p) == 86 )
+	if ( (*p) == 82 )
 		goto st39;
 	goto st0;
 st39:
@@ -364,27 +367,29 @@ st39:
 		goto _test_eof39;
 case 39:
 	if ( (*p) == 69 )
-		goto st40;
+		goto st35;
 	goto st0;
 st40:
 	if ( ++p == pe )
 		goto _test_eof40;
 case 40:
-	if ( (*p) == 82 )
-		goto st7;
+	switch( (*p) ) {
+		case 69: goto st41;
+		case 84: goto st37;
+	}
 	goto st0;
 st41:
 	if ( ++p == pe )
 		goto _test_eof41;
 case 41:
-	if ( (*p) == 79 )
+	if ( (*p) == 82 )
 		goto st42;
 	goto st0;
 st42:
 	if ( ++p == pe )
 		goto _test_eof42;
 case 42:
-	if ( (*p) == 82 )
+	if ( (*p) == 86 )
 		goto st43;
 	goto st0;
 st43:
@@ -392,7 +397,14 @@ st43:
 		goto _test_eof43;
 case 43:
 	if ( (*p) == 69 )
-		goto st35;
+		goto st44;
+	goto st0;
+st44:
+	if ( ++p == pe )
+		goto _test_eof44;
+case 44:
+	if ( (*p) == 82 )
+		goto st7;
 	goto st0;
 	}
 	_test_eof2: cs = 2; goto _test_eof; 
@@ -409,7 +421,7 @@ case 43:
 	_test_eof13: cs = 13; goto _test_eof; 
 	_test_eof14: cs = 14; goto _test_eof; 
 	_test_eof15: cs = 15; goto _test_eof; 
-	_test_eof44: cs = 44; goto _test_eof; 
+	_test_eof45: cs = 45; goto _test_eof; 
 	_test_eof16: cs = 16; goto _test_eof; 
 	_test_eof17: cs = 17; goto _test_eof; 
 	_test_eof18: cs = 18; goto _test_eof; 
@@ -422,7 +434,7 @@ case 43:
 	_test_eof25: cs = 25; goto _test_eof; 
 	_test_eof26: cs = 26; goto _test_eof; 
 	_test_eof27: cs = 27; goto _test_eof; 
-	_test_eof45: cs = 45; goto _test_eof; 
+	_test_eof46: cs = 46; goto _test_eof; 
 	_test_eof28: cs = 28; goto _test_eof; 
 	_test_eof29: cs = 29; goto _test_eof; 
 	_test_eof30: cs = 30; goto _test_eof; 
@@ -439,24 +451,25 @@ case 43:
 	_test_eof41: cs = 41; goto _test_eof; 
 	_test_eof42: cs = 42; goto _test_eof; 
 	_test_eof43: cs = 43; goto _test_eof; 
+	_test_eof44: cs = 44; goto _test_eof; 
 
 	_test_eof: {}
 	if ( p == eof )
 	{
 	switch ( cs ) {
-	case 44: 
-#line 47 "src/ngx_http_memc_response.rl"
+	case 45: 
+#line 50 "src/ngx_http_memc_response.rl"
 	{
             status = NGX_HTTP_BAD_GATEWAY;
         }
 	break;
-#line 454 "src/ngx_http_memc_response.c"
+#line 467 "src/ngx_http_memc_response.c"
 	}
 	}
 
 	_out: {}
 	}
-#line 66 "src/ngx_http_memc_response.rl"
+#line 70 "src/ngx_http_memc_response.rl"
 
     ctx->parser_state = cs;
 
@@ -468,27 +481,7 @@ case 43:
     if (cs >= memc_storage_first_final) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
-        r->headers_out.content_length_n = resp.len;
-        u->headers_in.status_n = status;
-        u->state->status = status;
-
-        for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
-            ll = &cl->next;
-        }
-
-        cl = ngx_chain_get_free_buf(ctx->request->pool, &u->free_bufs);
-        if (cl == NULL) {
-            return NGX_ERROR;
-        }
-
-        cl->buf->flush = 1;
-        cl->buf->memory = 1;
-        cl->buf->pos = b->pos;
-        cl->buf->last = b->last;
-
-        *ll = cl;
-
-        return NGX_OK;
+        return ngx_http_memc_write_simple_response(r, u, status, &resp);
     }
 
     if (cs == memc_storage_error) {
@@ -530,12 +523,12 @@ ngx_http_memc_empty_filter(void *data, ssize_t bytes)
     ngx_chain_t          *cl, **ll;
     ngx_http_upstream_t  *u;
 
-    dd("empty memcached filter");
+    /* dd("empty memcached filter"); */
 
     u = ctx->request->upstream;
     b = &u->buffer;
 
-    dd("buffer len %d", b->last - b->pos);
+    /* dd("buffer len %d", b->last - b->pos); */
 
     if (b->last - b->pos == 0) {
         return NGX_OK;
@@ -769,7 +762,6 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
-    ngx_chain_t             *cl, **ll;
     ngx_uint_t              status = NGX_HTTP_OK;
 
     dd("process flush_all cmd header");
@@ -778,25 +770,24 @@ ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
 
     if (ctx->parser_state == NGX_ERROR) {
         
-#line 782 "src/ngx_http_memc_response.c"
+#line 774 "src/ngx_http_memc_response.c"
 	{
 	cs = memc_storage_start;
 	}
-#line 387 "src/ngx_http_memc_response.rl"
+#line 370 "src/ngx_http_memc_response.rl"
     }
 
     u = r->upstream;
 
     b = &u->buffer;
-
     p  = b->pos;
     pe = b->last;
 
-    #line 413 "src/ngx_http_memc_response.rl"
+    #line 395 "src/ngx_http_memc_response.rl"
 
 
     
-#line 800 "src/ngx_http_memc_response.c"
+#line 791 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -1058,18 +1049,18 @@ case 29:
 	{
 	switch ( cs ) {
 	case 30: 
-#line 399 "src/ngx_http_memc_response.rl"
+#line 381 "src/ngx_http_memc_response.rl"
 	{
             status = NGX_HTTP_BAD_GATEWAY;
         }
 	break;
-#line 1067 "src/ngx_http_memc_response.c"
+#line 1058 "src/ngx_http_memc_response.c"
 	}
 	}
 
 	_out: {}
 	}
-#line 416 "src/ngx_http_memc_response.rl"
+#line 398 "src/ngx_http_memc_response.rl"
 
     ctx->parser_state = cs;
 
@@ -1081,33 +1072,13 @@ case 29:
     if (cs >= memc_flush_all_first_final) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
-        r->headers_out.content_length_n = resp.len;
-        u->headers_in.status_n = status;
-        u->state->status = status;
-
-        for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
-            ll = &cl->next;
-        }
-
-        cl = ngx_chain_get_free_buf(ctx->request->pool, &u->free_bufs);
-        if (cl == NULL) {
-            return NGX_ERROR;
-        }
-
-        cl->buf->flush = 1;
-        cl->buf->memory = 1;
-        cl->buf->pos = b->pos;
-        cl->buf->last = b->last;
-
-        *ll = cl;
-
-        return NGX_OK;
+        return ngx_http_memc_write_simple_response(r, u, status, &resp);
     }
 
     if (cs == memc_flush_all_error) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                      "memcached sent invalid response for the flush_all commands: "
-                      "%V", &resp);
+                      "memcached sent invalid response for the \"%V\" command: "
+                      "%V", &ctx->cmd_str, &resp);
 
         status = NGX_HTTP_BAD_GATEWAY;
         u->headers_in.status_n = status;
@@ -1117,5 +1088,34 @@ case 29:
     }
 
     return NGX_AGAIN;
+}
+
+static ngx_int_t
+ngx_http_memc_write_simple_response(ngx_http_request_t *r,
+        ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp)
+{
+    ngx_chain_t             *cl, **ll;
+
+    r->headers_out.content_length_n = resp->len;
+    u->headers_in.status_n = status;
+    u->state->status = status;
+
+    for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
+        ll = &cl->next;
+    }
+
+    cl = ngx_chain_get_free_buf(r->pool, &u->free_bufs);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf->flush = 1;
+    cl->buf->memory = 1;
+    cl->buf->pos = u->buffer.pos;
+    cl->buf->last = u->buffer.last;
+
+    *ll = cl;
+
+    return NGX_OK;
 }
 

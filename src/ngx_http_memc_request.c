@@ -34,7 +34,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     /* prepare the "key" argument */
 
-    key_vv = ngx_http_get_indexed_variable(r, mlcf->key_var_index);
+    key_vv = ctx->memc_key_vv;
 
     if (key_vv == NULL || key_vv->not_found || key_vv->len == 0) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -177,7 +177,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     if (memc_value_vv) {
         dd("copy $memc_value to the request");
-        b = ngx_palloc(r->pool, sizeof(ngx_buf_t));
+        b = ngx_calloc_buf(r->pool);
 
         if (b == NULL) {
             return NGX_ERROR;
@@ -207,7 +207,9 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     /* append the trailing CRLF */
 
-    b = ngx_palloc(r->pool, sizeof(ngx_buf_t));
+
+    b = ngx_calloc_buf(r->pool);
+
     if (b == NULL) {
         return NGX_ERROR;
     }
@@ -244,7 +246,9 @@ ngx_http_memc_create_get_cmd_request(ngx_http_request_t *r)
 
     mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
 
-    vv = ngx_http_get_indexed_variable(r, mlcf->key_var_index);
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    vv = ctx->memc_key_vv;
 
     if (vv == NULL || vv->not_found || vv->len == 0) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -272,8 +276,6 @@ ngx_http_memc_create_get_cmd_request(ngx_http_request_t *r)
     r->upstream->request_bufs = cl;
 
     *b->last++ = 'g'; *b->last++ = 'e'; *b->last++ = 't'; *b->last++ = ' ';
-
-    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
 
     ctx->key.data = b->last;
 

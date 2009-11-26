@@ -32,7 +32,6 @@ typedef enum {
 
 typedef struct {
     ngx_http_upstream_conf_t   upstream;
-    ngx_int_t                  key_var_index;
 } ngx_http_memc_loc_conf_t;
 
 typedef struct {
@@ -43,6 +42,7 @@ typedef struct {
     ngx_str_t                  cmd_str;
     ngx_http_memc_cmd_t        cmd;
     ngx_http_variable_value_t  *memc_value_vv;
+    ngx_http_variable_value_t  *memc_key_vv;
 
     int                        parser_state;
 } ngx_http_memc_ctx_t;
