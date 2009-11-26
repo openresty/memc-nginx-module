@@ -22,12 +22,13 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     int                     cs;
     u_char                  *p;
     u_char                  *pe;
-    u_char                  *eof = NULL;
+    u_char                  *eof;
     ngx_str_t               resp;
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_buf_t               *b;
     ngx_uint_t              status;
+    ngx_flag_t              done = 0;
 
     if (r->headers_out.status) {
         status = r->headers_out.status;
@@ -40,7 +41,10 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
 
     if (ctx->parser_state == NGX_ERROR) {
+        dd("reinit state");
         %% write init;
+    } else {
+        cs = ctx->parser_state;
     }
 
     u = r->upstream;
@@ -50,6 +54,11 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     p  = b->pos;
     pe = b->last;
 
+    dd("buffer len: %d", pe - p);
+
+    /* eof = pe; */
+    eof = NULL;
+
     %%{
         machine memc_storage;
 
@@ -58,22 +67,28 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
             status = NGX_HTTP_CREATED;
         }
 
-        action catch_err {
+        action check {
+            dd("state %d, left %d, reading char '%c'", cs, pe - p, *p);
+        }
+
+        action catch_blah {
+            dd("caught error...");
+            dd("machine state: %d", cs);
             status = NGX_HTTP_BAD_GATEWAY;
         }
 
         msg = any* -- "\r\n";
 
-        error = "ERROR\r\n"
-              | "CLIENT_ERROR " msg "\r\n"
-              | "SERVER_ERROR " msg "\r\n"
+        blah = "ERROR\r\n"
+              | ("CLIENT_ERROR " msg "\r\n")
+              | ("SERVER_ERROR " msg "\r\n")
               ;
 
-        main := "STORED\r\n" >handle_stored
+        main := ("ERROR\r\n" $check @catch_blah
+              | "STORED\r\n" $check @handle_stored
               | "NOT_STORED\r\n"
               | "EXISTS\r\n"
-              | "NOT_FOUND\r\n"
-              | error %catch_err
+              | "NOT_FOUND\r\n") @{ dd("done it!"); done = 1; }
               ;
     }%%
 
@@ -84,9 +99,10 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
     resp.data = b->pos;
     resp.len  = p - resp.data;
 
-    dd("memcached response: %s", resp.data);
+    dd("memcached response: (len: %d) %s", resp.len, resp.data);
+    dd("machine state: %d", cs);
 
-    if (cs >= memc_storage_first_final) {
+    if (done || cs >= memc_storage_first_final) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
         return ngx_http_memc_write_simple_response(r, u, status, &resp);
@@ -456,8 +472,8 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
 
     cl->buf->flush = 1;
     cl->buf->memory = 1;
-    cl->buf->pos = u->buffer.pos;
-    cl->buf->last = u->buffer.last;
+    cl->buf->pos = resp->data;
+    cl->buf->last = cl->buf->pos + resp->len;
 
     *ll = cl;
 

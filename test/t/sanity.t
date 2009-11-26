@@ -208,7 +208,7 @@ added"
 
 
 
-=== TEST 9: set using POST
+=== TEST 10: set using POST
 --- config
     location /main {
         echo 'flush all';
@@ -244,7 +244,8 @@ status: 200
 hello, world"
 
 
-=== TEST 9: default REST interface when no $memc_cmd is set
+
+=== TEST 11: default REST interface when no $memc_cmd is set
 --- config
     location /main {
         echo 'set foo FOO';
@@ -287,7 +288,8 @@ BAR
 "
 
 
-=== TEST 9: default REST interface when no $memc_cmd is set (read client req body)
+
+=== TEST 12: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -332,7 +334,7 @@ BAR
 
 
 
-=== TEST 9: default REST interface when no $memc_cmd is set (read client req body)
+=== TEST 13: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -376,7 +378,8 @@ howdy
 "
 
 
-=== TEST 9: test replace (stored)
+
+=== TEST 14: test replace (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -418,7 +421,7 @@ bah"
 
 
 
-=== TEST 9: test replace (not stored)
+=== TEST 15: test replace (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -446,6 +449,160 @@ flush all
 status: 200
 OK\r
 replace foo bah
+status: 200
+NOT_STORED\r
+get foo
+status: 404.*?404 Not Found.*$
+
+
+
+=== TEST 16: test append (stored)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'add foo hello';
+        echo_location '/memc?key=foo&cmd=add&val=hello';
+
+        echo 'append foo ,world';
+        echo_location '/memc?key=foo&cmd=append&val=,world';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush all
+status: 200
+OK\r
+add foo hello
+status: 201
+STORED\r
+append foo ,world
+status: 201
+STORED\r
+get foo
+status: 200
+hello,world"
+
+
+
+=== TEST 17: test append (not stored)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'append foo ,world';
+        echo_location '/memc?key=foo&cmd=append&val=,world';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body_like
+flush all
+status: 200
+OK\r
+append foo ,world
+status: 200
+NOT_STORED\r
+get foo
+status: 404.*?404 Not Found.*$
+
+
+
+=== TEST 18: test prepend (stored)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'add foo hello';
+        echo_location '/memc?key=foo&cmd=add&val=hello';
+
+        echo 'prepend foo world,';
+        echo_location '/memc?key=foo&cmd=prepend&val=world,';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush all
+status: 200
+OK\r
+add foo hello
+status: 201
+STORED\r
+prepend foo world,
+status: 201
+STORED\r
+get foo
+status: 200
+world,hello"
+
+
+
+=== TEST 19: test prepend (not stored)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'prepend foo world,';
+        echo_location '/memc?key=foo&cmd=prepend&val=world,';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body_like
+flush all
+status: 200
+OK\r
+prepend foo world,
 status: 200
 NOT_STORED\r
 get foo

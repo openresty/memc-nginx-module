@@ -8,7 +8,13 @@ Status
         set
         add
         replace
+        append
+        prepend
         flush_all
+
+Note that at least memcached version 1.2.2 does not support
+the "append" and "prepend" commands. At least 1.2.4 and later
+versions seem to supports these two commands.
 
 Examples
 
