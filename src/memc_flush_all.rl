@@ -3,9 +3,12 @@
 
     include memc_common "memc_common.rl";
 
-    main := "OK\r\n"
-          | error
-          ;
+    response = "OK\r\n"
+             | error
+             ;
+
+    main := response @finalize
+         ;
 
 }%%
 
