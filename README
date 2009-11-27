@@ -10,7 +10,8 @@ Status
         replace
         append
         prepend
-        flush_all
+        flush_all (the delay argument is unsupported)
+        version
 
 Note that at least memcached version 1.2.2 does not support
 the "append" and "prepend" commands. At least 1.2.4 and later
