@@ -235,6 +235,45 @@ sub run_test ($) {
         }
     }
 
+    my $i = 0;
+    while ($i++ < $RepeatEach) {
+        run_test_helper($block, $request);
+    }
+}
+
+sub trim ($) {
+    (my $s = shift) =~ s/^\s+|\s+$//g;
+    $s =~ s/\n/ /gs;
+    $s =~ s/\s{2,}/ /gs;
+    $s;
+}
+
+sub show_all_chars ($) {
+    my $s = shift;
+    $s =~ s/\n/\\n/gs;
+    $s =~ s/\r/\\r/gs;
+    $s =~ s/\t/\\t/gs;
+    $s;
+}
+
+sub parse_headers ($) {
+    my $s = shift;
+    my %headers;
+    open my $in, '<', \$s;
+    while (<$in>) {
+        s/^\s+|\s+$//g;
+        my ($key, $val) = split /\s*:\s*/, $_, 2;
+        $headers{$key} = $val;
+    }
+    close $in;
+    return \%headers;
+}
+
+sub run_test_helper ($$) {
+    my ($block, $request) = @_;
+
+    my $name = $block->name;
+
     my $req_spec = parse_request($name, \$request);
     ## $req_spec
     my $method = $req_spec->{method};
@@ -289,91 +328,60 @@ sub run_test ($) {
     }
     #warn "DONE!!!!!!!!!!!!!!!!!!!!";
 
-    my $i = 0;
-    while ($i++ < $RepeatEach) {
-        my $res = $UserAgent->request($req);
+    my $res = $UserAgent->request($req);
 
-        #warn "res returned!!!";
+    #warn "res returned!!!";
 
-        if (defined $block->error_code) {
-            is($res->code, $block->error_code, "$name - status code ok");
-        } else {
-            is($res->code, 200, "$name - status code ok");
+    if (defined $block->error_code) {
+        is($res->code, $block->error_code, "$name - status code ok");
+    } else {
+        is($res->code, 200, "$name - status code ok");
+    }
+
+    if (defined $block->response_headers) {
+        my $headers = parse_headers($block->response_headers);
+        while (my ($key, $val) = each %$headers) {
+            my $expected_val = $res->header($key);
+            if (!defined $expected_val) {
+                $expected_val = '';
+            }
+            is_string $expected_val, $val,
+                "$name - header $key ok";
         }
-
-        if (defined $block->response_headers) {
-            my $headers = parse_headers($block->response_headers);
-            while (my ($key, $val) = each %$headers) {
-                my $expected_val = $res->header($key);
-                if (!defined $expected_val) {
-                    $expected_val = '';
-                }
-                is_string $expected_val, $val,
-                    "$name - header $key ok";
+    } elsif (defined $block->response_headers_like) {
+        my $headers = parse_headers($block->response_headers_like);
+        while (my ($key, $val) = each %$headers) {
+            my $expected_val = $res->header($key);
+            if (!defined $expected_val) {
+                $expected_val = '';
             }
-        } elsif (defined $block->response_headers_like) {
-            my $headers = parse_headers($block->response_headers_like);
-            while (my ($key, $val) = each %$headers) {
-                my $expected_val = $res->header($key);
-                if (!defined $expected_val) {
-                    $expected_val = '';
-                }
-                like $expected_val, qr/^$val$/,
-                    "$name - header $key like ok";
-            }
-        }
-
-        if (defined $block->response_body) {
-            my $content = $res->content;
-            if (defined $content) {
-                $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
-            }
-
-            $content =~ s/^Connection: TE, close\r\n//gms;
-            my $expected = $block->response_body;
-            $expected =~ s/\$ServerPort\b/$ServerPort/g;
-            #warn show_all_chars($content);
-            is($content, $expected, "$name - response_body - response is expected");
-        } elsif (defined $block->response_body_like) {
-            my $content = $res->content;
-            if (defined $content) {
-                $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
-            }
-            $content =~ s/^Connection: TE, close\r\n//gms;
-            my $expected_pat = $block->response_body_like;
-            $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
-            my $summary = trim($content);
-            like($content, qr/$expected_pat/sm, "$name - response_body_like - response is expected ($summary)");
+            like $expected_val, qr/^$val$/,
+                "$name - header $key like ok";
         }
     }
-}
 
-sub trim ($) {
-    (my $s = shift) =~ s/^\s+|\s+$//g;
-    $s =~ s/\n/ /gs;
-    $s =~ s/\s{2,}/ /gs;
-    $s;
-}
+    if (defined $block->response_body) {
+        my $content = $res->content;
+        if (defined $content) {
+            $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
+        }
 
-sub show_all_chars ($) {
-    my $s = shift;
-    $s =~ s/\n/\\n/gs;
-    $s =~ s/\r/\\r/gs;
-    $s =~ s/\t/\\t/gs;
-    $s;
-}
-
-sub parse_headers ($) {
-    my $s = shift;
-    my %headers;
-    open my $in, '<', \$s;
-    while (<$in>) {
-        s/^\s+|\s+$//g;
-        my ($key, $val) = split /\s*:\s*/, $_, 2;
-        $headers{$key} = $val;
+        $content =~ s/^Connection: TE, close\r\n//gms;
+        my $expected = $block->response_body;
+        $expected =~ s/\$ServerPort\b/$ServerPort/g;
+        #warn show_all_chars($content);
+        is($content, $expected, "$name - response_body - response is expected");
+    } elsif (defined $block->response_body_like) {
+        my $content = $res->content;
+        if (defined $content) {
+            $content =~ s/^TE: deflate,gzip;q=0\.3\r\n//gms;
+        }
+        $content =~ s/^Connection: TE, close\r\n//gms;
+        my $expected_pat = $block->response_body_like;
+        $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
+        my $summary = trim($content);
+        like($content, qr/$expected_pat/sm, "$name - response_body_like - response is expected ($summary)");
     }
-    close $in;
-    return \%headers;
 }
 
 1;

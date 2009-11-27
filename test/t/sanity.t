@@ -384,6 +384,7 @@ howdy
     location /main {
         echo 'flush all';
         echo_location '/memc?cmd=flush_all';
+        #echo_sleep 0.001;
 
         echo 'add foo blah';
         echo_location '/memc?key=foo&cmd=add&val=added';
@@ -607,4 +608,5 @@ status: 200
 NOT_STORED\r
 get foo
 status: 404.*?404 Not Found.*$
+--- skip_nginx: 2: < 0.8.11
 
