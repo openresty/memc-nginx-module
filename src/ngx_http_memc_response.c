@@ -567,6 +567,7 @@ tr52:
 #line 6 "src/ngx_http_memc_response.rl"
 	{
         dd("status set to 201");
+
         *status_addr = NGX_HTTP_CREATED;
     }
 #line 21 "src/ngx_http_memc_response.rl"
@@ -579,7 +580,7 @@ st51:
 	if ( ++p == pe )
 		goto _test_eof51;
 case 51:
-#line 583 "src/ngx_http_memc_response.c"
+#line 584 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -903,7 +904,7 @@ parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_add
     #line 414 "src/ngx_http_memc_response.rl"
     #line 415 "src/ngx_http_memc_response.rl"
     
-#line 907 "src/ngx_http_memc_response.c"
+#line 908 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -1028,12 +1029,24 @@ tr18:
 
         *status_addr = NGX_HTTP_BAD_GATEWAY;
     }
+#line 21 "src/ngx_http_memc_response.rl"
+	{
+        dd("done it!");
+        *done_addr = 1;
+    }
+	goto st30;
+tr26:
+#line 21 "src/ngx_http_memc_response.rl"
+	{
+        dd("done it!");
+        *done_addr = 1;
+    }
 	goto st30;
 st30:
 	if ( ++p == pe )
 		goto _test_eof30;
 case 30:
-#line 1037 "src/ngx_http_memc_response.c"
+#line 1050 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -1096,7 +1109,7 @@ st24:
 		goto _test_eof24;
 case 24:
 	if ( (*p) == 10 )
-		goto st30;
+		goto tr26;
 	goto st0;
 st25:
 	if ( ++p == pe )
