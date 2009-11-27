@@ -379,7 +379,7 @@ howdy
 
 
 
-=== TEST 14: test replace (stored)
+=== TEST 14: test replace (stored) (without sleep)
 --- config
     location /main {
         echo 'flush all';
@@ -422,7 +422,52 @@ bah"
 
 
 
-=== TEST 15: test replace (not stored)
+=== TEST 15: test replace (stored) (with sleep)
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/memc?cmd=flush_all';
+        echo_sleep 0.001;
+
+        echo 'add foo blah';
+        echo_location '/memc?key=foo&cmd=add&val=added';
+        #echo_sleep 0.001;
+
+        echo 'replace foo bah';
+        echo_location '/memc?key=foo&cmd=replace&val=bah';
+        #echo_sleep 0.001;
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush all
+status: 200
+OK\r
+add foo blah
+status: 201
+STORED\r
+replace foo bah
+status: 201
+STORED\r
+get foo
+status: 200
+bah"
+--- skip_nginx: 2: < 0.8.11
+
+
+=== TEST 16: test replace (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -457,7 +502,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 16: test append (stored)
+=== TEST 17: test append (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -499,7 +544,7 @@ hello,world"
 
 
 
-=== TEST 17: test append (not stored)
+=== TEST 18: test append (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -534,7 +579,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 18: test prepend (stored)
+=== TEST 19: test prepend (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -576,7 +621,7 @@ world,hello"
 
 
 
-=== TEST 19: test prepend (not stored)
+=== TEST 20: test prepend (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -608,5 +653,4 @@ status: 200
 NOT_STORED\r
 get foo
 status: 404.*?404 Not Found.*$
---- skip_nginx: 2: < 0.8.11
 

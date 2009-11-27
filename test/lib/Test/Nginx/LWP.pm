@@ -6,7 +6,7 @@ our $RepeatEach = 1;
 use lib 'lib';
 use lib 'inc';
 use Time::HiRes qw(sleep);
-use Test::LongString;
+#use Test::LongString;
 
 #use Smart::Comments::JSON '##';
 use LWP::UserAgent; # XXX should use a socket level lib here
@@ -26,6 +26,9 @@ our $LogLevel               = 'debug';
 #our $MasterProcessEnabled   = 'on';
 #our $DaemonEnabled          = 'on';
 our $ServerPort             = 1984;
+
+our $NginxVersion;
+our $NginxRawVersion;
 
 #our ($PrevRequest, $PrevConfig);
 
@@ -59,7 +62,32 @@ sub show_all_chars ($);
 
 sub parse_headers ($);
 
+sub run_test_helper ($$);
+
+sub get_canon_version (@) {
+    sprintf "%d.%03d%03d", $_[0], $_[1], $_[2];
+}
+
+sub get_nginx_version () {
+    my $out = `nginx -V 2>&1`;
+    if (!defined $out || $? != 0) {
+        warn "Failed to get the version of the Nginx in PATH.\n";
+    }
+    if ($out =~ m{nginx/(\d+)\.(\d+)\.(\d+)}s) {
+        $NginxRawVersion = "$1.$2.$3";
+        return get_canon_version($1, $2, $3);
+    }
+    warn "Failed to parse the output of \"nginx -V\": $out\n";
+    return undef;
+}
+
 sub run_tests () {
+    $NginxVersion = get_nginx_version();
+
+    if (defined $NginxVersion) {
+        #warn "[INFO] Using nginx version $NginxVersion ($NginxRawVersion)\n";
+    }
+
     for my $block (shuffle blocks()) {
         #for (1..3) {
             run_test($block);
@@ -205,7 +233,7 @@ sub run_test ($) {
                 if (kill(1, $pid) == 0) { # send HUP signal
                     Test::More::BAIL_OUT("$name - Failed to send signal to the nginx process with PID $pid using signal HUP");
                 }
-                sleep 0.05;
+                sleep 0.02;
             } else {
                 unlink $PidFile or
                     die "Failed to remove pid file $PidFile\n";
@@ -235,9 +263,76 @@ sub run_test ($) {
         }
     }
 
+    my $skip_nginx = $block->skip_nginx;
+    my ($tests_to_skip, $should_skip, $skip_reason);
+    if (defined $skip_nginx) {
+        if ($skip_nginx =~ m{
+                ^ \s* (\d+) \s* : \s*
+                    ([<>]=?) \s* (\d+)\.(\d+)\.(\d+)
+                    (?: \s* : \s* (.*) )?
+                \s*$}x) {
+            $tests_to_skip = $1;
+            my ($op, $ver1, $ver2, $ver3) = ($2, $3, $4, $5);
+            $skip_reason = $6;
+            my $ver = get_canon_version($ver1, $ver2, $ver3);
+            if ((!defined $NginxVersion and $op =~ /^</)
+                    or eval "$NginxVersion $op $ver")
+            {
+                $should_skip = 1;
+            }
+        } else {
+            Test::More::BAIL_OUT("$name - Invalid --- skip_nginx spec: " .
+                $skip_nginx);
+            die;
+        }
+    }
+    if (!defined $skip_reason) {
+        $skip_reason = "various reasons";
+    }
+
+    my $todo_nginx = $block->todo_nginx;
+    my ($should_todo, $todo_reason);
+    if (defined $todo_nginx) {
+        if ($todo_nginx =~ m{
+                ^ \s*
+                    ([<>]=?) \s* (\d+)\.(\d+)\.(\d+)
+                    (?: \s* : \s* (.*) )?
+                \s*$}x) {
+            my ($op, $ver1, $ver2, $ver3) = ($1, $2, $3, $4);
+            $todo_reason = $5;
+            my $ver = get_canon_version($ver1, $ver2, $ver3);
+            if ((!defined $NginxVersion and $op =~ /^</)
+                    or eval "$NginxVersion $op $ver")
+            {
+                $should_todo = 1;
+            }
+        } else {
+            Test::More::BAIL_OUT("$name - Invalid --- todo_nginx spec: " .
+                $todo_nginx);
+            die;
+        }
+    }
+    if (!defined $todo_reason) {
+        $todo_reason = "various reasons";
+    }
+
     my $i = 0;
     while ($i++ < $RepeatEach) {
-        run_test_helper($block, $request);
+        if ($should_skip) {
+            SKIP: {
+                skip "$name - $skip_reason", $tests_to_skip;
+
+                run_test_helper($block, $request);
+            }
+        } elsif ($should_todo) {
+            TODO: {
+                local $TODO = "$name - $todo_reason";
+
+                run_test_helper($block, $request);
+            }
+        } else {
+            run_test_helper($block, $request);
+        }
     }
 }
 
@@ -273,6 +368,9 @@ sub run_test_helper ($$) {
     my ($block, $request) = @_;
 
     my $name = $block->name;
+    #if (defined $TODO) {
+    #$name .= "# $TODO";
+    #}
 
     my $req_spec = parse_request($name, \$request);
     ## $req_spec
@@ -345,7 +443,7 @@ sub run_test_helper ($$) {
             if (!defined $expected_val) {
                 $expected_val = '';
             }
-            is_string $expected_val, $val,
+            is $expected_val, $val,
                 "$name - header $key ok";
         }
     } elsif (defined $block->response_headers_like) {
