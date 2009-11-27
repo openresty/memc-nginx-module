@@ -272,11 +272,13 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     ctx->cmd = memc_cmd;
 
+    ctx->is_storage_cmd = is_storage_cmd;
+
     ngx_http_set_ctx(r, ctx, ngx_http_memc_module);
 
     if (is_storage_cmd) {
         u->create_request = ngx_http_memc_create_storage_cmd_request;
-        u->process_header = ngx_http_memc_process_storage_cmd_header;
+        u->process_header = ngx_http_memc_process_simple_header;
 
         u->input_filter_init = ngx_http_memc_empty_filter_init;
         u->input_filter = ngx_http_memc_empty_filter;
@@ -290,7 +292,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     } else if (memc_cmd == ngx_http_memc_cmd_flush_all) {
         u->create_request = ngx_http_memc_create_noarg_cmd_request;
-        u->process_header = ngx_http_memc_process_flush_all_cmd_header;
+        u->process_header = ngx_http_memc_process_simple_header;
 
         u->input_filter_init = ngx_http_memc_empty_filter_init;
         u->input_filter = ngx_http_memc_empty_filter;

@@ -44,6 +44,8 @@ typedef struct {
     ngx_http_variable_value_t  *memc_value_vv;
     ngx_http_variable_value_t  *memc_key_vv;
 
+    ngx_flag_t                 is_storage_cmd;
+
     int                        parser_state;
 } ngx_http_memc_ctx_t;
 

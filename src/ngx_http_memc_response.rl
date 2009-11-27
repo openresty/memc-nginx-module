@@ -12,23 +12,30 @@
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
+static u_char * parse_memc_storage(int *cs_addr, u_char *p, u_char *pe,
+        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+
+static u_char * parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe,
+        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+
 static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
         ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp);
 
-
 ngx_int_t
-ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
+ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 {
+    ngx_int_t               rc;
     int                     cs;
     u_char                  *p;
     u_char                  *pe;
-    u_char                  *eof;
+    /* u_char                  *eof = NULL; */
     ngx_str_t               resp;
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
-    ngx_buf_t               *b;
     ngx_uint_t              status;
     ngx_flag_t              done = 0;
+    int                     error_state;
+    int                     final_state;
 
     if (r->headers_out.status) {
         status = r->headers_out.status;
@@ -42,80 +49,92 @@ ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r)
 
     if (ctx->parser_state == NGX_ERROR) {
         dd("reinit state");
-        %% write init;
+
+        if (ctx->is_storage_cmd) {
+            dd("init memc_storage machine...");
+
+            %% machine memc_storage;
+            %% write init;
+
+        } else if (ctx->cmd == ngx_http_memc_cmd_flush_all) {
+            dd("init memc_flush_all machine...");
+
+            %% machine memc_flush_all;
+            %% write init;
+
+        } else {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+              "unrecognized memcached command in "
+              "ngx_http_memc_process_simple_header: %V",
+              &ctx->cmd_str);
+
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+
+        }
+
     } else {
         cs = ctx->parser_state;
     }
 
     u = r->upstream;
 
-    b = &u->buffer;
-
-    p  = b->pos;
-    pe = b->last;
+    p  = u->buffer.pos;
+    pe = u->buffer.last;
 
     dd("buffer len: %d", pe - p);
 
-    /* eof = pe; */
-    eof = NULL;
+    if (ctx->is_storage_cmd) {
+        dd("setting memc_storage states...");
 
-    %%{
-        machine memc_storage;
+        error_state = memc_storage_error;
+        final_state = memc_storage_first_final;
 
-        action handle_stored {
-            dd("status set to 201");
-            status = NGX_HTTP_CREATED;
-        }
+        p = parse_memc_storage(&cs, p, pe, &status, &done);
 
-        action check {
-            dd("state %d, left %d, reading char '%c'", cs, pe - p, *p);
-        }
+    } else if (ctx->cmd == ngx_http_memc_cmd_flush_all) {
+        dd("setting memc_flush-all states...");
 
-        action catch_blah {
-            dd("caught error...");
-            dd("machine state: %d", cs);
-            status = NGX_HTTP_BAD_GATEWAY;
-        }
+        error_state = memc_flush_all_error;
+        final_state = memc_flush_all_first_final;
 
-        msg = any* -- "\r\n";
+        p = parse_memc_flush_all(&cs, p, pe, &status, &done);
 
-        blah = "ERROR\r\n"
-              | ("CLIENT_ERROR " msg "\r\n")
-              | ("SERVER_ERROR " msg "\r\n")
-              ;
+    } else {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+          "unrecognized memcached command in "
+          "ngx_http_memc_process_simple_header: %V",
+          &ctx->cmd_str);
 
-        main := ("ERROR\r\n" $check @catch_blah
-              | "STORED\r\n" $check @handle_stored
-              | "NOT_STORED\r\n"
-              | "EXISTS\r\n"
-              | "NOT_FOUND\r\n") @{ dd("done it!"); done = 1; }
-              ;
-    }%%
-
-    %% write exec;
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
 
     ctx->parser_state = cs;
 
-    resp.data = b->pos;
+    resp.data = u->buffer.pos;
     resp.len  = p - resp.data;
 
     dd("memcached response: (len: %d) %s", resp.len, resp.data);
     dd("machine state: %d", cs);
 
-    if (done || cs >= memc_storage_first_final) {
+    if (done || cs >= final_state) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
-        return ngx_http_memc_write_simple_response(r, u, status, &resp);
+        rc = ngx_http_memc_write_simple_response(r, u, status, &resp);
+
+        u->buffer.pos = p;
+
+        return rc;
     }
 
-    if (cs == memc_storage_error) {
+    if (cs == error_state) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                      "memcached sent invalid response for storange commands: "
-                      "%V", &resp);
+                  "memcached sent invalid response for command \"%V\": %V",
+                      &ctx->cmd_str, &resp);
 
         status = NGX_HTTP_BAD_GATEWAY;
         u->headers_in.status_n = status;
         u->state->status = status;
+        u->buffer.pos = p;
 
         return status;
     }
@@ -140,40 +159,6 @@ ngx_http_memc_empty_filter_init(void *data)
 ngx_int_t
 ngx_http_memc_empty_filter(void *data, ssize_t bytes)
 {
-    ngx_http_memc_ctx_t  *ctx = data;
-
-    /* u_char               *last; */
-    ngx_buf_t            *b;
-    ngx_chain_t          *cl, **ll;
-    ngx_http_upstream_t  *u;
-
-    /* dd("empty memcached filter"); */
-
-    u = ctx->request->upstream;
-    b = &u->buffer;
-
-    /* dd("buffer len %d", b->last - b->pos); */
-
-    if (b->last - b->pos == 0) {
-        return NGX_OK;
-    }
-
-    for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
-        ll = &cl->next;
-    }
-
-    cl = ngx_chain_get_free_buf(ctx->request->pool, &u->free_bufs);
-    if (cl == NULL) {
-        return NGX_ERROR;
-    }
-
-    cl->buf->flush = 1;
-    cl->buf->memory = 1;
-    cl->buf->pos = b->pos;
-    cl->buf->last = b->last;
-
-    *ll = cl;
-
     return NGX_OK;
 }
 
@@ -375,82 +360,6 @@ no_valid:
     return NGX_HTTP_UPSTREAM_INVALID_HEADER;
 }
 
-ngx_int_t
-ngx_http_memc_process_flush_all_cmd_header(ngx_http_request_t *r)
-{
-    int                     cs;
-    u_char                  *p;
-    u_char                  *pe;
-    u_char                  *eof = NULL;
-    ngx_str_t               resp;
-    ngx_http_upstream_t     *u;
-    ngx_http_memc_ctx_t     *ctx;
-    ngx_buf_t               *b;
-    ngx_uint_t              status = NGX_HTTP_OK;
-
-    dd("process flush_all cmd header");
-
-    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
-
-    if (ctx->parser_state == NGX_ERROR) {
-        %% write init;
-    }
-
-    u = r->upstream;
-
-    b = &u->buffer;
-    p  = b->pos;
-    pe = b->last;
-
-    %%{
-        machine memc_flush_all;
-
-        action catch_err {
-            status = NGX_HTTP_BAD_GATEWAY;
-        }
-
-        msg = any* -- "\r\n";
-
-        error = "ERROR\r\n"
-              | "CLIENT_ERROR " msg "\r\n"
-              | "SERVER_ERROR " msg "\r\n"
-              ;
-
-        main := "OK\r\n"
-              | error %catch_err
-              ;
-    }%%
-
-    %% write exec;
-
-    ctx->parser_state = cs;
-
-    resp.data = b->pos;
-    resp.len  = p - resp.data;
-
-    dd("memcached response: %s", resp.data);
-
-    if (cs >= memc_flush_all_first_final) {
-        dd("memcached response parsed (resp.len: %d)", resp.len);
-
-        return ngx_http_memc_write_simple_response(r, u, status, &resp);
-    }
-
-    if (cs == memc_flush_all_error) {
-        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                      "memcached sent invalid response for the \"%V\" command: "
-                      "%V", &ctx->cmd_str, &resp);
-
-        status = NGX_HTTP_BAD_GATEWAY;
-        u->headers_in.status_n = status;
-        u->state->status = status;
-
-        return status;
-    }
-
-    return NGX_AGAIN;
-}
-
 static ngx_int_t
 ngx_http_memc_write_simple_response(ngx_http_request_t *r,
         ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp)
@@ -478,5 +387,35 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
     *ll = cl;
 
     return NGX_OK;
+}
+
+
+static u_char *
+parse_memc_storage(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+{
+    int cs = *cs_addr;
+
+    %% machine memc_storage;
+    %% include "memc_storage.rl";
+    %% write exec;
+
+    *cs_addr = cs;
+
+    return p;
+}
+
+
+static u_char *
+parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+{
+    int cs = *cs_addr;
+
+    %% machine memc_flush_all;
+    %% include "memc_flush_all.rl";
+    %% write exec;
+
+    *cs_addr = cs;
+
+    return p;
 }
 

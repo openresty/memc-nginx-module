@@ -10,7 +10,7 @@ ngx_int_t ngx_http_memc_get_cmd_filter_init(void *data);
 
 ngx_int_t ngx_http_memc_get_cmd_filter(void *data, ssize_t bytes);
 
-ngx_int_t ngx_http_memc_process_storage_cmd_header(ngx_http_request_t *r);
+ngx_int_t ngx_http_memc_process_simple_header(ngx_http_request_t *r);
 
 ngx_int_t ngx_http_memc_empty_filter_init(void *data);
 
