@@ -467,6 +467,7 @@ bah"
 --- skip_nginx: 2: < 0.8.11
 
 
+
 === TEST 16: test replace (not stored)
 --- config
     location /main {
@@ -653,4 +654,16 @@ status: 200
 NOT_STORED\r
 get foo
 status: 404.*?404 Not Found.*$
+
+
+
+=== TEST 21: the "version" command
+--- config
+    location /ver {
+        set $memc_cmd version;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /ver
+--- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
 
