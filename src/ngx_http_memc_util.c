@@ -32,9 +32,11 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
             break;
 
         case 4:
+            /*
             if (ngx_str4cmp(data, 'g', 'e', 't', 's')) {
                 return ngx_http_memc_cmd_gets;
             }
+            */
 
             if (ngx_str4cmp(data, 'i', 'n', 'c', 'r')) {
                 return ngx_http_memc_cmd_incr;

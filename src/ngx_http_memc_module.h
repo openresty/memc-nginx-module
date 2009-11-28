@@ -11,10 +11,10 @@ typedef enum {
     ngx_http_memc_cmd_replace,
     ngx_http_memc_cmd_append,
     ngx_http_memc_cmd_prepend,
-    ngx_http_memc_cmd_cas,
+    /* ngx_http_memc_cmd_cas, */
 
     ngx_http_memc_cmd_get,
-    ngx_http_memc_cmd_gets,
+    /* ngx_http_memc_cmd_gets, */
 
     ngx_http_memc_cmd_delete,
 
@@ -26,7 +26,9 @@ typedef enum {
     ngx_http_memc_cmd_flush_all,
     ngx_http_memc_cmd_version,
     ngx_http_memc_cmd_verbosity,
+
     /* we do not want to support the "quit" command here */
+    /* ngx_http_memc_cmd_quit, */
 
     ngx_http_memc_cmd_unknown
 } ngx_http_memc_cmd_t;
