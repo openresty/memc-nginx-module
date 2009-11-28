@@ -24,7 +24,6 @@ __DATA__
 --- error_code: 400
 
 
-
 === TEST 2: bad cmd (case sensitive)
 --- config
     location /foo {

@@ -1,6 +1,10 @@
 #ifndef NGX_HTTP_MEMC_UTIL_H
 #define NGX_HTTP_MEMC_UTIL_H
 
+#include <ngx_core.h>
+#include <ngx_http.h>
+#include "ngx_http_memc_module.h"
+
 #ifndef ngx_str3cmp
 
 #  define ngx_str3cmp(m, c0, c1, c2)                                       \
@@ -92,6 +96,8 @@
 
 #endif /* ngx_str9cmp */
 
+ngx_http_memc_cmd_t ngx_http_memc_parse_cmd(u_char *data, size_t len,
+        ngx_flag_t *is_storage_cmd);
 
 #endif /* NGX_HTTP_MEMC_UTIL_H */
 
