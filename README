@@ -16,8 +16,11 @@ Status
         version
 
     All the ngx_memcached directives in nginx 0.8.28 are
-    directly inherited. Additionally this module supports
-    the "memc_cmds_allowed" directive.
+    directly inherited.
+
+    In addition, this module also supports the
+    "memc_cmds_allowed" directive to control which memcached
+    commands are allowed to be executed.
 
 The following commands won't be supported in the future unless
 I've found a good reason:
@@ -32,8 +35,13 @@ versions seem to supports these two commands.
 Examples
 
     # GET /foo?key=dog
+    #
     # POST /foo?key=cat
+    # Cat's value...
+    #
     # PUT /foo?key=bird
+    # Bird's value...
+    #
     # DELETE /foo?key=Tiger
     location /foo {
         set $memc_key $arg_key;
@@ -46,7 +54,10 @@ Examples
     }
 
     # GET /bar?cmd=get&key=cat
+    #
     # POST /bar?cmd=set&key=dog
+    # My value for the "dog" key...
+    #
     # DELETE /bar?cmd=delete&key=dog
     # GET /bar?cmd=delete&key=dog
     location /bar {
