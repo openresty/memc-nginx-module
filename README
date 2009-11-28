@@ -10,7 +10,7 @@ Status
         replace
         append
         prepend
-        flush_all (the delay argument is unsupported)
+        flush_all (the delay argument is not supported)
         version
 
 Note that at least memcached version 1.2.2 does not support
@@ -40,6 +40,20 @@ Examples
     location /bar {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
+        set $memc_flags $arg_flags;
+
+        memc_pass 127.0.0.1:11984;
+    }
+
+    # GET /bar?cmd=get&key=cat
+    # GET /bar?cmd=set&key=dog&val=animal&flags=1234
+    # GET /bar?cmd=delete&key=dog
+    # GET /bar?cmd=flush_all
+    location /bar {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        set $memc_flags $arg_flags; # defaults to 0
 
         memc_pass 127.0.0.1:11984;
     }
@@ -75,4 +89,14 @@ Compatibility
 
     If you find that any particular version of Nginx above 0.7.63 does not
     work with this module, please consider reporting a bug.
+
+See Also
+
+    *   The Memcached Protocol:
+        <http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt>
+    *   The standard ngx_memcached module:
+        <http://wiki.nginx.org/NginxHttpMemcachedModule>
+
+Author
+    agentzh (章亦春) <agentzh at gmail dot com>
 
