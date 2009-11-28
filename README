@@ -4,6 +4,7 @@ get/set/add/delete and more memcached commands.
 Status
     The following memcached commands have been implemented
     and tested:
+
         get
         set
         add
@@ -12,6 +13,12 @@ Status
         prepend
         flush_all (the delay argument is not supported)
         version
+
+The following commands won't be supported in the future unless
+I've found a good reason:
+
+        gets
+        quit
 
 Note that at least memcached version 1.2.2 does not support
 the "append" and "prepend" commands. At least 1.2.4 and later
