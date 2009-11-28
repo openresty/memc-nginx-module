@@ -23,7 +23,7 @@ Status
     commands are allowed to be executed.
 
 The following commands won't be supported in the future unless
-I've found a good reason:
+I find a good reason:
 
         gets
         quit

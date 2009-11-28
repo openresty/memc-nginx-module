@@ -25,7 +25,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     ngx_http_memc_loc_conf_t       *mlcf;
     ngx_uint_t                      hash_key;
-    u_char                          bytes_buf[NGX_INT_T_LEN];
+    u_char                          bytes_buf[NGX_INT32_LEN];
 
     /* TODO add support for the "cas" command */
 
@@ -76,7 +76,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
     flags_vv = ctx->memc_flags_vv;
 
     if (flags_vv == NULL) {
-        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        return NGX_ERROR;
     }
 
     if (flags_vv->not_found) {

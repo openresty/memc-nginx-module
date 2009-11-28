@@ -21,6 +21,9 @@ static void ngx_http_memc_abort_request(ngx_http_request_t *r);
 static void ngx_http_memc_finalize_request(ngx_http_request_t *r,
     ngx_int_t rc);
 
+static ngx_flag_t ngx_http_memc_is_valid_flags(u_char *data, size_t len);
+
+
 
 ngx_int_t
 ngx_http_memc_handler(ngx_http_request_t *r)
@@ -199,6 +202,15 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         }
 
         ctx->memc_flags_vv = flags_vv;
+
+        if ( is_storage_cmd
+                && ! flags_vv->not_found
+                && flags_vv->len
+                && ! ngx_http_memc_is_valid_flags(
+                    flags_vv->data, flags_vv->len))
+        {
+            return NGX_HTTP_BAD_REQUEST;
+        }
     }
 
     if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_incr
@@ -306,5 +318,25 @@ ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
     }
 
     return 0;
+}
+
+
+static ngx_flag_t
+ngx_http_memc_is_valid_flags(u_char *data, size_t len)
+{
+    u_char              *p, *last;
+
+    if (len >= NGX_INT32_LEN) {
+        return 0;
+    }
+
+    last = data + len;
+    for (p = data; p != last; p++) {
+        if (*p < '0' || *p > '9') {
+            return 0;
+        }
+    }
+
+    return 1;
 }
 

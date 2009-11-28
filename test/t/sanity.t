@@ -717,6 +717,7 @@ status: 404.*?404 Not Found.*$
     location /allow {
         memc_cmds_allowed set add delete version;
 
+        set $memcached_key foo;
         memc_pass 127.0.0.1:11984;
     }
 --- request
@@ -729,8 +730,8 @@ status: 404.*?404 Not Found.*$
 === TEST 26: set flags and get flags
 --- config
     location /flags {
-        echo 'set foo BAR (flag: 12345)';
-        echo_subrequest PUT '/memc?key=foo&flags=12345' -b BAR;
+        echo 'set foo BAR (flag: 1234567890)';
+        echo_subrequest PUT '/memc?key=foo&flags=1234567890' -b BAR;
 
         echo 'get foo';
         echo_subrequest GET '/memc?key=foo';
@@ -747,13 +748,13 @@ status: 404.*?404 Not Found.*$
 --- request
     GET /flags
 --- response_body eval
-"set foo BAR (flag: 12345)
+"set foo BAR (flag: 1234567890)
 status: 201
-flags: 12345
+flags: 1234567890
 STORED\r
 get foo
 status: 200
-flags: 12345
+flags: 1234567890
 BAR"
 
 
@@ -861,4 +862,20 @@ get foo
 status: 200
 flags: 54321
 BAR"
+
+
+
+=== TEST 30: set invalid flags
+--- config
+    location /allow {
+        set $memc_cmd 'set';
+        set $memc_key 'foo';
+        set $memc_value 'nice';
+        set $memc_flags 'invalid';
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: 400 Bad Request
+--- error_code: 400
 
