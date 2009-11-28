@@ -4,7 +4,6 @@
 #include "ngx_http_memc_request.h"
 #include "ngx_http_memc_module.h"
 
-static ngx_str_t  ngx_http_memc_flags = ngx_string("memc_flags");
 static ngx_str_t  ngx_http_memc_exptime = ngx_string("memc_exptime");
 
 ngx_int_t
@@ -18,10 +17,12 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
     ngx_chain_t                    *cl;
     ngx_chain_t                   **ll;
     ngx_http_memc_ctx_t            *ctx;
+
     ngx_http_variable_value_t      *key_vv;
     ngx_http_variable_value_t      *flags_vv;
     ngx_http_variable_value_t      *exptime_vv;
     ngx_http_variable_value_t      *memc_value_vv;
+
     ngx_http_memc_loc_conf_t       *mlcf;
     ngx_uint_t                      hash_key;
     u_char                          bytes_buf[NGX_INT_T_LEN];
@@ -72,9 +73,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     /* prepare the "flags" argument */
 
-    hash_key = ngx_hash_key(ngx_http_memc_flags.data, ngx_http_memc_flags.len);
-
-    flags_vv = ngx_http_get_variable(r, &ngx_http_memc_flags, hash_key, 1);
+    flags_vv = ctx->memc_flags_vv;
 
     if (flags_vv == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -84,6 +83,9 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
         flags_vv->not_found = 0;
         flags_vv->valid = 1;
         flags_vv->no_cacheable = 0;
+        flags_vv->len = sizeof("0") - 1;
+        flags_vv->data = (u_char *) "0";
+    } else if (flags_vv->len == 0) {
         flags_vv->len = sizeof("0") - 1;
         flags_vv->data = (u_char *) "0";
     }

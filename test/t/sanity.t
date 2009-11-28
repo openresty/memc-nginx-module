@@ -724,3 +724,141 @@ status: 404.*?404 Not Found.*$
 --- response_body_like: 403 Forbidden
 --- error_code: 403
 
+
+
+=== TEST 26: set flags and get flags
+--- config
+    location /flags {
+        echo 'set foo BAR (flag: 12345)';
+        echo_subrequest PUT '/memc?key=foo&flags=12345' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "flags: $memc_flags";
+
+        set $memc_key $arg_key;
+        set $memc_flags $arg_flags;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /flags
+--- response_body eval
+"set foo BAR (flag: 12345)
+status: 201
+flags: 12345
+STORED\r
+get foo
+status: 200
+flags: 12345
+BAR"
+
+
+
+=== TEST 27: test empty flags (default to 0)
+--- config
+    location /flags {
+        echo 'set foo BAR (flag: EMPTY)';
+        echo_subrequest PUT '/memc?key=foo' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+    }
+
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "flags: $memc_flags";
+
+        set $memc_key $arg_key;
+        set $memc_flags $arg_flags;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /flags
+--- response_body eval
+"set foo BAR (flag: EMPTY)
+status: 201
+flags: 0
+STORED\r
+get foo
+status: 200
+flags: 0
+BAR"
+
+
+
+=== TEST 28: test empty flags (default to 0) (another form)
+--- config
+    location /flags {
+        echo 'set foo BAR (flag: EMPTY)';
+        echo_subrequest PUT '/memc?key=foo&flags=' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+    }
+
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "flags: $memc_flags";
+
+        set $memc_key $arg_key;
+        set $memc_flags $arg_flags;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /flags
+--- response_body eval
+"set foo BAR (flag: EMPTY)
+status: 201
+flags: 0
+STORED\r
+get foo
+status: 200
+flags: 0
+BAR"
+
+
+
+=== TEST 29: add flags and get flags
+--- config
+    location /flags {
+        echo 'flush_all';
+        echo_subrequest GET '/memc?cmd=flush_all';
+
+        echo 'add foo BAR (flag: 54321)';
+        echo_subrequest POST '/memc?key=foo&flags=54321' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "flags: $memc_flags";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_flags $arg_flags;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /flags
+--- response_body eval
+"flush_all
+status: 200
+flags: 
+OK\r
+add foo BAR (flag: 54321)
+status: 201
+flags: 54321
+STORED\r
+get foo
+status: 200
+flags: 54321
+BAR"
+

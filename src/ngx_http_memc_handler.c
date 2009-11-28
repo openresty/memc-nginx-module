@@ -10,6 +10,7 @@
 static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
 static ngx_str_t  ngx_http_memc_cmd = ngx_string("memc_cmd");
 static ngx_str_t  ngx_http_memc_value = ngx_string("memc_value");
+static ngx_str_t  ngx_http_memc_flags = ngx_string("memc_flags");
 
 
 static ngx_flag_t ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
@@ -29,9 +30,12 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_http_memc_ctx_t            *ctx;
     ngx_http_memc_loc_conf_t       *mlcf;
     /* ngx_int_t                       index; */
+
     ngx_http_variable_value_t      *cmd_vv;
     ngx_http_variable_value_t      *key_vv;
     ngx_http_variable_value_t      *value_vv;
+    ngx_http_variable_value_t      *flags_vv;
+
     ngx_uint_t                      hash_key;
     ngx_http_memc_cmd_t             memc_cmd;
     ngx_flag_t                      is_storage_cmd = 0;
@@ -52,7 +56,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (cmd_vv->not_found) {
+    if (cmd_vv->not_found || cmd_vv->len == 0) {
         dd("variable $memc_cmd not found");
         cmd_vv->not_found = 0;
         cmd_vv->valid = 1;
@@ -133,6 +137,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     ctx->memc_key_vv = key_vv;
     ctx->memc_value_vv = NULL;
+    ctx->memc_flags_vv = NULL;
+
     ctx->parser_state = NGX_ERROR;
 
     ctx->rest = NGX_HTTP_MEMC_END;
@@ -182,6 +188,18 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     u->finalize_request = ngx_http_memc_finalize_request;
 
     u->input_filter_ctx = ctx;
+
+    if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_get) {
+        hash_key = ngx_hash_key(ngx_http_memc_flags.data, ngx_http_memc_flags.len);
+
+        flags_vv = ngx_http_get_variable(r, &ngx_http_memc_flags, hash_key, 1);
+
+        if (flags_vv == NULL) {
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        ctx->memc_flags_vv = flags_vv;
+    }
 
     if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_incr
                 || memc_cmd == ngx_http_memc_cmd_decr

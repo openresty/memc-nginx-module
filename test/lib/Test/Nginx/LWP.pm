@@ -6,7 +6,7 @@ our $RepeatEach = 1;
 use lib 'lib';
 use lib 'inc';
 use Time::HiRes qw(sleep);
-use Test::LongString;
+#use Test::LongString;
 
 #use Smart::Comments::JSON '##';
 use LWP::UserAgent; # XXX should use a socket level lib here
@@ -468,7 +468,10 @@ sub run_test_helper ($$) {
         my $expected = $block->response_body;
         $expected =~ s/\$ServerPort\b/$ServerPort/g;
         #warn show_all_chars($content);
-        is_string($content, $expected, "$name - response_body - response is expected");
+
+        #is_string($content, $expected, "$name - response_body - response is expected");
+        is($content, $expected, "$name - response_body - response is expected");
+
     } elsif (defined $block->response_body_like) {
         my $content = $res->content;
         if (defined $content) {

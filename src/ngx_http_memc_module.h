@@ -43,8 +43,10 @@ typedef struct {
 
     ngx_str_t                  cmd_str;
     ngx_http_memc_cmd_t        cmd;
+
     ngx_http_variable_value_t  *memc_value_vv;
     ngx_http_variable_value_t  *memc_key_vv;
+    ngx_http_variable_value_t  *memc_flags_vv;
 
     ngx_flag_t                 is_storage_cmd;
 
