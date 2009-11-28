@@ -32,6 +32,20 @@ Note that at least memcached version 1.2.2 does not support
 the "append" and "prepend" commands. At least 1.2.4 and later
 versions seem to supports these two commands.
 
+The "get" command returns 404 for NOT FOUND response or
+the value of the key $memc_key otherwise. It also sets
+the variable $memc_flags to the flags associated with
+the memcached key.
+
+The memcached storage commands "set", "add", "replace",
+"prepend", and "append" uses the $memc_key as the key,
+$memc_exptime as the expiration time (or delay) (defaults
+to 0), $memc_flags as the flags (defaults to 0), to build
+the corresponding memcached request.
+
+Note that the $memc_exptime variable has not been tested
+yet.
+
 Examples
 
     # GET /foo?key=dog
