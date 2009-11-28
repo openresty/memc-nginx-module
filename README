@@ -15,6 +15,10 @@ Status
         flush_all (the delay argument is not supported)
         version
 
+    All the ngx_memcached directives in nginx 0.8.28 are
+    directly inherited. Additionally this module supports
+    the "memc_cmds_allowed" directive.
+
 The following commands won't be supported in the future unless
 I've found a good reason:
 
