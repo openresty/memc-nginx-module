@@ -11,6 +11,7 @@
 
 #include "ngx_http_memc_module.h"
 #include "ngx_http_memc_handler.h"
+#include "ngx_http_memc_util.h"
 
 #include <ngx_config.h>
 #include <ngx_core.h>
@@ -20,6 +21,9 @@
 static void *ngx_http_memc_create_loc_conf(ngx_conf_t *cf);
 static char *ngx_http_memc_merge_loc_conf(ngx_conf_t *cf,
     void *parent, void *child);
+
+static char *ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd,
+    void *conf);
 
 static char *ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
@@ -41,6 +45,14 @@ static ngx_conf_bitmask_t  ngx_http_memc_next_upstream_masks[] = {
 
 
 static ngx_command_t  ngx_http_memc_commands[] = {
+
+    { ngx_string("memc_cmds_allowed"),
+      NGX_HTTP_MAIN_CONF|NGX_HTTP_SRV_CONF|NGX_HTTP_LOC_CONF
+          |NGX_HTTP_LIF_CONF|NGX_CONF_1MORE,
+      ngx_http_memc_cmds_allowed,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      0,
+      NULL },
 
     { ngx_string("memc_pass"),
       NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_TAKE1,
@@ -157,6 +169,7 @@ ngx_http_memc_create_loc_conf(ngx_conf_t *cf)
     /*
      * set by ngx_pcalloc():
      *
+     *     conf->cmds_allowed = NULL;
      *     conf->upstream.bufs.num = 0;
      *     conf->upstream.next_upstream = 0;
      *     conf->upstream.temp_path = NULL;
@@ -220,6 +233,10 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 
     if (conf->upstream.upstream == NULL) {
         conf->upstream.upstream = prev->upstream.upstream;
+    }
+
+    if (conf->cmds_allowed == NULL) {
+        conf->cmds_allowed = prev->cmds_allowed;
     }
 
     return NGX_CONF_OK;
@@ -286,5 +303,47 @@ ngx_http_memc_upstream_fail_timeout_unsupported(ngx_conf_t *cf,
          "inside the \"upstream\" block");
 
     return NGX_CONF_ERROR;
+}
+
+static char *
+ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
+{
+    ngx_http_memc_loc_conf_t *mlcf = conf;
+
+    ngx_uint_t                 i;
+    ngx_str_t                 *value;
+    ngx_http_memc_cmd_t        memc_cmd;
+    ngx_http_memc_cmd_t        *c;
+    ngx_flag_t                 is_storage_cmd;
+
+    value = cf->args->elts;
+
+    mlcf->cmds_allowed = ngx_array_create(cf->pool, cf->args->nelts - 1,
+            sizeof(ngx_http_memc_cmd_t));
+
+    if (mlcf->cmds_allowed == NULL) {
+        return NGX_CONF_ERROR;
+    }
+
+    for (i = 1; i < cf->args->nelts; i++) {
+        memc_cmd = ngx_http_memc_parse_cmd(value[i].data, value[i].len, &is_storage_cmd);
+
+        if (memc_cmd == ngx_http_memc_cmd_unknown) {
+            ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
+                 "Unknown memcached command \"%V\" used in "
+                 "\"memc_cmds_allowed\"", &value[i]);
+
+            return NGX_CONF_ERROR;
+        }
+
+        c = ngx_array_push(mlcf->cmds_allowed);
+        if (c == NULL) {
+            return NGX_CONF_ERROR;
+        }
+
+        *c = memc_cmd;
+    }
+
+    return NGX_CONF_OK;
 }
 

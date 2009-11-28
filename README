@@ -63,6 +63,8 @@ Examples
         set $memc_value $arg_val;
         set $memc_flags $arg_flags; # defaults to 0
 
+        memc_cmds_allowed get set add delete flush_all;
+
         memc_pass 127.0.0.1:11984;
     }
 

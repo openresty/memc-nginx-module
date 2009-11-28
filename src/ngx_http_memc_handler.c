@@ -11,10 +11,15 @@ static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
 static ngx_str_t  ngx_http_memc_cmd = ngx_string("memc_cmd");
 static ngx_str_t  ngx_http_memc_value = ngx_string("memc_value");
 
+
+static ngx_flag_t ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
+        ngx_http_memc_cmd_t memc_cmd);
+
 static ngx_int_t ngx_http_memc_reinit_request(ngx_http_request_t *r);
 static void ngx_http_memc_abort_request(ngx_http_request_t *r);
 static void ngx_http_memc_finalize_request(ngx_http_request_t *r,
     ngx_int_t rc);
+
 
 ngx_int_t
 ngx_http_memc_handler(ngx_http_request_t *r)
@@ -88,10 +93,20 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
         if (memc_cmd == ngx_http_memc_cmd_unknown) {
             ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
-             "ngx_memc: unknown $memc_cmd \"%v\"", cmd_vv);
+                     "ngx_memc: unknown $memc_cmd \"%v\"", cmd_vv);
 
             return NGX_HTTP_BAD_REQUEST;
         }
+    }
+
+    mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
+
+    if ( ! ngx_http_memc_in_cmds_allowed(mlcf, memc_cmd) ) {
+        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+                 "ngx_memc: User requests to run memcached command "
+                 "\"%v\"", cmd_vv);
+
+        return NGX_HTTP_FORBIDDEN;
     }
 
     if (ngx_http_set_content_type(r) != NGX_OK) {
@@ -108,8 +123,6 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     u->schema.data = (u_char *) "memcached://";
 
     u->output.tag = (ngx_buf_tag_t) &ngx_http_memc_module;
-
-    mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
 
     u->conf = &mlcf->upstream;
 
@@ -253,4 +266,27 @@ ngx_http_memc_finalize_request(ngx_http_request_t *r, ngx_int_t rc)
     return;
 }
 
+
+static ngx_flag_t
+ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
+        ngx_http_memc_cmd_t memc_cmd)
+{
+    ngx_uint_t                   i;
+    ngx_http_memc_cmd_t         *value;
+
+    if (mlcf->cmds_allowed == NULL || mlcf->cmds_allowed->nelts == 0) {
+        /* by default, all the memcached commands supported are allowed. */
+        return 1;
+    }
+
+    value = mlcf->cmds_allowed->elts;
+
+    for (i = 0; i < mlcf->cmds_allowed->nelts; i++) {
+        if (memc_cmd == value[i]) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
 

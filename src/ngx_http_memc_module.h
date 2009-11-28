@@ -33,6 +33,7 @@ typedef enum {
 
 typedef struct {
     ngx_http_upstream_conf_t   upstream;
+    ngx_array_t               *cmds_allowed;
 } ngx_http_memc_loc_conf_t;
 
 typedef struct {

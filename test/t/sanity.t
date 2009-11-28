@@ -24,6 +24,7 @@ __DATA__
 --- error_code: 400
 
 
+
 === TEST 2: bad cmd (case sensitive)
 --- config
     location /foo {
@@ -665,4 +666,61 @@ status: 404.*?404 Not Found.*$
 --- request
     GET /ver
 --- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
+
+
+
+=== TEST 22: explicit $memc_cmd in non-empty cmds_allowed list
+--- config
+    location /allow {
+        set $memc_cmd version;
+        memc_cmds_allowed get version;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
+
+
+
+=== TEST 23: explicit $memc_cmd in non-empty cmds_allowed list (in first)
+--- config
+    location /allow {
+        set $memc_cmd version;
+        memc_cmds_allowed version get;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
+
+
+
+=== TEST 24: explicit $memc_cmd NOT in non-empty cmds_allowed list
+--- config
+    location /allow {
+        set $memc_cmd version;
+        memc_cmds_allowed set get add delete;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: 403 Forbidden
+--- error_code: 403
+
+
+
+=== TEST 25: implicit $memc_cmd NOT in non-empty cmds_allowed list
+--- config
+    location /allow {
+        memc_cmds_allowed set add delete version;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: 403 Forbidden
+--- error_code: 403
 
