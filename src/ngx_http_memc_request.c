@@ -5,7 +5,6 @@
 #include "ngx_http_memc_module.h"
 #include "ngx_http_memc_util.h"
 
-static ngx_str_t  ngx_http_memc_exptime = ngx_string("memc_exptime");
 
 ngx_int_t
 ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
@@ -25,7 +24,6 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
     ngx_http_variable_value_t      *memc_value_vv;
 
     ngx_http_memc_loc_conf_t       *mlcf;
-    ngx_uint_t                      hash_key;
     u_char                          bytes_buf[NGX_UINT32_LEN];
 
     /* TODO add support for the "cas" command */
@@ -93,20 +91,25 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     /* prepare the "exptime" argument */
 
-    hash_key = ngx_hash_key(ngx_http_memc_exptime.data, ngx_http_memc_exptime.len);
-
-    exptime_vv = ngx_http_get_variable(r, &ngx_http_memc_exptime, hash_key, 1);
+    exptime_vv = ctx->memc_exptime_vv;
 
     if (exptime_vv == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    if (exptime_vv->not_found) {
+    if (exptime_vv->not_found || exptime_vv->len == 0) {
+        dd("setting exptime to its default value 0...");
+
         exptime_vv->not_found = 0;
         exptime_vv->valid = 1;
         exptime_vv->no_cacheable = 0;
         exptime_vv->len = sizeof("0") - 1;
         exptime_vv->data = (u_char *) "0";
+
+        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
+                   "$memc_exptime got its default value: \"%v\"",
+                   exptime_vv);
+
     }
 
     /* calculate the total length of the command */

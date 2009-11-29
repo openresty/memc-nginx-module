@@ -5,7 +5,7 @@ use Test::Nginx::LWP;
 
 plan tests => $Test::Nginx::LWP::RepeatEach * 2 * blocks();
 
-#no_diff;
+no_diff;
 
 run_tests();
 
@@ -724,4 +724,84 @@ status: 404.*?404 Not Found.*$
     GET /allow
 --- response_body_like: 403 Forbidden
 --- error_code: 403
+
+
+
+=== TEST 26: set and get big value
+--- config
+    location /big {
+        client_body_buffer_size 1k;
+        client_max_body_size 100k;
+
+        echo 'set big';
+        echo_subrequest POST '/memc?key=big&cmd=set';
+
+        echo 'get big';
+        echo_location '/memc?key=big&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request eval
+"POST /big\n" .
+ 'a' x (1024 * 90) . 'efg'
+
+--- response_body eval
+"set big
+STORED\r
+get big
+" . 'a' x (1024 * 90) . 'efg'
+
+
+
+=== TEST 27: set and get too big values
+--- config
+    location /big {
+        client_body_buffer_size 1k;
+        client_max_body_size 100k;
+
+        echo 'set big';
+        echo_subrequest POST '/memc?key=big&cmd=set';
+
+        echo 'get big';
+        echo_location '/memc?key=big&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request eval
+"POST /big\n" .
+ 'a' x (1024 * 100) . 'efg'
+
+--- response_body_like: 413 Request Entity Too Large
+--- error_code: 413
+
+
+
+=== TEST 28: $memc_cmd has its default values when it's an empty string
+--- config
+    location /main {
+        echo 'set big';
+        echo_subrequest POST '/memc?key=big';
+
+        echo 'get big';
+        echo_location '/memc?key=big&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+POST /main
+nice to meet you!
+--- response_body eval
+"set big
+STORED\r
+get big
+nice to meet you!"
 

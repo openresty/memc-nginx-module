@@ -127,7 +127,7 @@ static ngx_command_t  ngx_http_memc_commands[] = {
 
 static ngx_http_module_t  ngx_http_memc_module_ctx = {
     NULL,                                  /* preconfiguration */
-    NULL,                                  /* postconfiguration */
+    ngx_http_memc_init,                    /* postconfiguration */
 
     NULL,                                  /* create main configuration */
     NULL,                                  /* init main configuration */

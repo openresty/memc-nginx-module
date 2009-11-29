@@ -11,7 +11,13 @@ static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
 static ngx_str_t  ngx_http_memc_cmd = ngx_string("memc_cmd");
 static ngx_str_t  ngx_http_memc_value = ngx_string("memc_value");
 static ngx_str_t  ngx_http_memc_flags = ngx_string("memc_flags");
+static ngx_str_t  ngx_http_memc_exptime = ngx_string("memc_exptime");
 
+static ngx_uint_t  ngx_http_memc_key_hkey;
+static ngx_uint_t  ngx_http_memc_cmd_hkey;
+static ngx_uint_t  ngx_http_memc_value_hkey;
+static ngx_uint_t  ngx_http_memc_flags_hkey;
+static ngx_uint_t  ngx_http_memc_exptime_hkey;
 
 static ngx_flag_t ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
         ngx_http_memc_cmd_t memc_cmd);
@@ -21,8 +27,7 @@ static void ngx_http_memc_abort_request(ngx_http_request_t *r);
 static void ngx_http_memc_finalize_request(ngx_http_request_t *r,
     ngx_int_t rc);
 
-static ngx_flag_t ngx_http_memc_is_valid_flags(u_char *data, size_t len);
-
+static ngx_flag_t ngx_http_memc_valid_uint32_str(u_char *data, size_t len);
 
 
 ngx_int_t
@@ -38,22 +43,18 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_http_variable_value_t      *key_vv;
     ngx_http_variable_value_t      *value_vv;
     ngx_http_variable_value_t      *flags_vv;
+    ngx_http_variable_value_t      *exptime_vv;
 
-    ngx_uint_t                      hash_key;
     ngx_http_memc_cmd_t             memc_cmd;
     ngx_flag_t                      is_storage_cmd = 0;
 
-    hash_key = ngx_hash_key(ngx_http_memc_key.data, ngx_http_memc_key.len);
-
-    key_vv = ngx_http_get_variable(r, &ngx_http_memc_key, hash_key, 1);
+    key_vv = ngx_http_get_variable(r, &ngx_http_memc_key, ngx_http_memc_key_hkey, 1);
 
     if (key_vv == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    hash_key = ngx_hash_key(ngx_http_memc_cmd.data, ngx_http_memc_cmd.len);
-
-    cmd_vv = ngx_http_get_variable(r, &ngx_http_memc_cmd, hash_key, 1);
+    cmd_vv = ngx_http_get_variable(r, &ngx_http_memc_cmd, ngx_http_memc_cmd_hkey, 1);
 
     if (cmd_vv == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -211,10 +212,31 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     u->input_filter_ctx = ctx;
 
-    if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_get) {
-        hash_key = ngx_hash_key(ngx_http_memc_flags.data, ngx_http_memc_flags.len);
+    if (is_storage_cmd
+            || memc_cmd == ngx_http_memc_cmd_flush_all
+            || memc_cmd == ngx_http_memc_cmd_delete)
+    {
+        exptime_vv = ngx_http_get_variable(r, &ngx_http_memc_exptime,
+                ngx_http_memc_exptime_hkey, 1);
 
-        flags_vv = ngx_http_get_variable(r, &ngx_http_memc_flags, hash_key, 1);
+        if (exptime_vv == NULL) {
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        ctx->memc_exptime_vv = exptime_vv;
+
+        if ( ! exptime_vv->not_found
+                && exptime_vv->len
+                && ! ngx_http_memc_valid_uint32_str(
+                    exptime_vv->data, exptime_vv->len))
+        {
+            return NGX_HTTP_BAD_REQUEST;
+        }
+    }
+
+    if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_get) {
+        flags_vv = ngx_http_get_variable(r, &ngx_http_memc_flags,
+                ngx_http_memc_flags_hkey, 1);
 
         if (flags_vv == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -225,7 +247,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         if ( is_storage_cmd
                 && ! flags_vv->not_found
                 && flags_vv->len
-                && ! ngx_http_memc_is_valid_flags(
+                && ! ngx_http_memc_valid_uint32_str(
                     flags_vv->data, flags_vv->len))
         {
             return NGX_HTTP_BAD_REQUEST;
@@ -236,9 +258,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
                 || memc_cmd == ngx_http_memc_cmd_decr
                 || memc_cmd == ngx_http_memc_cmd_verbosity)
     {
-        hash_key = ngx_hash_key(ngx_http_memc_value.data, ngx_http_memc_value.len);
-
-        value_vv = ngx_http_get_variable(r, &ngx_http_memc_value, hash_key, 1);
+        value_vv = ngx_http_get_variable(r, &ngx_http_memc_value, ngx_http_memc_value_hkey, 1);
         if (value_vv == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
@@ -341,7 +361,7 @@ ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
 
 
 static ngx_flag_t
-ngx_http_memc_is_valid_flags(u_char *data, size_t len)
+ngx_http_memc_valid_uint32_str(u_char *data, size_t len)
 {
     u_char              *p, *last;
 
@@ -357,5 +377,27 @@ ngx_http_memc_is_valid_flags(u_char *data, size_t len)
     }
 
     return 1;
+}
+
+
+ngx_int_t
+ngx_http_memc_init(ngx_conf_t *cf)
+{
+    ngx_http_memc_key_hkey =
+        ngx_hash_key(ngx_http_memc_key.data, ngx_http_memc_key.len);
+;
+    ngx_http_memc_cmd_hkey =
+        ngx_hash_key(ngx_http_memc_cmd.data, ngx_http_memc_cmd.len);
+
+    ngx_http_memc_value_hkey =
+        ngx_hash_key(ngx_http_memc_value.data, ngx_http_memc_value.len);
+
+    ngx_http_memc_flags_hkey =
+        ngx_hash_key(ngx_http_memc_flags.data, ngx_http_memc_flags.len);
+
+    ngx_http_memc_exptime_hkey =
+        ngx_hash_key(ngx_http_memc_exptime.data, ngx_http_memc_exptime.len);
+
+    return NGX_OK;
 }
 
