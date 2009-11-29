@@ -44,9 +44,6 @@ $memc_exptime as the expiration time (or delay) (defaults
 to 0), $memc_flags as the flags (defaults to 0), to build
 the corresponding memcached request.
 
-Note that the $memc_exptime variable has not been tested
-yet.
-
 Examples
 
     # GET /foo?key=dog
