@@ -5,6 +5,10 @@
 #include <ngx_http.h>
 #include "ngx_http_memc_module.h"
 
+#ifndef NGX_UINT32_LEN
+#define NGX_UINT32_LEN (NGX_INT32_LEN - 1)
+#endif
+
 #ifndef ngx_str3cmp
 
 #  define ngx_str3cmp(m, c0, c1, c2)                                       \

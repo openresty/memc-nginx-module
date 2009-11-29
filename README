@@ -4,15 +4,16 @@ Description
 
 Status
     The following memcached commands have been implemented
-    and tested:
+    and tested (with their parameters marked by corresponding
+    nginx variables defined by this module):
 
-        get
-        set
-        add
-        replace
-        append
-        prepend
-        flush_all (the delay argument is not supported)
+        get $memc_key
+        set $memc_key $memc_flags $memc_exptime $memc_value
+        add $memc_key $memc_flags $memc_exptime $memc_value
+        replace $memc_key $memc_flags $memc_exptime $memc_value
+        append $memc_key $memc_flags $memc_exptime $memc_value
+        prepend $memc_key $memc_flags $memc_exptime $memc_value
+        flush_all
         version
 
     All the ngx_memcached directives in nginx 0.8.28 are
@@ -122,7 +123,12 @@ Compatibility
 
     *   0.8.x (last tested version is 0.8.28)
 
-    *   0.7.x >= 0.7.63 (last tested version is 0.7.64)
+    *   0.7.x >= 0.7.46 (last tested version is 0.7.64)
+
+    Nginx 0.7.x < 0.7.46 might also work, but I can't easily
+    test them because the test suite makes extensive use of
+    the "echo" module's "echo_location" directive, which
+    requires at least nginx 0.7.46 :)
 
     Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 

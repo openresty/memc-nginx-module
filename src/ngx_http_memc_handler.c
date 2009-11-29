@@ -120,11 +120,30 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
+#if defined(nginx_version) && nginx_version >= 7063
+
     if (ngx_http_upstream_create(r) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
     u = r->upstream;
+
+#else /* nginx_version < 7063, i.e., nginx 0.7.62- */
+
+    u = ngx_pcalloc(r->pool, sizeof(ngx_http_upstream_t));
+    if (u == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    u->peer.log = r->connection->log;
+    u->peer.log_error = NGX_ERROR_ERR;
+#  if (NGX_THREADS)
+    u->peer.lock = &r->connection->lock;
+#  endif
+
+    r->upstream = u;
+
+#endif
 
     u->schema.len = sizeof("memcached://") - 1;
     u->schema.data = (u_char *) "memcached://";
@@ -326,7 +345,7 @@ ngx_http_memc_is_valid_flags(u_char *data, size_t len)
 {
     u_char              *p, *last;
 
-    if (len >= NGX_INT32_LEN) {
+    if (len > NGX_UINT32_LEN) {
         return 0;
     }
 
