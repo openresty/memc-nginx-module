@@ -127,10 +127,10 @@ Compatibility
 
     *   0.7.x >= 0.7.46 (last tested version is 0.7.64)
 
-    Nginx 0.7.x < 0.7.46 might also work, but I can't easily
-    test them because the test suite makes extensive use of
-    the "echo" module's "echo_location" directive, which
-    requires at least nginx 0.7.46 :)
+    Some 0.7.x versions older than 0.7.46 might also work, but
+    I can't easily test them because the test suite makes
+    extensive use of the "echo" module's "echo_location"
+    directive, which requires at least nginx 0.7.46 :)
 
     Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
