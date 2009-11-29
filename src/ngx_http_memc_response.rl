@@ -125,8 +125,10 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 
     ctx->parser_state = cs;
 
-    resp.data = u->buffer.pos;
+    resp.data = u->buffer.start;
     resp.len  = p - resp.data;
+
+    u->buffer.pos = p;
 
     dd("memcached response: (len: %d) %s", resp.len, resp.data);
     dd("machine state: %d", cs);
@@ -135,8 +137,6 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
         rc = ngx_http_memc_write_simple_response(r, u, status, &resp);
-
-        u->buffer.pos = p;
 
         return rc;
     }
