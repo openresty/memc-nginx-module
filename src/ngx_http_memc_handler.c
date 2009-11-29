@@ -121,7 +121,9 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-#if defined(nginx_version) && nginx_version >= 7063
+#if defined(nginx_version) && \
+    ((nginx_version >= 7063 && nginx_version < 8000) \
+     || nginx_version >= 8007)
 
     if (ngx_http_upstream_create(r) != NGX_OK) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -129,7 +131,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     u = r->upstream;
 
-#else /* nginx_version < 7063, i.e., nginx 0.7.62- */
+#else /* 0.7.x < 0.7.63, 0.8.x < 0.8.7 */
 
     u = ngx_pcalloc(r->pool, sizeof(ngx_http_upstream_t));
     if (u == NULL) {

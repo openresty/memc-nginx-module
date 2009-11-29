@@ -24,15 +24,15 @@ __DATA__
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 0.2;
+        echo_sleep 0.1;
 
-        echo 'get foo - 0.2 sec';
+        echo 'get foo - 0.1 sec';
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 1.1;
+        echo_sleep 1.5;
 
-        echo 'get foo - 1.4 sec';
+        echo 'get foo - 1.6 sec';
         echo_location '/memc?key=foo';
     }
     location /memc {
@@ -60,14 +60,15 @@ get foo - 0 sec
 status: 200
 exptime: 
 BAR
-get foo - 0\.2 sec
+get foo - 0\.1 sec
 status: 200
 exptime: 
 BAR
-get foo - 1\.4 sec
+get foo - 1\.6 sec
 status: 404
 exptime: 
 <html>.*?404 Not Found.*$
+--- skip_nginx: 2: < 0.8.11
 
 
 
@@ -103,6 +104,7 @@ get foo
 status: 200
 exptime: 
 BAR"
+--- skip_nginx: 2: < 0.8.11
 
 
 
