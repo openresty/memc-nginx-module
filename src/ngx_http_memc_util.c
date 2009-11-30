@@ -90,10 +90,12 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
                 return ngx_http_memc_cmd_flush_all;
             }
 
+            /*
             if (ngx_str9cmp(data, 'v', 'e', 'r', 'b', 'o', 's', 'i', 't', 'y'))
             {
                 return ngx_http_memc_cmd_verbosity;
             }
+            */
 
             break;
 

@@ -9,6 +9,10 @@
 #define NGX_UINT32_LEN (NGX_INT32_LEN - 1)
 #endif
 
+#ifndef NGX_UINT64_LEN
+#define NGX_UINT64_LEN (NGX_INT64_LEN - 1)
+#endif
+
 #ifndef ngx_str3cmp
 
 #  define ngx_str3cmp(m, c0, c1, c2)                                       \

@@ -51,7 +51,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
         memc_value_vv = ctx->memc_value_vv;
 
-        bytes = ctx->memc_value_vv->len;
+        bytes = memc_value_vv->len;
 
     } else if (r->request_body == NULL || r->request_body->bufs == NULL) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -346,6 +346,8 @@ ngx_http_memc_create_flush_all_cmd_request(ngx_http_request_t *r)
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
 
+    /* prepare the (optional) "exptime" argument */
+
     exptime_vv = ctx->memc_exptime_vv;
 
     if (exptime_vv == NULL) {
@@ -415,6 +417,8 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
 
     escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len, NGX_ESCAPE_MEMCACHED);
 
+    /* prepare the (optional) "exptime" argument */
+
     exptime_vv = ctx->memc_exptime_vv;
 
     if (exptime_vv == NULL) {
@@ -462,6 +466,77 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
         *b->last++ = ' ';
         b->last = ngx_copy(b->last, exptime_vv->data, exptime_vv->len);
     }
+
+    *b->last++ = CR; *b->last++ = LF;
+
+    return NGX_OK;
+}
+
+
+ngx_int_t
+ngx_http_memc_create_incr_decr_cmd_request(ngx_http_request_t *r)
+{
+    size_t                          len;
+    ngx_buf_t                      *b;
+    ngx_http_memc_ctx_t            *ctx;
+    ngx_chain_t                    *cl;
+    uintptr_t                       escape;
+    ngx_http_variable_value_t      *key_vv;
+    ngx_http_variable_value_t      *value_vv;
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    /* prepare the "key" argument */
+
+    key_vv = ctx->memc_key_vv;
+
+    if (key_vv == NULL || key_vv->not_found || key_vv->len == 0) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                      "the \"$memc_key\" variable is not set");
+        return NGX_ERROR;
+    }
+
+    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len, NGX_ESCAPE_MEMCACHED);
+
+    /* prepare the "value" argument */
+
+    value_vv = ctx->memc_value_vv;
+
+    /* XXX validate if $memc_value_vv is a valid uint64 string */
+
+    len = ctx->cmd_str.len + sizeof(' ') + key_vv->len + escape
+        + sizeof(' ') + value_vv->len + sizeof(CRLF) - 1;
+
+    b = ngx_create_temp_buf(r->pool, len);
+    if (b == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl = ngx_alloc_chain_link(r->pool);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf = b;
+    cl->next = NULL;
+
+    r->upstream->request_bufs = cl;
+
+    b->last = ngx_copy(b->last, ctx->cmd_str.data, ctx->cmd_str.len);
+
+    *b->last++ = ' ';
+
+    if (escape == 0) {
+        b->last = ngx_copy(b->last, key_vv->data, key_vv->len);
+
+    } else {
+        b->last = (u_char *) ngx_escape_uri(b->last, key_vv->data, key_vv->len,
+                                        NGX_ESCAPE_MEMCACHED);
+    }
+
+    *b->last++ = ' ';
+
+    b->last = ngx_copy(b->last, value_vv->data, value_vv->len);
 
     *b->last++ = CR; *b->last++ = LF;
 

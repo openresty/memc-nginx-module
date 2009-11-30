@@ -25,7 +25,7 @@ typedef enum {
 
     ngx_http_memc_cmd_flush_all,
     ngx_http_memc_cmd_version,
-    ngx_http_memc_cmd_verbosity,
+    /* ngx_http_memc_cmd_verbosity, */
 
     /* we do not want to support the "quit" command here */
     /* ngx_http_memc_cmd_quit, */

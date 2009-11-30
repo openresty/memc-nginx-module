@@ -15,13 +15,16 @@ Status
         prepend $memc_key $memc_flags $memc_exptime $memc_value
         delete $memc_key
         delete $memc_key $memc_exptime
+        incr $memc_key $memc_value
+        decr $memc_key $memc_value
         flush_all
         flush_all $memc_exptime
         stats
         version
 
     If $memc_value is not defined at all, then the request body
-    will be used as the value of the $memc_value. Note that
+    will be used as the value of the $memc_value except for the
+    "incr" and "decr" commands. Note that
     if $memc_value is defined as an empty string (""), that
     empty string will still be used as the value as is.
 
@@ -32,26 +35,31 @@ Status
     "memc_cmds_allowed" directive to control which memcached
     commands are allowed to be executed.
 
-The following commands won't be supported in the future unless
-I find a good reason:
+    Support for the "cas" command is currently planned in a
+    future release.
+
+    The following commands won't be supported in the future
+    unless I find a good reason:
 
         gets
+        verbosity
         quit
 
-Note that at least memcached version 1.2.2 does not support
-the "append" and "prepend" commands. At least 1.2.4 and later
-versions seem to supports these two commands.
+    Note that at least memcached version 1.2.2 does not support
+    the "append" and "prepend" commands. At least 1.2.4 and later
+    versions seem to supports these two commands.
 
-The "get" command returns 404 for NOT FOUND response or
-the value of the key $memc_key otherwise. It also sets
-the variable $memc_flags to the flags associated with
-the memcached key.
+Notes
+    The "get" command returns 404 for NOT FOUND response or
+    the value of the key $memc_key otherwise. It also sets
+    the variable $memc_flags to the flags associated with
+    the memcached key.
 
-The memcached storage commands "set", "add", "replace",
-"prepend", and "append" uses the $memc_key as the key,
-$memc_exptime as the expiration time (or delay) (defaults
-to 0), $memc_flags as the flags (defaults to 0), to build
-the corresponding memcached request.
+    The memcached storage commands "set", "add", "replace",
+    "prepend", and "append" uses the $memc_key as the key,
+    $memc_exptime as the expiration time (or delay) (defaults
+    to 0), $memc_flags as the flags (defaults to 0), to build
+    the corresponding memcached request.
 
 Examples
 

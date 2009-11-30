@@ -29,6 +29,7 @@ static void ngx_http_memc_finalize_request(ngx_http_request_t *r,
 
 static ngx_flag_t ngx_http_memc_valid_uint32_str(u_char *data, size_t len);
 
+static ngx_flag_t ngx_http_memc_valid_uint64_str(u_char *data, size_t len);
 
 ngx_int_t
 ngx_http_memc_handler(ngx_http_request_t *r)
@@ -215,6 +216,14 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         u->input_filter_init = ngx_http_memc_empty_filter_init;
         u->input_filter = ngx_http_memc_empty_filter;
 
+    } else if (memc_cmd == ngx_http_memc_cmd_incr
+            || memc_cmd == ngx_http_memc_cmd_decr) {
+        u->create_request = ngx_http_memc_create_incr_decr_cmd_request;
+        u->process_header = ngx_http_memc_process_simple_header;
+
+        u->input_filter_init = ngx_http_memc_empty_filter_init;
+        u->input_filter = ngx_http_memc_empty_filter;
+
     } else {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
             "assertion failed: command \"%v\" does not have proper "
@@ -272,12 +281,29 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     }
 
     if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_incr
-                || memc_cmd == ngx_http_memc_cmd_decr
-                || memc_cmd == ngx_http_memc_cmd_verbosity)
+                || memc_cmd == ngx_http_memc_cmd_decr)
     {
         value_vv = ngx_http_get_variable(r, &ngx_http_memc_value, ngx_http_memc_value_hkey, 1);
         if (value_vv == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        if (memc_cmd == ngx_http_memc_cmd_incr
+                || memc_cmd == ngx_http_memc_cmd_decr)
+        {
+            if (value_vv->not_found || value_vv->len == 0) {
+                ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "The \"$memc_value\" variable is required for "
+                          "command \"%V\"", &ctx->cmd_str);
+
+                return NGX_HTTP_BAD_REQUEST;
+            }
+
+            if ( ! ngx_http_memc_valid_uint64_str(
+                    value_vv->data, value_vv->len))
+            {
+                return NGX_HTTP_BAD_REQUEST;
+            }
         }
 
         ctx->memc_value_vv = value_vv;
@@ -383,6 +409,26 @@ ngx_http_memc_valid_uint32_str(u_char *data, size_t len)
     u_char              *p, *last;
 
     if (len > NGX_UINT32_LEN) {
+        return 0;
+    }
+
+    last = data + len;
+    for (p = data; p != last; p++) {
+        if (*p < '0' || *p > '9') {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+
+static ngx_flag_t
+ngx_http_memc_valid_uint64_str(u_char *data, size_t len)
+{
+    u_char              *p, *last;
+
+    if (len > NGX_UINT64_LEN) {
         return 0;
     }
 

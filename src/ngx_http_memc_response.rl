@@ -19,6 +19,9 @@
 %% machine memc_delete;
 %% write data;
 
+%% machine memc_incr_decr;
+%% write data;
+
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
@@ -35,6 +38,9 @@ static u_char * parse_memc_stats(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
 
 static u_char * parse_memc_delete(int *cs_addr, u_char *p, u_char *pe,
+        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+
+static u_char * parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
 
 
@@ -100,6 +106,14 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
             %% machine memc_delete;
             %% write init;
 
+        } else if (ctx->cmd == ngx_http_memc_cmd_incr
+                || ctx->cmd == ngx_http_memc_cmd_decr)
+        {
+            dd("init memc_incr_decr machine...");
+
+            %% machine memc_incr_decr;
+            %% write init;
+
         } else {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
               "unrecognized memcached command in "
@@ -150,6 +164,14 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 
         p = parse_memc_delete(&cs, p, pe, &status, &done);
 
+    } else if (ctx->cmd == ngx_http_memc_cmd_incr
+            || ctx->cmd == ngx_http_memc_cmd_decr)
+    {
+        error_state = memc_incr_decr_error;
+        final_state = memc_incr_decr_first_final;
+
+        p = parse_memc_incr_decr(&cs, p, pe, &status, &done);
+
     } else {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
           "unrecognized memcached command in "
@@ -166,8 +188,8 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 
     u->buffer.pos = p;
 
+    dd("machine state: %d (done: %d)", cs, done);
     dd("memcached response: (len: %d) %s", resp.len, resp.data);
-    dd("machine state: %d", cs);
 
     if (done || cs >= final_state) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
@@ -524,6 +546,21 @@ parse_memc_delete(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, 
 
     %% machine memc_delete;
     %% include "memc_delete.rl";
+    %% write exec;
+
+    *cs_addr = cs;
+
+    return p;
+}
+
+
+static u_char *
+parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+{
+    int cs = *cs_addr;
+
+    %% machine memc_incr_decr;
+    %% include "memc_incr_decr.rl";
     %% write exec;
 
     *cs_addr = cs;
