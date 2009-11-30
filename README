@@ -35,8 +35,8 @@ Status
     "memc_cmds_allowed" directive to control which memcached
     commands are allowed to be executed.
 
-    Support for the "cas" command is currently planned in a
-    future release.
+    Support for the "cas" and "stats <args>" commands are
+    currently planned in a future release.
 
     The following commands won't be supported in the future
     unless I find a good reason:
