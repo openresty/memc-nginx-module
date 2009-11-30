@@ -16,6 +16,9 @@
 %% machine memc_stats;
 %% write data;
 
+%% machine memc_delete;
+%% write data;
+
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
@@ -29,6 +32,9 @@ static u_char * parse_memc_version(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
 
 static u_char * parse_memc_stats(int *cs_addr, u_char *p, u_char *pe,
+        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+
+static u_char * parse_memc_delete(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
 
 
@@ -88,6 +94,12 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
             %% machine memc_stats;
             %% write init;
 
+        } else if (ctx->cmd == ngx_http_memc_cmd_delete) {
+            dd("init memc_delete machine...");
+
+            %% machine memc_delete;
+            %% write init;
+
         } else {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
               "unrecognized memcached command in "
@@ -131,6 +143,12 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
         final_state = memc_stats_first_final;
 
         p = parse_memc_stats(&cs, p, pe, &status, &done);
+
+    } else if (ctx->cmd == ngx_http_memc_cmd_delete) {
+        error_state = memc_delete_error;
+        final_state = memc_delete_first_final;
+
+        p = parse_memc_delete(&cs, p, pe, &status, &done);
 
     } else {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -491,6 +509,21 @@ parse_memc_stats(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, n
 
     %% machine memc_stats;
     %% include "memc_stats.rl";
+    %% write exec;
+
+    *cs_addr = cs;
+
+    return p;
+}
+
+
+static u_char *
+parse_memc_delete(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+{
+    int cs = *cs_addr;
+
+    %% machine memc_delete;
+    %% include "memc_delete.rl";
     %% write exec;
 
     *cs_addr = cs;

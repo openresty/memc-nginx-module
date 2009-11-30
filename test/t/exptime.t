@@ -157,6 +157,7 @@ BAR"
 --- SKIP
 
 
+
 === TEST 6: set negative exptime
 --- config
     location /allow {

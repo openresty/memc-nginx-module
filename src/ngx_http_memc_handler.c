@@ -208,6 +208,13 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         u->input_filter_init = ngx_http_memc_empty_filter_init;
         u->input_filter = ngx_http_memc_empty_filter;
 
+    } else if (memc_cmd == ngx_http_memc_cmd_delete) {
+        u->create_request = ngx_http_memc_create_delete_cmd_request;
+        u->process_header = ngx_http_memc_process_simple_header;
+
+        u->input_filter_init = ngx_http_memc_empty_filter_init;
+        u->input_filter = ngx_http_memc_empty_filter;
+
     } else {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
             "assertion failed: command \"%v\" does not have proper "

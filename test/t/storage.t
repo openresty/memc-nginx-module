@@ -622,4 +622,36 @@ get big
 
 
 
+=== TEST 18: replace non-existent item
+--- config
+    location /main {
+        echo 'flush_all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'replace foo bar';
+        echo_location '/memc?key=foo&cmd=replace&val=bar';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "exptime: $memc_exptime";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        set $memc_exptime $arg_exptime;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"flush_all
+status: 200
+exptime: 
+OK\r
+replace foo bar
+status: 200
+exptime: 0
+NOT_STORED\r
+"
 

@@ -27,5 +27,17 @@
         dd("state %d, left %d, reading char '%c'", cs, pe - p, *p);
     }
 
+    action handle_stored {
+        dd("status set to 201");
+
+        *status_addr = NGX_HTTP_CREATED;
+    }
+
+    action handle_not_found {
+        dd("status set to 404");
+
+        *status_addr = NGX_HTTP_NOT_FOUND;
+    }
+
 }%%
 

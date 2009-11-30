@@ -13,6 +13,8 @@ Status
         replace $memc_key $memc_flags $memc_exptime $memc_value
         append $memc_key $memc_flags $memc_exptime $memc_value
         prepend $memc_key $memc_flags $memc_exptime $memc_value
+        delete $memc_key
+        delete $memc_key $memc_exptime
         flush_all
         flush_all $memc_exptime
         stats

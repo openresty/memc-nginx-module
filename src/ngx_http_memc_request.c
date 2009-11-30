@@ -389,3 +389,82 @@ ngx_http_memc_create_flush_all_cmd_request(ngx_http_request_t *r)
     return NGX_OK;
 }
 
+
+ngx_int_t
+ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
+{
+    size_t                          len;
+    ngx_buf_t                      *b;
+    ngx_http_memc_ctx_t            *ctx;
+    ngx_chain_t                    *cl;
+    uintptr_t                       escape;
+    ngx_http_variable_value_t      *key_vv;
+    ngx_http_variable_value_t      *exptime_vv;
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    /* prepare the "key" argument */
+
+    key_vv = ctx->memc_key_vv;
+
+    if (key_vv == NULL || key_vv->not_found || key_vv->len == 0) {
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                      "the \"$memc_key\" variable is not set");
+        return NGX_ERROR;
+    }
+
+    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len, NGX_ESCAPE_MEMCACHED);
+
+    exptime_vv = ctx->memc_exptime_vv;
+
+    if (exptime_vv == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    len = ctx->cmd_str.len + sizeof(' ') + key_vv->len + escape;
+
+    if ( ! exptime_vv->not_found && exptime_vv->len) {
+        dd("found exptime: %s", exptime_vv->data);
+
+        len += sizeof(' ') + exptime_vv->len;
+    }
+
+    len += sizeof(CRLF) - 1;
+
+    b = ngx_create_temp_buf(r->pool, len);
+    if (b == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl = ngx_alloc_chain_link(r->pool);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf = b;
+    cl->next = NULL;
+
+    r->upstream->request_bufs = cl;
+
+    b->last = ngx_copy(b->last, ctx->cmd_str.data, ctx->cmd_str.len);
+
+    *b->last++ = ' ';
+
+    if (escape == 0) {
+        b->last = ngx_copy(b->last, key_vv->data, key_vv->len);
+
+    } else {
+        b->last = (u_char *) ngx_escape_uri(b->last, key_vv->data, key_vv->len,
+                                        NGX_ESCAPE_MEMCACHED);
+    }
+
+    if ( ! exptime_vv->not_found && exptime_vv->len) {
+        *b->last++ = ' ';
+        b->last = ngx_copy(b->last, exptime_vv->data, exptime_vv->len);
+    }
+
+    *b->last++ = CR; *b->last++ = LF;
+
+    return NGX_OK;
+}
+
