@@ -11,48 +11,7 @@ run_tests();
 
 __DATA__
 
-=== TEST 1: bad cmd
---- config
-    location /foo {
-        set $memc_cmd blah;
-        set $memc_key foo;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /foo
---- response_body_like: 400 Bad Request
---- error_code: 400
-
-
-
-=== TEST 2: bad cmd (case sensitive)
---- config
-    location /foo {
-        set $memc_cmd GET;
-        set $memc_key foo;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /foo
---- response_body_like: 400 Bad Request
---- error_code: 400
-
-
-
-=== TEST 3: no default value for $memc_cmd for method COPY
---- config
-    location /foo {
-        set $memc_key foo;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    COPY /foo
---- response_body_like: 400 Bad Request
---- error_code: 400
-
-
-
-=== TEST 4: set only
+=== TEST 1: set only
 --- config
     location /memc {
         set $memc_cmd $arg_cmd;
@@ -68,7 +27,7 @@ __DATA__
 
 
 
-=== TEST 5: set and get
+=== TEST 2: set and get
 --- config
     location /main {
         echo 'set foo blah';
@@ -93,56 +52,7 @@ blah"
 
 
 
-=== TEST 6: flush_all
---- config
-    location /flush {
-        set $memc_cmd flush_all;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /flush
---- response_body eval
-"OK\r
-"
-
-
-
-=== TEST 7: set and flush and get
---- config
-    location /main {
-        echo 'set foo blah';
-        echo_location '/memc?key=foo&cmd=set&val=blah';
-
-        echo 'flush_all';
-        echo_location '/memc?cmd=flush_all';
-
-        echo 'get foo';
-        echo_location '/memc?key=foo&cmd=get';
-    }
-    location /memc {
-        echo_before_body "status: $echo_response_status";
-
-        set $memc_cmd $arg_cmd;
-        set $memc_key $arg_key;
-        set $memc_value $arg_val;
-
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /main
---- response_body_like
-^set foo blah
-status: 201
-STORED\r
-flush_all
-status: 200
-OK\r
-get foo
-status: 404.*?404 Not Found.*$
-
-
-
-=== TEST 8: set and get empty values
+=== TEST 3: set and get empty values
 --- config
     location /main {
         echo 'flush all';
@@ -172,7 +82,7 @@ get foo
 
 
 
-=== TEST 9: add
+=== TEST 4: add
 --- config
     location /main {
         echo 'flush all';
@@ -208,7 +118,7 @@ added"
 
 
 
-=== TEST 10: set using POST
+=== TEST 5: set using POST
 --- config
     location /main {
         echo 'flush all';
@@ -245,7 +155,7 @@ hello, world"
 
 
 
-=== TEST 11: default REST interface when no $memc_cmd is set
+=== TEST 6: default REST interface when no $memc_cmd is set
 --- config
     location /main {
         echo 'set foo FOO';
@@ -289,7 +199,7 @@ BAR
 
 
 
-=== TEST 12: default REST interface when no $memc_cmd is set (read client req body)
+=== TEST 7: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -334,7 +244,7 @@ BAR
 
 
 
-=== TEST 13: default REST interface when no $memc_cmd is set (read client req body)
+=== TEST 8: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -379,7 +289,7 @@ howdy
 
 
 
-=== TEST 14: test replace (stored) (without sleep)
+=== TEST 9: test replace (stored) (without sleep)
 --- config
     location /main {
         echo 'flush all';
@@ -422,7 +332,7 @@ bah"
 
 
 
-=== TEST 15: test replace (stored) (with sleep)
+=== TEST 10: test replace (stored) (with sleep)
 --- config
     location /main {
         echo 'flush all';
@@ -468,7 +378,7 @@ bah"
 
 
 
-=== TEST 16: test replace (not stored)
+=== TEST 11: test replace (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -503,7 +413,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 17: test append (stored)
+=== TEST 12: test append (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -545,7 +455,7 @@ hello,world"
 
 
 
-=== TEST 18: test append (not stored)
+=== TEST 13: test append (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -580,7 +490,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 19: test prepend (stored)
+=== TEST 14: test prepend (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -622,7 +532,7 @@ world,hello"
 
 
 
-=== TEST 20: test prepend (not stored)
+=== TEST 15: test prepend (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -657,77 +567,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 21: the "version" command
---- config
-    location /ver {
-        set $memc_cmd version;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /ver
---- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
-
-
-
-=== TEST 22: explicit $memc_cmd in non-empty cmds_allowed list
---- config
-    location /allow {
-        set $memc_cmd version;
-        memc_cmds_allowed get version;
-
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /allow
---- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
-
-
-
-=== TEST 23: explicit $memc_cmd in non-empty cmds_allowed list (in first)
---- config
-    location /allow {
-        set $memc_cmd version;
-        memc_cmds_allowed version get;
-
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /allow
---- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
-
-
-
-=== TEST 24: explicit $memc_cmd NOT in non-empty cmds_allowed list
---- config
-    location /allow {
-        set $memc_cmd version;
-        memc_cmds_allowed set get add delete;
-
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /allow
---- response_body_like: 403 Forbidden
---- error_code: 403
-
-
-
-=== TEST 25: implicit $memc_cmd NOT in non-empty cmds_allowed list
---- config
-    location /allow {
-        memc_cmds_allowed set add delete version;
-
-        set $memcached_key foo;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-    GET /allow
---- response_body_like: 403 Forbidden
---- error_code: 403
-
-
-
-=== TEST 26: set and get big value
+=== TEST 16: set and get big value
 --- config
     location /big {
         client_body_buffer_size 1k;
@@ -756,7 +596,7 @@ get big
 
 
 
-=== TEST 27: set and get too big values
+=== TEST 17: set and get too big values
 --- config
     location /big {
         client_body_buffer_size 1k;
@@ -782,26 +622,4 @@ get big
 
 
 
-=== TEST 28: $memc_cmd has its default values when it's an empty string
---- config
-    location /main {
-        echo 'set big';
-        echo_subrequest POST '/memc?key=big';
-
-        echo 'get big';
-        echo_location '/memc?key=big&cmd=get';
-    }
-    location /memc {
-        set $memc_cmd $arg_cmd;
-        set $memc_key $arg_key;
-        memc_pass 127.0.0.1:11984;
-    }
---- request
-POST /main
-nice to meet you!
---- response_body eval
-"set big
-STORED\r
-get big
-nice to meet you!"
 

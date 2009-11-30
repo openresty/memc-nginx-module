@@ -108,7 +108,7 @@ BAR"
 
 
 
-=== TEST 5: set invalid exptime
+=== TEST 3: set invalid exptime
 --- config
     location /allow {
         set $memc_cmd 'set';
@@ -123,7 +123,8 @@ BAR"
 --- error_code: 400
 
 
-=== TEST 6: set negative exptime
+
+=== TEST 4: set negative exptime
 --- config
     location /allow {
         set $memc_cmd 'set';
