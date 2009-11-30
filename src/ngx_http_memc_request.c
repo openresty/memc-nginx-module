@@ -105,11 +105,6 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
         exptime_vv->no_cacheable = 0;
         exptime_vv->len = sizeof("0") - 1;
         exptime_vv->data = (u_char *) "0";
-
-        ngx_log_debug1(NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
-                   "$memc_exptime got its default value: \"%v\"",
-                   exptime_vv);
-
     }
 
     /* calculate the total length of the command */
@@ -333,6 +328,61 @@ ngx_http_memc_create_noarg_cmd_request(ngx_http_request_t *r)
     r->upstream->request_bufs = cl;
 
     b->last = ngx_copy(b->last, ctx->cmd_str.data, ctx->cmd_str.len);
+
+    *b->last++ = CR; *b->last++ = LF;
+
+    return NGX_OK;
+}
+
+
+ngx_int_t
+ngx_http_memc_create_flush_all_cmd_request(ngx_http_request_t *r)
+{
+    size_t                          len;
+    ngx_buf_t                      *b;
+    ngx_http_memc_ctx_t            *ctx;
+    ngx_chain_t                    *cl;
+    ngx_http_variable_value_t      *exptime_vv;
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    exptime_vv = ctx->memc_exptime_vv;
+
+    if (exptime_vv == NULL) {
+        return NGX_HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    len = ctx->cmd_str.len;
+
+    if ( ! exptime_vv->not_found && exptime_vv->len) {
+        dd("found exptime: %s", exptime_vv->data);
+
+        len += sizeof(' ') + exptime_vv->len;
+    }
+
+    len += sizeof(CRLF) - 1;
+
+    b = ngx_create_temp_buf(r->pool, len);
+    if (b == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl = ngx_alloc_chain_link(r->pool);
+    if (cl == NULL) {
+        return NGX_ERROR;
+    }
+
+    cl->buf = b;
+    cl->next = NULL;
+
+    r->upstream->request_bufs = cl;
+
+    b->last = ngx_copy(b->last, ctx->cmd_str.data, ctx->cmd_str.len);
+
+    if ( ! exptime_vv->not_found && exptime_vv->len) {
+        *b->last++ = ' ';
+        b->last = ngx_copy(b->last, exptime_vv->data, exptime_vv->len);
+    }
 
     *b->last++ = CR; *b->last++ = LF;
 

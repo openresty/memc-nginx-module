@@ -14,6 +14,7 @@ Status
         append $memc_key $memc_flags $memc_exptime $memc_value
         prepend $memc_key $memc_flags $memc_exptime $memc_value
         flush_all
+        flush_all $memc_exptime
         version
 
     If $memc_value is not defined at all, then the request body

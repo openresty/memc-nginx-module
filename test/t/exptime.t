@@ -108,7 +108,7 @@ BAR"
 
 
 
-=== TEST 3: set invalid exptime
+=== TEST 3: invalid exptime in set
 --- config
     location /allow {
         set $memc_cmd 'set';
@@ -124,7 +124,40 @@ BAR"
 
 
 
-=== TEST 4: set negative exptime
+=== TEST 4: invalid exptime in flush_all
+--- config
+    location /allow {
+        set $memc_cmd 'flush_all';
+        set $memc_key 'foo';
+        set $memc_value 'nice';
+        set $memc_exptime 'invalid';
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: 400 Bad Request
+--- error_code: 400
+
+
+
+=== TEST 5: invalid exptime in delete
+--- config
+    location /allow {
+        set $memc_cmd 'delete';
+        set $memc_key 'foo';
+        set $memc_value 'nice';
+        set $memc_exptime 'invalid';
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /allow
+--- response_body_like: 400 Bad Request
+--- error_code: 400
+--- TODO
+--- SKIP
+
+
+=== TEST 6: set negative exptime
 --- config
     location /allow {
         set $memc_cmd 'set';

@@ -194,7 +194,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     } else if (memc_cmd == ngx_http_memc_cmd_flush_all
             || memc_cmd == ngx_http_memc_cmd_version) {
-        u->create_request = ngx_http_memc_create_noarg_cmd_request;
+        u->create_request = ngx_http_memc_create_flush_all_cmd_request;
         u->process_header = ngx_http_memc_process_simple_header;
 
         u->input_filter_init = ngx_http_memc_empty_filter_init;

@@ -5,7 +5,7 @@ use Test::Nginx::LWP;
 
 plan tests => $Test::Nginx::LWP::RepeatEach * 2 * blocks();
 
-no_diff;
+#no_diff;
 
 run_tests();
 
@@ -60,4 +60,59 @@ status: 404.*?404 Not Found.*$
 
 
 
+=== TEST 3: set exptime
+--- config
+    location /exptime {
+        echo 'flush_all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'set foo BAR';
+        echo_subrequest PUT '/memc?key=foo' -b BAR;
+
+        echo 'flush_all exptime=2';
+        echo_location '/memc?cmd=flush_all&exptime=2';
+
+        echo 'get foo - 0 sec';
+        echo_location '/memc?key=foo';
+        echo;
+
+        echo_sleep 1.6;
+
+        echo 'get foo - 1.6 sec';
+        echo_location '/memc?key=foo';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "exptime: $memc_exptime";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_exptime $arg_exptime;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /exptime
+--- response_body_like
+flush_all
+status: 200
+exptime: 
+OK\r
+set foo BAR
+status: 201
+exptime: 0
+STORED\r
+flush_all exptime=2
+status: 200
+exptime: 2
+OK\r
+get foo - 0 sec
+status: 200
+exptime: 
+BAR
+get foo - 1\.6 sec
+status: 404
+exptime: 
+<html>.*?404 Not Found.*$
+--- skip_nginx: 2: < 0.8.11
 

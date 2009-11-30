@@ -5,7 +5,7 @@ use Test::Nginx::LWP;
 
 plan tests => $Test::Nginx::LWP::RepeatEach * 2 * blocks();
 
-no_diff;
+#no_diff;
 
 run_tests();
 
