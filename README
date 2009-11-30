@@ -2,6 +2,9 @@ Description
     This is an enhanced ngx_memcached module that supports
     get/set/add/delete and more memcached commands.
 
+    This is a non-blocking upstream module and implements
+    the latest memcached TCP protocol all by itself.
+
 Status
     The following memcached commands have been implemented
     and tested (with their parameters marked by corresponding
