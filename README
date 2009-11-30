@@ -67,7 +67,7 @@ Examples
         #   add for POST, set for PUT, and
         #   delete for the DELETE request method.
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:11211;
     }
 
     # GET /bar?cmd=get&key=cat
@@ -83,7 +83,7 @@ Examples
         set $memc_flags $arg_flags; # defaults to 0
         set $memc_exptime $arg_exptime; # defaults to 0
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:11211;
     }
 
     # GET /bar?cmd=get&key=cat
@@ -99,7 +99,7 @@ Examples
 
         memc_cmds_allowed get set add delete flush_all;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:11211;
     }
 
 Installation
