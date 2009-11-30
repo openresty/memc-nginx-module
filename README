@@ -80,13 +80,14 @@ Examples
     location /bar {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
-        set $memc_flags $arg_flags;
+        set $memc_flags $arg_flags; # defaults to 0
+        set $memc_exptime $arg_exptime; # defaults to 0
 
         memc_pass 127.0.0.1:11984;
     }
 
     # GET /bar?cmd=get&key=cat
-    # GET /bar?cmd=set&key=dog&val=animal&flags=1234
+    # GET /bar?cmd=set&key=dog&val=animal&flags=1234&exptime=2
     # GET /bar?cmd=delete&key=dog
     # GET /bar?cmd=flush_all
     location /bar {
@@ -94,6 +95,7 @@ Examples
         set $memc_key $arg_key;
         set $memc_value $arg_val;
         set $memc_flags $arg_flags; # defaults to 0
+        set $memc_exptime $arg_exptime; # defaults to 0
 
         memc_cmds_allowed get set add delete flush_all;
 
