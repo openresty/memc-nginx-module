@@ -50,7 +50,7 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
 
         case 5:
             if (ngx_str5cmp(data, 's', 't', 'a', 't', 's')) {
-                return ngx_http_memc_cmd_decr;
+                return ngx_http_memc_cmd_stats;
             }
 
             break;

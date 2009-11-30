@@ -481,7 +481,7 @@ sub run_test_helper ($$) {
         my $expected_pat = $block->response_body_like;
         $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
         my $summary = trim($content);
-        like($content, qr/$expected_pat/sm, "$name - response_body_like - response is expected ($summary)");
+        like($content, qr/$expected_pat/s, "$name - response_body_like - response is expected ($summary)");
     }
 }
 
