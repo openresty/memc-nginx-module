@@ -85,7 +85,8 @@ exptime:
 <html>.*?404 Not Found.*$
 
 
-=== TEST 2: set and delete and set (with exptime)
+
+=== TEST 3: set and delete and set (with exptime)
 --- config
     location /main {
         echo 'set foo bar';
@@ -97,7 +98,7 @@ exptime:
         echo 'add foo cat';
         echo_location '/memc?key=foo&cmd=add&val=cat';
 
-        echo_sleep 1.6;
+        echo_blocking_sleep 1.6;
 
         echo 'add foo cat - 2nd';
         echo_location '/memc?key=foo&cmd=add&val=cat';

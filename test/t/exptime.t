@@ -24,13 +24,13 @@ __DATA__
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 0.1;
+        echo_blocking_sleep 0.1;
 
         echo 'get foo - 0.1 sec';
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 1.5;
+        echo_blocking_sleep 1.5;
 
         echo 'get foo - 1.6 sec';
         echo_location '/memc?key=foo';
@@ -68,7 +68,6 @@ get foo - 1\.6 sec
 status: 404
 exptime: 
 <html>.*?404 Not Found.*$
---- skip_nginx: 2: < 0.8.11
 
 
 
@@ -78,7 +77,7 @@ exptime:
         echo 'set foo BAR (exptime: EMPTY)';
         echo_subrequest PUT '/memc?key=foo' -b BAR;
 
-        echo_sleep 1;
+        echo_blocking_sleep 1;
 
         echo 'get foo';
         echo_subrequest GET '/memc?key=foo';
@@ -104,7 +103,6 @@ get foo
 status: 200
 exptime: 
 BAR"
---- skip_nginx: 2: < 0.8.11
 
 
 

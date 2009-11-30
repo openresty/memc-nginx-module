@@ -76,7 +76,7 @@ status: 404.*?404 Not Found.*$
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 1.6;
+        echo_blocking_sleep 1.6;
 
         echo 'get foo - 1.6 sec';
         echo_location '/memc?key=foo';
@@ -114,5 +114,4 @@ get foo - 1\.6 sec
 status: 404
 exptime: 
 <html>.*?404 Not Found.*$
---- skip_nginx: 2: < 0.8.11
 
