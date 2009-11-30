@@ -212,6 +212,8 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
         return NGX_OK;
     }
 
+    dd("we need more data to proceed (returned NGX_AGAIN)");
+
     return NGX_AGAIN;
 }
 

@@ -31,6 +31,7 @@ static ngx_flag_t ngx_http_memc_valid_uint32_str(u_char *data, size_t len);
 
 static ngx_flag_t ngx_http_memc_valid_uint64_str(u_char *data, size_t len);
 
+
 ngx_int_t
 ngx_http_memc_handler(ngx_http_request_t *r)
 {
