@@ -1,16 +1,17 @@
 package Test::Nginx::LWP;
 
+use lib 'lib';
+use lib 'inc';
+use Test::Base -Base;
+
 our $NoNginxManager = 0;
 our $RepeatEach = 1;
 
-use lib 'lib';
-use lib 'inc';
 use Time::HiRes qw(sleep);
-#use Test::LongString;
+use Test::LongString;
 
 #use Smart::Comments::JSON '##';
 use LWP::UserAgent; # XXX should use a socket level lib here
-use Test::Base -Base;
 use Module::Install::Can;
 use List::Util qw( shuffle );
 use File::Spec ();
@@ -26,6 +27,8 @@ our $LogLevel               = 'debug';
 #our $MasterProcessEnabled   = 'on';
 #our $DaemonEnabled          = 'on';
 our $ServerPort             = 1984;
+our $ServerPortForClient    = 1984;
+#our $ServerPortForClient    = 1984;
 
 our $NginxVersion;
 our $NginxRawVersion;
@@ -165,7 +168,7 @@ sub parse_request ($$) {
     }
     $first =~ s/^\s+|\s+$//g;
     my ($meth, $rel_url) = split /\s+/, $first, 2;
-    my $url = "http://localhost:$ServerPort" . $rel_url;
+    my $url = "http://localhost:$ServerPortForClient" . $rel_url;
 
     my $content = do { local $/; <$in> };
     if ($content) {
@@ -244,6 +247,7 @@ sub run_test ($) {
         }
 
         unless ($nginx_is_running) {
+            warn "*** Restarting the nginx server...\n";
             setup_server_root();
             write_config_file(\$config);
             if ( ! Module::Install::Can->can_run('nginx') ) {
@@ -420,7 +424,7 @@ sub run_test_helper ($$) {
         for my $header (@headers) {
             next if $header =~ /^\s*\#/;
             my ($key, $val) = split /:\s*/, $header, 2;
-            warn "[$key, $val]\n";
+            #warn "[$key, $val]\n";
             $req->header($key => $val);
         }
     }
@@ -467,10 +471,11 @@ sub run_test_helper ($$) {
         $content =~ s/^Connection: TE, close\r\n//gms;
         my $expected = $block->response_body;
         $expected =~ s/\$ServerPort\b/$ServerPort/g;
+        $expected =~ s/\$ServerPortForClient\b/$ServerPortForClient/g;
         #warn show_all_chars($content);
 
-        #is_string($content, $expected, "$name - response_body - response is expected");
-        is($content, $expected, "$name - response_body - response is expected");
+        is_string($content, $expected, "$name - response_body - response is expected");
+        #is($content, $expected, "$name - response_body - response is expected");
 
     } elsif (defined $block->response_body_like) {
         my $content = $res->content;
@@ -480,6 +485,7 @@ sub run_test_helper ($$) {
         $content =~ s/^Connection: TE, close\r\n//gms;
         my $expected_pat = $block->response_body_like;
         $expected_pat =~ s/\$ServerPort\b/$ServerPort/g;
+        $expected_pat =~ s/\$ServerPortForClient\b/$ServerPortForClient/g;
         my $summary = trim($content);
         like($content, qr/$expected_pat/s, "$name - response_body_like - response is expected ($summary)");
     }
