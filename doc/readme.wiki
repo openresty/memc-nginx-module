@@ -67,7 +67,7 @@ This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-
 
 This module extends the standard [[NginxHttpMemcachedModule|memcached module]] to support almost the whole [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
 
-It allows you to define a custom REST interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [http://github.com/srlindsay/nginx-independent-subrequest independent fake requests].
+It allows you to define a custom [http://en.wikipedia.org/wiki/REST REST] interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [http://github.com/srlindsay/nginx-independent-subrequest independent fake requests].
 
 This module is not supposed to be merged into the Nginx core because I've used [http://www.complang.org/ragel/ Ragel] to generate the memcached response parsers for joy :)
 

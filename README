@@ -68,7 +68,8 @@ Description
     (<http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt>)
     .
 
-    It allows you to define a custom REST interface to your memcached
+    It allows you to define a custom REST
+    (<http://en.wikipedia.org/wiki/REST>) interface to your memcached
     servers or access memcached in a very efficient way from within the
     nginx server by means of subrequests or independent fake requests
     (<http://github.com/srlindsay/nginx-independent-subrequest>).
