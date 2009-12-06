@@ -52,7 +52,32 @@ blah"
 
 
 
-=== TEST 3: set and get empty values
+=== TEST 3: set UTF-8 and get UTF-8
+--- config
+    location /main {
+        echo 'set foo 你好';
+        echo_location '/memc?key=foo&cmd=set&val=你好';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /main
+--- response_body eval
+"set foo 你好
+STORED\r
+get foo
+你好"
+
+
+
+=== TEST 4: set and get empty values
 --- config
     location /main {
         echo 'flush all';
@@ -82,7 +107,7 @@ get foo
 
 
 
-=== TEST 4: add
+=== TEST 5: add
 --- config
     location /main {
         echo 'flush all';
@@ -118,7 +143,7 @@ added"
 
 
 
-=== TEST 5: set using POST
+=== TEST 6: set using POST
 --- config
     location /main {
         echo 'flush all';
@@ -155,7 +180,7 @@ hello, world"
 
 
 
-=== TEST 6: default REST interface when no $memc_cmd is set
+=== TEST 7: default REST interface when no $memc_cmd is set
 --- config
     location /main {
         echo 'set foo FOO';
@@ -199,7 +224,7 @@ BAR
 
 
 
-=== TEST 7: default REST interface when no $memc_cmd is set (read client req body)
+=== TEST 8: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -244,7 +269,7 @@ BAR
 
 
 
-=== TEST 8: default REST interface when no $memc_cmd is set (read client req body)
+=== TEST 9: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -289,7 +314,7 @@ howdy
 
 
 
-=== TEST 9: test replace (stored) (without sleep)
+=== TEST 10: test replace (stored) (without sleep)
 --- config
     location /main {
         echo 'flush all';
@@ -332,7 +357,7 @@ bah"
 
 
 
-=== TEST 10: test replace (stored) (with sleep)
+=== TEST 11: test replace (stored) (with sleep)
 --- config
     location /main {
         echo 'flush all';
@@ -377,7 +402,7 @@ bah"
 
 
 
-=== TEST 11: test replace (not stored)
+=== TEST 12: test replace (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -412,7 +437,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 12: test append (stored)
+=== TEST 13: test append (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -454,7 +479,7 @@ hello,world"
 
 
 
-=== TEST 13: test append (not stored)
+=== TEST 14: test append (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -489,7 +514,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 14: test prepend (stored)
+=== TEST 15: test prepend (stored)
 --- config
     location /main {
         echo 'flush all';
@@ -531,7 +556,7 @@ world,hello"
 
 
 
-=== TEST 15: test prepend (not stored)
+=== TEST 16: test prepend (not stored)
 --- config
     location /main {
         echo 'flush all';
@@ -566,7 +591,7 @@ status: 404.*?404 Not Found.*$
 
 
 
-=== TEST 16: set and get big value
+=== TEST 17: set and get big value
 --- config
     location /big {
         client_body_buffer_size 1k;
@@ -595,7 +620,7 @@ get big
 
 
 
-=== TEST 17: set and get too big values
+=== TEST 18: set and get too big values
 --- config
     location /big {
         client_body_buffer_size 1k;
@@ -621,7 +646,7 @@ get big
 
 
 
-=== TEST 18: replace non-existent item
+=== TEST 19: replace non-existent item
 --- config
     location /main {
         echo 'flush_all';

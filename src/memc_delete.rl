@@ -1,6 +1,8 @@
 %%{
     machine memc_delete;
 
+    alphtype short;
+
     include memc_common "memc_common.rl";
 
     response = "DELETED\r\n"

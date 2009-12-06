@@ -1,6 +1,8 @@
 %%{
     machine memc_stats;
 
+    alphtype short;
+
     include memc_common "memc_common.rl";
 
     content = any+ - "\r\n"

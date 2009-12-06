@@ -1,6 +1,8 @@
 %%{
     machine memc_incr_decr;
 
+    alphtype short;
+
     include memc_common "memc_common.rl";
 
     value = digit+

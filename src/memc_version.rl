@@ -1,6 +1,8 @@
 %%{
     machine memc_version;
 
+    alphtype short;
+
     include memc_common "memc_common.rl";
 
     version = any+ - "\r\n"
