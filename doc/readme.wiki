@@ -1,0 +1,419 @@
+﻿= Name =
+
+'''memc-nginx-module''' - An extended version of the standard memcached module that supports set, add, delete, and many more memcached commands.
+
+''This module is not distributed with the Nginx source.'' See [[#Installation|the installation instructions]].
+
+= Version =
+
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.01] released on Dec 6, 2009.
+
+= Synopsis =
+
+<geshi lang="nginx">
+    # GET /foo?key=dog
+    #
+    # POST /foo?key=cat
+    # Cat's value...
+    #
+    # PUT /foo?key=bird
+    # Bird's value...
+    #
+    # DELETE /foo?key=Tiger
+    location /foo {
+        set $memc_key $arg_key;
+
+        # $memc_cmd defaults to get for GET,
+        #   add for POST, set for PUT, and
+        #   delete for the DELETE request method.
+
+        memc_pass 127.0.0.1:11211;
+    }
+
+    # GET /bar?cmd=get&key=cat
+    #
+    # POST /bar?cmd=set&key=dog
+    # My value for the "dog" key...
+    #
+    # DELETE /bar?cmd=delete&key=dog
+    # GET /bar?cmd=delete&key=dog
+    location /bar {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_flags $arg_flags; # defaults to 0
+        set $memc_exptime $arg_exptime; # defaults to 0
+
+        memc_pass 127.0.0.1:11211;
+    }
+
+    # GET /bar?cmd=get&key=cat
+    # GET /bar?cmd=set&key=dog&val=animal&flags=1234&exptime=2
+    # GET /bar?cmd=delete&key=dog
+    # GET /bar?cmd=flush_all
+    location /bar {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        set $memc_flags $arg_flags; # defaults to 0
+        set $memc_exptime $arg_exptime; # defaults to 0
+
+        memc_cmds_allowed get set add delete flush_all;
+
+        memc_pass 127.0.0.1:11211;
+    }
+</geshi>
+
+= Description =
+
+This module extends the standard [[NginxHttpMemcachedModule|memcached module]] to support almost the whole [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
+
+It allows you to define a custom REST interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [http://github.com/srlindsay/nginx-independent-subrequest independent fake requests].
+
+This module is not supposed to be merged into the Nginx core because I've used [http://www.complang.org/ragel/ Ragel] to generate the memcached response parsers for joy :)
+
+== How it works ==
+
+It implements the memcached TCP protocol all by itself, based upon the <code>upstream</code> mechansim. Everything involving I/O is non-blocking but it does not keep TCP connections to the upstream memcached servers across requests (just like other upstream modules).
+
+= Memcached commands supported =
+
+The memcached storage commands "set", "add", "replace", "prepend", and "append" uses the <code>$memc_key</code> as the key, <code>$memc_exptime</code> as the expiration time (or delay) (defaults to 0), <code>$memc_flags</code> as the flags (defaults to 0), to build the corresponding memcached queries.
+
+If <code>$memc_value</code> is not defined at all, then the request body will be used as the value of the <code>$memc_value</code> except for the [[#incr $memc_key $memc_value|incr]] and [[#decr $memc_key $memc_value|decr]] commands. Note that if <code>$memc_value</code> is defined as an empty string (<code>""</code>), that empty string will still be used as the value as is.
+
+The following memcached commands have been implemented and tested (with their parameters marked by corresponding
+nginx variables defined by this module):
+
+== get $memc_key ==
+
+Retrieves the value using a key.
+
+<geshi lang="nginx">
+  location /foo {
+      set $memc_cmd 'get';
+      set $memc_key 'my_key';
+      
+      memc_pass 127.0.0.1:11211;
+      
+      add_header X-Memc-Flags $memc_flags;
+  }
+</geshi>
+
+Returns <code>200 OK</code> with the value put into the response body if the key is found, or <code>404 Not Found</code> otherwise. The <code>flags</code> number will be set into the <code>$memc_flags</code> variable so it's often desired to put that info into the response headers by means of the standard [[NginxHttpHeadersModule#add_header|add_header directive]].
+
+It returns <code>502</code> for <code>ERROR</code>, <code>CLIENT_ERROR</code>, or <code>SERVER_ERROR</code>.
+
+== set $memc_key $memc_flags $memc_exptime $memc_value ==
+
+To use the request body as the memcached value, just avoid setting the <code>$memc_value</code> variable:
+
+<geshi lang="nginx">
+  # POST /foo
+  # my value...
+  location /foo {
+      set $memc_cmd 'set';
+      set $memc_key 'my_key';
+      set $memc_flags 12345;
+      set $memc_exptime 24;
+      
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+Or let the <code>$memc_value</code> hold the value:
+
+<geshi lang="nginx">
+  location /foo {
+      set $memc_cmd 'set';
+      set $memc_key 'my_key';
+      set $memc_flags 12345;
+      set $memc_exptime 24;
+      set $memc_value 'my_value';
+
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+Returns <code>201 Created</code> if the upstream memcached server replies <code>STORED</code>, <code>200</code> for <code>NOT_STORED</code>, <code>404</code> for <code>NOT_FOUND</code>, <code>502</code> for <code>ERROR</code>, <code>CLIENT_ERROR</code>, or <code>SERVER_ERROR</code>.
+
+The original memcached responses are returned as the response body except for <code>404 NOT FOUND</code>.
+
+== add $memc_key $memc_flags $memc_exptime $memc_value ==
+
+Similar to the [[#set $memc_key $memc_flags $memc_exptime $memc_value|set command]].
+
+== replace $memc_key $memc_flags $memc_exptime $memc_value ==
+
+Similar to the [[#set $memc_key $memc_flags $memc_exptime $memc_value|set command]].
+
+== append $memc_key $memc_flags $memc_exptime $memc_value ==
+
+Similar to the [[#set $memc_key $memc_flags $memc_exptime $memc_value|set command]].
+
+Note that at least memcached version 1.2.2 does not support the "append" and "prepend" commands. At least 1.2.4 and later versions seem to supports these two commands.
+
+== prepend $memc_key $memc_flags $memc_exptime $memc_value ==
+
+Similar to the [[#append $memc_key $memc_flags $memc_exptime $memc_value|append command]].
+
+== delete $memc_key ==
+
+Deletes the memcached entry using a key.
+
+<geshi lang="nginx">
+  location /foo
+      set $memc_cmd delete;
+      set $memc_key my_key;
+      
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+Returns <code>200 OK</code> if deleted successfully, <code>404 Not Found</code> for <code>NOT_FOUND</code>, or <code>502</code> for <code>ERROR</code>, <code>CLIENT_ERROR</code>, or <code>SERVER_ERROR</code>.
+
+The original memcached responses are returned as the response body except for <code>404 NOT FOUND</code>.
+
+== delete $memc_key $memc_exptime ==
+
+Similar to the [[#delete $memc_key|delete $memc_key]] command except it accepts an optional <code>expiration</code> time specified by the <code>$memc_exptime</code> variable.
+
+This command is no longer available in the latest memcached version 1.4.4.
+
+== incr $memc_key $memc_value ==
+
+Increments the existing value of <code>$memc_key</code> by the amount specified by <code>$memc_value</code>:
+
+<geshi lang="nginx">
+  location /foo {
+      set $memc_key my_key;
+      set $memc_value 2;
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+In the preceding example, every time we access <code>/foo</code> will cause the value of <code>my_key</code> increments by <code>2</code>.
+
+Returns <code>200 OK</code> with the new value associated with that key as the response body if successful, or <code>404 Not Found</code> if the key is not found.
+
+It returns <code>502</code> for <code>ERROR</code>, <code>CLIENT_ERROR</code>, or <code>SERVER_ERROR</code>.
+
+== decr $memc_key $memc_value ==
+
+Similar to [[#incr $memc_key $memc_value|incr $memc_key $memc_value]].
+
+== flush_all ==
+
+Mark all the keys on the memcached server as expired:
+
+<geshi lang="nginx">
+  location /foo {
+      set $memc_cmd flush_all;
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+== flush_all $memc_exptime ==
+
+Just like [[#flush_all|flush_all]] but also accepts an expiration time specified by the <code>$memc_exptime</code> variable.
+
+== stats ==
+
+Causes the memcached server to output general-purpose statistics and settings
+
+<geshi lang="nginx">
+  location /foo {
+      set $memc_cmd stats;
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+Returns <code>200 OK</code> if the request succeeds, or 502 for <code>ERROR</code>, <code>CLIENT_ERROR</code>, or <code>SERVER_ERROR</code>.
+
+The raw <code>stats</code> command output from the upstream memcached server will be put into the response body. 
+
+== version ==
+
+Queries the memcached server's version number:
+
+<geshi lang="nginx">
+  location /foo {
+      set $memc_cmd version;
+      memc_pass 127.0.0.1:11211;
+  }
+</geshi>
+
+Returns <code>200 OK</code> if the request succeeds, or 502 for <code>ERROR</code>, <code>CLIENT_ERROR</code>, or <code>SERVER_ERROR</code>.
+
+The raw <code>version</code> command output from the upstream memcached server will be put into the response body.
+
+= Directives =
+
+All the standard [[NginxHttpMemcachedModule|memcached module]] directives in nginx 0.8.28 are directly inherited. Consult the [[NginxHttpMemcachedModule]] documentation for more details.
+
+Here we only document the most important two directives (the latter is a new directive introduced by this module).
+
+== memc_pass ==
+'''syntax:''' ''memc_pass <host>:<port>''
+
+'''default:''' ''none''
+
+'''context:''' ''http, server, location, if''
+
+Specify the memcached server backend.
+
+== memc_cmds_allowed ==
+'''syntax:''' ''memc_cmds_allowed <cmd>...''
+
+'''default:''' ''none''
+
+'''context:''' ''http, server, location, if''
+
+Lists memcached commands that are allowed to access. By default, all the memcached commands supported by this module are accessible.
+An example is
+
+<geshi lang="nginx">
+   location /foo {
+       set $memc_cmd $arg_cmd;
+       set $memc_key $arg_key;
+       set $memc_value $arg_val;
+       
+       memc_pass 127.0.0.1:11211;
+        
+       memc_cmds_allowed get;
+   }
+</geshi>
+
+Then <code>/foo?cmd=set&key=foo&val=bar</code> and <code>/foo?cmd=flush_all</code> will both fail and yield <code>403 Fobidden</code>.
+
+= Installation =
+
+Grab the nginx source code from [http://nginx.net/ nginx.net], for example,
+the version 0.8.29 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
+
+<geshi lang="bash">
+    $ wget 'http://sysoev.ru/nginx/nginx-0.8.29.tar.gz'
+    $ tar -xzvf nginx-0.8.29.tar.gz
+    $ cd nginx-0.8.29/
+    
+    # Here we assume you would install you nginx under /opt/nginx/.
+    $ ./configure --prefix=/opt/nginx \
+        --add-module=/path/to/memc-nginx-module
+     
+    $ make -j2
+    $ make install
+</geshi>
+
+Download the latest version of the release tarball of this module from [http://github.com/agentzh/memc-nginx-module/downloads memc-nginx-module file list].
+
+== For Developers ==
+
+The memached response parsers were generated by [http://www.complang.org/ragel/ Ragel]. If you want to
+regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-module/blob/master/src/ngx_http_memc_response.c src/ngx_http_memc_response.c], use the following command from the root of the memc module's source tree:
+
+<geshi lang="bash">
+    $ ragel -G2 src/ngx_http_memc_response.rl
+</geshi>
+
+= Compatibility =
+
+The following versions of Nginx should work with this module:
+
+* '''0.8.x'''                       (last tested version is 0.8.29)
+* '''0.7.x >= 0.7.46'''             (last tested version is 0.7.64)
+
+It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
+
+Earlier versions of Nginx like 0.6.x and 0.5.x will ''not'' work.
+
+If you find that any particular version of Nginx above 0.7.21 does not work with this module, please consider [[#Report Bugs|reporting a bug]].
+
+= Report Bugs =
+
+Although a lot of effort has been put into testing and code tuning, there must be some serious bugs lurking somewhere in this module. So whenever you are bitten by any quirks, please don't hesitate to
+
+# send a bug report or even patches to <agentzh@gmail.com>,
+# or create a ticket on the [http://github.com/agentzh/memc-nginx-module/issues issue tracking interface] provided by GitHub.
+
+= Source Repository =
+
+Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc-nginx-module].
+
+= ChangeLog =
+
+== v0.01 ==
+* initial release.
+
+= Test Suite =
+
+This module comes with a Perl-driven test suite. The [http://github.com/agentzh/memc-nginx-module/tree/master/test/t/ test cases] are
+[http://github.com/agentzh/memc-nginx-module/blob/master/test/t/storage.t declarative] too. Thanks to the [http://search.cpan.org/perldoc?Test::Base Test::Base] module in the Perl world.
+
+To run it on your side:
+
+<geshi lang="bash">
+    $ cd test
+    $ PATH=/path/to/your/nginx-with-memc-module:$PATH prove -r t
+</geshi>
+
+You need to terminate any Nginx processes before running the test suite if you have changed the Nginx server binary.
+
+At the moment, [http://search.cpan.org/perldoc?LWP::UserAgent LWP::UserAgent] is used by the [http://github.com/agentzh/memc-nginx-module/blob/master/test/lib/Test/Nginx/LWP.pm test scaffold] for simplicity.
+
+Because a single nginx server (by default, <code>localhost:1984</code>) is used across all the test scripts (<code>.t</code> files), it's meaningless to run the test suite in parallel by specifying <code>-jN</code> when invoking the <code>prove</code> utility.
+
+You should also keep a memcached server listening on the <code>11984</code> port at localhost before running the test suite.
+
+Some parts of the test suite requires modules [[NginxHttpRewriteModule|rewrite]] and [[NginxHttpEchoModule|echo]] to be enabled as well when building Nginx.
+
+= TODO =
+
+* add support for the memcached commands <code>cas</code> and <code>gets</code>.
+* add support for the <code>noreply</code> option.
+
+= Getting involved =
+
+You'll be very welcomed to submit patches to the [[#Author|author]] or just ask for a commit bit to the [[#Source Repository|source repository]] on GitHub.
+
+= Author =
+
+agentzh (章亦春) ''<agentzh@gmail.com>''
+
+This wiki page is also maintained by the author himself, and everybody is encouraged to improve this page as well.
+
+= Copyright & License =
+
+The code base is borrowed directly from the standard [[NginxHttpMemcachedModule|memcached module]] in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
+
+Copyright (c) 2009, Taobao Inc., Alibaba Group ( http://www.taobao.com ).
+
+Copyright (c) 2009, agentzh <agentzh@gmail.com>.
+
+This module is licensed under the terms of the BSD license.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+* Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+* Neither the name of the Taobao Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+= See Also =
+
+* The latest [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
+* The standard [[NginxHttpMemcachedModule|memcached]] module.
+* The [[NginxHttpEchoModule|echo module]] for Nginx module's automated testing.
+* The standard [[NginxHttpHeadersModule|headers]] module and the 3rd-parth [[NginxHttpHeadersMoreModule|headers-more]] module.
+
