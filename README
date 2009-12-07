@@ -76,7 +76,7 @@ Description
 
     This module is not supposed to be merged into the Nginx core because
     I've used Ragel (<http://www.complang.org/ragel/>) to generate the
-    memcached response parsers for joy :)
+    memcached response parsers (in C) for joy :)
 
   How it works
     It implements the memcached TCP protocol all by itself, based upon the
@@ -85,10 +85,10 @@ Description
     requests (just like other upstream modules).
 
 Memcached commands supported
-    The memcached storage commands "set", "add", "replace", "prepend", and
-    "append" uses the $memc_key as the key, $memc_exptime as the expiration
-    time (or delay) (defaults to 0), $memc_flags as the flags (defaults to
-    0), to build the corresponding memcached queries.
+    The memcached storage commands set, add, replace, prepend, and append
+    uses the $memc_key as the key, $memc_exptime as the expiration time (or
+    delay) (defaults to 0), $memc_flags as the flags (defaults to 0), to
+    build the corresponding memcached queries.
 
     If $memc_value is not defined at all, then the request body will be used
     as the value of the $memc_value except for the incr and decr commands.
@@ -255,8 +255,9 @@ Memcached commands supported
 
 Directives
     All the standard memcached module directives in nginx 0.8.28 are
-    directly inherited. Consult the [[NginxHttpMemcachedModule]]
-    documentation for more details.
+    directly inherited, with the "memcached_" prefixes replaced by "memc_".
+    For example, the "memcached_pass" directive is spelled "memc_pass".
+    Consult the [[NginxHttpMemcachedModule]] documentation for more details.
 
     Here we only document the most important two directives (the latter is a
     new directive introduced by this module).
@@ -292,7 +293,7 @@ Directives
        }
 
     Then "/foo?cmd=set&key=foo&val=bar" and "/foo?cmd=flush_all" will both
-    fail and yield "403 Fobidden".
+    fail and yield "403 Forbidden".
 
 Installation
     Grab the nginx source code from nginx.net (<http://nginx.net/>), for
@@ -338,7 +339,7 @@ Compatibility
 
     Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
-    If you find that any particular version of Nginx above 0.7.21 does not
+    If you find that any particular version of Nginx above 0.7.46 does not
     work with this module, please consider reporting a bug.
 
 Report Bugs

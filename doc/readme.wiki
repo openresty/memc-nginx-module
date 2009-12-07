@@ -69,7 +69,7 @@ This module extends the standard [[NginxHttpMemcachedModule|memcached module]] t
 
 It allows you to define a custom [http://en.wikipedia.org/wiki/REST REST] interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [http://github.com/srlindsay/nginx-independent-subrequest independent fake requests].
 
-This module is not supposed to be merged into the Nginx core because I've used [http://www.complang.org/ragel/ Ragel] to generate the memcached response parsers for joy :)
+This module is not supposed to be merged into the Nginx core because I've used [http://www.complang.org/ragel/ Ragel] to generate the memcached response parsers (in C) for joy :)
 
 == How it works ==
 
@@ -77,7 +77,7 @@ It implements the memcached TCP protocol all by itself, based upon the <code>ups
 
 = Memcached commands supported =
 
-The memcached storage commands "set", "add", "replace", "prepend", and "append" uses the <code>$memc_key</code> as the key, <code>$memc_exptime</code> as the expiration time (or delay) (defaults to 0), <code>$memc_flags</code> as the flags (defaults to 0), to build the corresponding memcached queries.
+The memcached storage commands [[#set $memc_key $memc_flags $memc_exptime $memc_value|set]], [[#add $memc_key $memc_flags $memc_exptime $memc_value|add]], [[#replace $memc_key $memc_flags $memc_exptime $memc_value|replace]], [[#prepend $memc_key $memc_flags $memc_exptime $memc_value|prepend]], and [[#append $memc_key $memc_flags $memc_exptime $memc_value|append]] uses the <code>$memc_key</code> as the key, <code>$memc_exptime</code> as the expiration time (or delay) (defaults to 0), <code>$memc_flags</code> as the flags (defaults to 0), to build the corresponding memcached queries.
 
 If <code>$memc_value</code> is not defined at all, then the request body will be used as the value of the <code>$memc_value</code> except for the [[#incr $memc_key $memc_value|incr]] and [[#decr $memc_key $memc_value|decr]] commands. Note that if <code>$memc_value</code> is defined as an empty string (<code>""</code>), that empty string will still be used as the value as is.
 
@@ -248,7 +248,7 @@ The raw <code>version</code> command output from the upstream memcached server w
 
 = Directives =
 
-All the standard [[NginxHttpMemcachedModule|memcached module]] directives in nginx 0.8.28 are directly inherited. Consult the [[NginxHttpMemcachedModule]] documentation for more details.
+All the standard [[NginxHttpMemcachedModule|memcached module]] directives in nginx 0.8.28 are directly inherited, with the <code>memcached_</code> prefixes replaced by <code>memc_</code>. For example, the <code>memcached_pass</code> directive is spelled <code>memc_pass</code>. Consult the [[NginxHttpMemcachedModule]] documentation for more details.
 
 Here we only document the most important two directives (the latter is a new directive introduced by this module).
 
@@ -283,7 +283,7 @@ An example is
    }
 </geshi>
 
-Then <code>/foo?cmd=set&key=foo&val=bar</code> and <code>/foo?cmd=flush_all</code> will both fail and yield <code>403 Fobidden</code>.
+Then <code>/foo?cmd=set&key=foo&val=bar</code> and <code>/foo?cmd=flush_all</code> will both fail and yield <code>403 Forbidden</code>.
 
 = Installation =
 
@@ -325,7 +325,7 @@ It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work
 
 Earlier versions of Nginx like 0.6.x and 0.5.x will ''not'' work.
 
-If you find that any particular version of Nginx above 0.7.21 does not work with this module, please consider [[#Report Bugs|reporting a bug]].
+If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [[#Report Bugs|reporting a bug]].
 
 = Report Bugs =
 

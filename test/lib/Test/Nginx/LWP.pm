@@ -132,7 +132,7 @@ http {
     access_log $AccLogFile;
 
     default_type text/plain;
-    keepalive_timeout  65;
+    keepalive_timeout  0;
     server {
         listen          $ServerPort;
         server_name     localhost;
