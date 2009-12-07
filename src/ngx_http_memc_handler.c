@@ -334,12 +334,6 @@ ngx_http_memc_handler(ngx_http_request_t *r)
                 return rc;
             }
 
-#if defined(nginx_version) && nginx_version >= 8011
-
-            r->main->count++;
-
-#endif
-
             return NGX_DONE;
         }
     }
@@ -350,13 +344,13 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return rc;
     }
 
-    ngx_http_upstream_init(r);
-
 #if defined(nginx_version) && nginx_version >= 8011
 
-            r->main->count++;
+    r->main->count++;
 
 #endif
+
+    ngx_http_upstream_init(r);
 
     return NGX_DONE;
 }

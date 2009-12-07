@@ -1,9 +1,11 @@
 # vi:filetype=perl
 
 use lib 'lib';
-use Test::Nginx::LWP;
+#use Test::Nginx::LWP;
+use Test::Nginx::Socket;
 
-plan tests => $Test::Nginx::LWP::RepeatEach * 2 * blocks();
+#plan tests => $Test::Nginx::LWP::RepeatEach * 2 * blocks();
+plan tests => $Test::Nginx::Socket::RepeatEach * 2 * blocks();
 
 #no_diff;
 
@@ -266,7 +268,6 @@ get foo
 status: 200
 BAR
 "
-
 
 
 === TEST 9: default REST interface when no $memc_cmd is set (read client req body)
