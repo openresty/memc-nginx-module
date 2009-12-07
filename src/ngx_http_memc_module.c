@@ -276,6 +276,8 @@ ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         clcf->auto_redirect = 1;
     }
 
+    ngx_http_memc_set_module_enabled();
+
     return NGX_CONF_OK;
 }
 
@@ -346,4 +348,5 @@ ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     return NGX_CONF_OK;
 }
+
 

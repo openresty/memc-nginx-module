@@ -7,17 +7,24 @@
 #include "ngx_http_memc_response.h"
 #include "ngx_http_memc_util.h"
 
+static ngx_flag_t  ngx_http_memc_enabled = 0;
+
 static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
 static ngx_str_t  ngx_http_memc_cmd = ngx_string("memc_cmd");
 static ngx_str_t  ngx_http_memc_value = ngx_string("memc_value");
 static ngx_str_t  ngx_http_memc_flags = ngx_string("memc_flags");
 static ngx_str_t  ngx_http_memc_exptime = ngx_string("memc_exptime");
 
-static ngx_uint_t  ngx_http_memc_key_hkey;
-static ngx_uint_t  ngx_http_memc_cmd_hkey;
-static ngx_uint_t  ngx_http_memc_value_hkey;
-static ngx_uint_t  ngx_http_memc_flags_hkey;
-static ngx_uint_t  ngx_http_memc_exptime_hkey;
+static ngx_int_t  ngx_http_memc_key_index;
+static ngx_int_t  ngx_http_memc_cmd_index;
+static ngx_int_t  ngx_http_memc_value_index;
+static ngx_int_t  ngx_http_memc_flags_index;
+static ngx_int_t  ngx_http_memc_exptime_index;
+
+static ngx_int_t ngx_http_memc_variable_not_found(ngx_http_request_t *r,
+        ngx_http_variable_value_t *v, uintptr_t data);
+
+static ngx_int_t ngx_http_memc_add_variable(ngx_conf_t *cf, ngx_str_t *name);
 
 static ngx_flag_t ngx_http_memc_in_cmds_allowed(ngx_http_memc_loc_conf_t *mlcf,
         ngx_http_memc_cmd_t memc_cmd);
@@ -50,13 +57,13 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_http_memc_cmd_t             memc_cmd;
     ngx_flag_t                      is_storage_cmd = 0;
 
-    key_vv = ngx_http_get_variable(r, &ngx_http_memc_key, ngx_http_memc_key_hkey, 1);
+    key_vv = ngx_http_get_indexed_variable(r, ngx_http_memc_key_index);
 
     if (key_vv == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    cmd_vv = ngx_http_get_variable(r, &ngx_http_memc_cmd, ngx_http_memc_cmd_hkey, 1);
+    cmd_vv = ngx_http_get_indexed_variable(r, ngx_http_memc_cmd_index);
 
     if (cmd_vv == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -243,8 +250,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
             || memc_cmd == ngx_http_memc_cmd_flush_all
             || memc_cmd == ngx_http_memc_cmd_delete)
     {
-        exptime_vv = ngx_http_get_variable(r, &ngx_http_memc_exptime,
-                ngx_http_memc_exptime_hkey, 1);
+        exptime_vv = ngx_http_get_indexed_variable(r,
+                ngx_http_memc_exptime_index);
 
         if (exptime_vv == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -262,8 +269,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     }
 
     if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_get) {
-        flags_vv = ngx_http_get_variable(r, &ngx_http_memc_flags,
-                ngx_http_memc_flags_hkey, 1);
+        flags_vv = ngx_http_get_indexed_variable(r, ngx_http_memc_flags_index);
 
         if (flags_vv == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
@@ -284,7 +290,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     if (is_storage_cmd || memc_cmd == ngx_http_memc_cmd_incr
                 || memc_cmd == ngx_http_memc_cmd_decr)
     {
-        value_vv = ngx_http_get_variable(r, &ngx_http_memc_value, ngx_http_memc_value_hkey, 1);
+        value_vv = ngx_http_get_indexed_variable(r,
+                ngx_http_memc_value_index);
         if (value_vv == NULL) {
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
@@ -443,25 +450,73 @@ ngx_http_memc_valid_uint64_str(u_char *data, size_t len)
     return 1;
 }
 
-
 ngx_int_t
 ngx_http_memc_init(ngx_conf_t *cf)
 {
-    ngx_http_memc_key_hkey =
-        ngx_hash_key(ngx_http_memc_key.data, ngx_http_memc_key.len);
-;
-    ngx_http_memc_cmd_hkey =
-        ngx_hash_key(ngx_http_memc_cmd.data, ngx_http_memc_cmd.len);
+    if (!ngx_http_memc_enabled) {
+        return NGX_OK;
+    }
 
-    ngx_http_memc_value_hkey =
-        ngx_hash_key(ngx_http_memc_value.data, ngx_http_memc_value.len);
+    if ((ngx_http_memc_key_index = ngx_http_memc_add_variable(
+                cf, &ngx_http_memc_key)) == NGX_ERROR)
+    {
+        return NGX_ERROR;
+    }
 
-    ngx_http_memc_flags_hkey =
-        ngx_hash_key(ngx_http_memc_flags.data, ngx_http_memc_flags.len);
+    if ((ngx_http_memc_cmd_index = ngx_http_memc_add_variable(
+                cf, &ngx_http_memc_cmd)) == NGX_ERROR)
+    {
+        return NGX_ERROR;
+    }
 
-    ngx_http_memc_exptime_hkey =
-        ngx_hash_key(ngx_http_memc_exptime.data, ngx_http_memc_exptime.len);
+    if ((ngx_http_memc_flags_index = ngx_http_memc_add_variable(
+                cf, &ngx_http_memc_flags)) == NGX_ERROR)
+    {
+        return NGX_ERROR;
+    }
 
+    if ((ngx_http_memc_exptime_index = ngx_http_memc_add_variable(
+                cf, &ngx_http_memc_exptime)) == NGX_ERROR)
+    {
+        return NGX_ERROR;
+    }
+
+    if ((ngx_http_memc_value_index = ngx_http_memc_add_variable(
+                cf, &ngx_http_memc_value)) == NGX_ERROR)
+    {
+        return NGX_ERROR;
+    }
+
+    return NGX_OK;
+}
+
+
+static ngx_int_t
+ngx_http_memc_add_variable(ngx_conf_t *cf, ngx_str_t *name) {
+    ngx_http_variable_t         *v;
+
+    v = ngx_http_add_variable(cf, name, NGX_HTTP_VAR_CHANGEABLE);
+    if (v == NULL) {
+        return NGX_ERROR;
+    }
+
+    v->get_handler = ngx_http_memc_variable_not_found;
+
+    return ngx_http_get_variable_index(cf, name);
+}
+
+
+void
+ngx_http_memc_set_module_enabled() {
+    ngx_http_memc_enabled = 1;
+}
+
+
+static ngx_int_t
+ngx_http_memc_variable_not_found(ngx_http_request_t *r,
+        ngx_http_variable_value_t *v, uintptr_t data)
+{
+    v->not_found = 1;
     return NGX_OK;
 }
 
