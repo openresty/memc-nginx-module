@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.02] released on Dec 7, 2009.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.03] released on Dec 7, 2009.
 
 = Synopsis =
 
@@ -340,6 +340,9 @@ Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc
 
 = ChangeLog =
 
+== v0.03 ==
+* fixed a connection leak caused by an extra <code>r->main->count++</code> operation: we should NOT do <code>r->main->count++</code> after calling the <code>ngx_http_read_client_request_body</code> function.
+
 == v0.02 ==
 * applied the (miner) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the [[#memc_pass|memc_pass]] directive is actually used in the config file.
 
@@ -360,7 +363,7 @@ To run it on your side:
 
 You need to terminate any Nginx processes before running the test suite if you have changed the Nginx server binary.
 
-At the moment, [http://search.cpan.org/perldoc?LWP::UserAgent LWP::UserAgent] is used by the [http://github.com/agentzh/memc-nginx-module/blob/master/test/lib/Test/Nginx/LWP.pm test scaffold] for simplicity.
+Either [http://search.cpan.org/perldoc?LWP::UserAgent LWP::UserAgent] or [http://search.cpan.org/perldoc?IO::Socket IO::Socket] is used by the [http://github.com/agentzh/memc-nginx-module/blob/master/test/lib/Test/Nginx/LWP.pm test scaffold].
 
 Because a single nginx server (by default, <code>localhost:1984</code>) is used across all the test scripts (<code>.t</code> files), it's meaningless to run the test suite in parallel by specifying <code>-jN</code> when invoking the <code>prove</code> utility.
 

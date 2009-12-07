@@ -6,7 +6,7 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.02
+    This document describes memc-nginx-module v0.03
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
     Dec 7, 2009.
 
@@ -358,6 +358,11 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.03
+    *   fixed a connection leak caused by an extra "r->main->count++"
+        operation: we should NOT do "r->main->count++" after calling the
+        "ngx_http_read_client_request_body" function.
+
   v0.02
     *   applied the (miner) optimization trick suggested by Marcus Clyne:
         creating our variables and save their indexes at post-config phase
@@ -382,11 +387,11 @@ Test Suite
     You need to terminate any Nginx processes before running the test suite
     if you have changed the Nginx server binary.
 
-    At the moment, LWP::UserAgent
-    (<http://search.cpan.org/perldoc?LWP::UserAgent>) is used by the test
-    scaffold
+    Either LWP::UserAgent (<http://search.cpan.org/perldoc?LWP::UserAgent>)
+    or IO::Socket (<http://search.cpan.org/perldoc?IO::Socket>) is used by
+    the test scaffold
     (<http://github.com/agentzh/memc-nginx-module/blob/master/test/lib/Test/
-    Nginx/LWP.pm>) for simplicity.
+    Nginx/LWP.pm>).
 
     Because a single nginx server (by default, "localhost:1984") is used
     across all the test scripts (".t" files), it's meaningless to run the
