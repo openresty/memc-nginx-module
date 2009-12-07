@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.01
+    This document describes memc-nginx-module v0.02
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
-    Dec 6, 2009.
+    Dec 7, 2009.
 
 Synopsis
         # GET /foo?key=dog
@@ -358,6 +358,11 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.02
+    *   applied the (miner) optimization trick suggested by Marcus Clyne:
+        creating our variables and save their indexes at post-config phase
+        when the memc_pass directive is actually used in the config file.
+
   v0.01
     *   initial release.
 
@@ -395,7 +400,8 @@ Test Suite
     enabled as well when building Nginx.
 
 TODO
-    *   add support for the memcached commands "cas" and "gets".
+    *   add support for the memcached commands "cas", "gets" and "stats
+        $memc_value".
 
     *   add support for the "noreply" option.
 

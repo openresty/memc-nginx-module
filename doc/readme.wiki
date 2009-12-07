@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.01] released on Dec 6, 2009.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.02] released on Dec 7, 2009.
 
 = Synopsis =
 
@@ -340,6 +340,9 @@ Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc
 
 = ChangeLog =
 
+== v0.02 ==
+* applied the (miner) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the [[#memc_pass|memc_pass]] directive is actually used in the config file.
+
 == v0.01 ==
 * initial release.
 
@@ -367,7 +370,7 @@ Some parts of the test suite requires modules [[NginxHttpRewriteModule|rewrite]]
 
 = TODO =
 
-* add support for the memcached commands <code>cas</code> and <code>gets</code>.
+* add support for the memcached commands <code>cas</code>, <code>gets</code> and <code>stats $memc_value</code>.
 * add support for the <code>noreply</code> option.
 
 = Getting involved =
