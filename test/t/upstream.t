@@ -47,5 +47,5 @@ __DATA__
 --- request
     GET /memc?key=dog
 --- response_body
---- ONLY
+--- SKIP
 
