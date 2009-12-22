@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.03
+    This document describes memc-nginx-module v0.04
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
-    Dec 7, 2009.
+    Dec 22, 2009.
 
 Synopsis
         # GET /foo?key=dog
@@ -94,16 +94,40 @@ Description
     I've used Ragel (<http://www.complang.org/ragel/>) to generate the
     memcached response parsers (in C) for joy :)
 
-  How it works
-    It implements the memcached TCP protocol all by itself, based upon the
-    "upstream" mechansim. Everything involving I/O is non-blocking but it
-    does not keep TCP connections to the upstream memcached servers across
-    requests, just like other upstream modules.
-
+  Keep-alive connections to memcached servers
     You need Maxim Dounin's ngx_upstream_keepalive module
     (<http://mdounin.ru/hg/ngx_http_upstream_keepalive/>) together with this
-    module for keep-alive TCP connections to your backend memcached servers
-    ;)
+    module for keep-alive TCP connections to your backend memcached servers.
+
+    Here's a sample configuration:
+
+      http {
+        upstream backend {
+          server 127.0.0.1:11211;
+
+          # a pool with at most 1024 connections
+          # and do not distinguish the servers
+          keepalive 1024 single;
+        }
+
+        server {
+            ...
+            location /memc {
+                set $memc_cmd get;
+                set $memc_key $arg_key;
+                memc_pass backend;
+            }
+        }
+      }
+
+  How it works
+    It implements the memcached TCP protocol all by itself, based upon the
+    "upstream" mechansim. Everything involving I/O is non-blocking.
+
+    The module itself does not keep TCP connections to the upstream
+    memcached servers across requests, just like other upstream modules. For
+    a working solution, see section Keep-alive connections to memcached
+    servers.
 
 Memcached commands supported
     The memcached storage commands set, add, replace, prepend, and append
@@ -381,6 +405,15 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.04
+    *   to ensure Maxim's ngx_http_upstream_keepalive
+        (<http://mdounin.ru/hg/ngx_http_upstream_keepalive/>) module caches
+        our connections even if "u->headers_in->status" is 201 (Created).
+
+    *   updated docs to make it clear that this module can work with
+        "upstream" multi-server backends. thanks Bernd Dorn for reporting
+        it.
+
   v0.03
     *   fixed a connection leak caused by an extra "r->main->count++"
         operation: we should NOT do "r->main->count++" after calling the
