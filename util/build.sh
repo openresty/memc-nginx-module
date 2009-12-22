@@ -13,6 +13,7 @@ root=`pwd`
 cd ~/work
 version=$1
 opts=$2
+home=~
 lwp-mirror "http://sysoev.ru/nginx/nginx-$version.tar.gz" nginx-$version.tar.gz
 tar -xzvf nginx-$version.tar.gz
 cd nginx-$version/
@@ -20,6 +21,7 @@ if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$
     ./configure --prefix=/opt/nginx \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root $opts \
+          --add-module=$home/work/nginx/nginx_upstream_hash-0.3 \
           --with-debug
   #--without-http_ssi_module  # we cannot disable ssi because echo_location_async depends on it (i dunno why?!)
 

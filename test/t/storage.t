@@ -268,6 +268,7 @@ BAR
 "
 
 
+
 === TEST 9: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {

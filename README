@@ -62,6 +62,22 @@ Synopsis
             memc_pass 127.0.0.1:11211;
         }
 
+      http {
+        ...
+        upstream backend {
+           server 127.0.0.1:11984;
+           server 127.0.0.1:11985;
+        }
+        server {
+            location /stats {
+                set $memc_cmd stats;
+                memc_pass backend;
+            }
+            ...
+        }
+      }
+      ...
+
 Description
     This module extends the standard memcached module to support almost the
     whole memcached TCP protocol
@@ -82,7 +98,12 @@ Description
     It implements the memcached TCP protocol all by itself, based upon the
     "upstream" mechansim. Everything involving I/O is non-blocking but it
     does not keep TCP connections to the upstream memcached servers across
-    requests (just like other upstream modules).
+    requests, just like other upstream modules.
+
+    You need Maxim Dounin's ngx_upstream_keepalive module
+    (<http://mdounin.ru/hg/ngx_http_upstream_keepalive/>) together with this
+    module for keep-alive TCP connections to your backend memcached servers
+    ;)
 
 Memcached commands supported
     The memcached storage commands set, add, replace, prepend, and append
@@ -263,7 +284,9 @@ Directives
     new directive introduced by this module).
 
   memc_pass
-    syntax: *memc_pass <host>:<port>*
+    syntax: *memc_pass <memcached_server_ip>:<memcached_server_port>*
+
+    syntax (2): *memc_pass <upstream_backend_name>*
 
     default: *none*
 
@@ -328,7 +351,7 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested version is 0.8.29)
+    *   0.8.x (last tested version is 0.8.30)
 
     *   0.7.x >= 0.7.46 (last tested version is 0.7.64)
 
@@ -361,10 +384,10 @@ ChangeLog
   v0.03
     *   fixed a connection leak caused by an extra "r->main->count++"
         operation: we should NOT do "r->main->count++" after calling the
-        "ngx_http_read_client_request_body" function.
+        "ngx_http_read_client_request_body" function in our content handler.
 
   v0.02
-    *   applied the (miner) optimization trick suggested by Marcus Clyne:
+    *   applied the (minor) optimization trick suggested by Marcus Clyne:
         creating our variables and save their indexes at post-config phase
         when the memc_pass directive is actually used in the config file.
 
@@ -459,6 +482,11 @@ Copyright & License
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 See Also
+    *   The original announcement email on the nginx mailing list: ngx_memc:
+        "an extended version of ngx_memcached that supports set, add,
+        delete, and many more commands"
+        (<http://forum.nginx.org/read.php?2,28359>)
+
     *   The latest memcached TCP protocol
         (<http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.t
         xt>).

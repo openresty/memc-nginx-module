@@ -29,7 +29,9 @@ This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-
 
         memc_pass 127.0.0.1:11211;
     }
+</geshi>
 
+<geshi lang="nginx">
     # GET /bar?cmd=get&key=cat
     #
     # POST /bar?cmd=set&key=dog
@@ -45,7 +47,9 @@ This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-
 
         memc_pass 127.0.0.1:11211;
     }
+</geshi>
 
+<geshi lang="nginx">
     # GET /bar?cmd=get&key=cat
     # GET /bar?cmd=set&key=dog&val=animal&flags=1234&exptime=2
     # GET /bar?cmd=delete&key=dog
@@ -63,6 +67,24 @@ This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-
     }
 </geshi>
 
+<geshi lang="nginx">
+  http {
+    ...
+    upstream backend {
+       server 127.0.0.1:11984;
+       server 127.0.0.1:11985;
+    }
+    server {
+        location /stats {
+            set $memc_cmd stats;
+            memc_pass backend;
+        }
+        ...
+    }
+  }
+  ...
+</geshi>
+
 = Description =
 
 This module extends the standard [[NginxHttpMemcachedModule|memcached module]] to support almost the whole [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
@@ -73,7 +95,9 @@ This module is not supposed to be merged into the Nginx core because I've used [
 
 == How it works ==
 
-It implements the memcached TCP protocol all by itself, based upon the <code>upstream</code> mechansim. Everything involving I/O is non-blocking but it does not keep TCP connections to the upstream memcached servers across requests (just like other upstream modules).
+It implements the memcached TCP protocol all by itself, based upon the <code>upstream</code> mechansim. Everything involving I/O is non-blocking but it does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules.
+
+You need Maxim Dounin's [http://mdounin.ru/hg/ngx_http_upstream_keepalive/ ngx_upstream_keepalive module] together with this module for keep-alive TCP connections to your backend memcached servers ;)
 
 = Memcached commands supported =
 
@@ -253,7 +277,9 @@ All the standard [[NginxHttpMemcachedModule|memcached module]] directives in ngi
 Here we only document the most important two directives (the latter is a new directive introduced by this module).
 
 == memc_pass ==
-'''syntax:''' ''memc_pass <host>:<port>''
+'''syntax:''' ''memc_pass <memcached_server_ip>:<memcached_server_port>''
+
+'''syntax (2):''' ''memc_pass <upstream_backend_name>''
 
 '''default:''' ''none''
 
@@ -318,7 +344,7 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.29)
+* '''0.8.x'''                       (last tested version is 0.8.30)
 * '''0.7.x >= 0.7.46'''             (last tested version is 0.7.64)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
@@ -341,10 +367,10 @@ Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc
 = ChangeLog =
 
 == v0.03 ==
-* fixed a connection leak caused by an extra <code>r->main->count++</code> operation: we should NOT do <code>r->main->count++</code> after calling the <code>ngx_http_read_client_request_body</code> function.
+* fixed a connection leak caused by an extra <code>r->main->count++</code> operation: we should NOT do <code>r->main->count++</code> after calling the <code>ngx_http_read_client_request_body</code> function in our content handler.
 
 == v0.02 ==
-* applied the (miner) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the [[#memc_pass|memc_pass]] directive is actually used in the config file.
+* applied the (minor) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the [[#memc_pass|memc_pass]] directive is actually used in the config file.
 
 == v0.01 ==
 * initial release.
@@ -418,6 +444,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 = See Also =
 
+* The original announcement email on the nginx mailing list: [http://forum.nginx.org/read.php?2,28359 ngx_memc: "an extended version of ngx_memcached that supports set, add, delete, and many more commands"]
 * The latest [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
 * The standard [[NginxHttpMemcachedModule|memcached]] module.
 * The [[NginxHttpEchoModule|echo module]] for Nginx module's automated testing.
