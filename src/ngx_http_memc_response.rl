@@ -228,6 +228,13 @@ ngx_http_memc_empty_filter_init(void *data)
 
     u->length = 0;
 
+    /* to persuade ngx_http_upstream_keepalive (if any)
+       to cache the connection if the status is neither
+       200 nor 404. */
+    if (u->headers_in.status_n == NGX_HTTP_CREATED) {
+        u->headers_in.status_n = NGX_HTTP_OK;
+    }
+
     return NGX_OK;
 }
 
@@ -426,8 +433,8 @@ found:
             return NGX_HTTP_UPSTREAM_INVALID_HEADER;
         }
 
-        u->headers_in.status_n = 200;
-        u->state->status = 200;
+        u->headers_in.status_n = NGX_HTTP_OK;
+        u->state->status = NGX_HTTP_OK;
         u->buffer.pos = p + 1;
 
         return NGX_OK;
@@ -437,8 +444,8 @@ found:
         ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
                       "key: \"%V\" was not found by memcached", &ctx->key);
 
-        u->headers_in.status_n = 404;
-        u->state->status = 404;
+        u->headers_in.status_n = NGX_HTTP_NOT_FOUND;
+        u->state->status = NGX_HTTP_NOT_FOUND;
 
         return NGX_OK;
     }

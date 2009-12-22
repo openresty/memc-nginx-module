@@ -113,11 +113,11 @@ __DATA__
 === TEST 8: $memc_cmd has its default values when it's an empty string
 --- config
     location /main {
-        echo 'set big';
-        echo_subrequest POST '/memc?key=big';
+        echo 'set big2';
+        echo_subrequest PUT '/memc?key=big2';
 
-        echo 'get big';
-        echo_location '/memc?key=big&cmd=get';
+        echo 'get big2';
+        echo_location '/memc?key=big2&cmd=get';
     }
     location /memc {
         set $memc_cmd $arg_cmd;
@@ -128,8 +128,8 @@ __DATA__
 POST /main
 nice to meet you!
 --- response_body eval
-"set big
+"set big2
 STORED\r
-get big
+get big2
 nice to meet you!"
 

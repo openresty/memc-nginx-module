@@ -35,17 +35,20 @@ __DATA__
       server 127.0.0.1:11984;
       server 127.0.0.1:11985;
       server 127.0.0.1:11986;
-      hash $arg_key;
+      keepalive 2 single;
+      #hash $arg_key;
     }
 
 --- config
     location /memc {
-        set $memc_cmd get;
+        set $memc_cmd set;
         set $memc_key $arg_key;
+        set $memc_value 'value';
         memc_pass backend;
     }
 --- request
     GET /memc?key=dog
 --- response_body
+--- error_code: 201
 --- SKIP
 

@@ -332,6 +332,13 @@ ngx_http_memc_empty_filter_init(void *data)
 
     u->length = 0;
 
+    /* to persuade ngx_http_upstream_keepalive (if any)
+       to cache the connection if the status is neither
+       200 nor 404. */
+    if (u->headers_in.status_n == NGX_HTTP_CREATED) {
+        u->headers_in.status_n = NGX_HTTP_OK;
+    }
+
     return NGX_OK;
 }
 
@@ -530,8 +537,8 @@ found:
             return NGX_HTTP_UPSTREAM_INVALID_HEADER;
         }
 
-        u->headers_in.status_n = 200;
-        u->state->status = 200;
+        u->headers_in.status_n = NGX_HTTP_OK;
+        u->state->status = NGX_HTTP_OK;
         u->buffer.pos = p + 1;
 
         return NGX_OK;
@@ -541,8 +548,8 @@ found:
         ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
                       "key: \"%V\" was not found by memcached", &ctx->key);
 
-        u->headers_in.status_n = 404;
-        u->state->status = 404;
+        u->headers_in.status_n = NGX_HTTP_NOT_FOUND;
+        u->state->status = NGX_HTTP_NOT_FOUND;
 
         return NGX_OK;
     }
@@ -591,11 +598,11 @@ parse_memc_storage(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
     int cs = *cs_addr;
 
     
-#line 490 "src/ngx_http_memc_response.rl"
+#line 497 "src/ngx_http_memc_response.rl"
     
-#line 491 "src/ngx_http_memc_response.rl"
+#line 498 "src/ngx_http_memc_response.rl"
     
-#line 599 "src/ngx_http_memc_response.c"
+#line 606 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -763,7 +770,7 @@ st54:
 	if ( ++p == pe )
 		goto _test_eof54;
 case 54:
-#line 767 "src/ngx_http_memc_response.c"
+#line 774 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -1096,7 +1103,7 @@ case 53:
 	_out: {}
 	}
 
-#line 492 "src/ngx_http_memc_response.rl"
+#line 499 "src/ngx_http_memc_response.rl"
 
     *cs_addr = cs;
 
@@ -1110,11 +1117,11 @@ parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_add
     int cs = *cs_addr;
 
     
-#line 505 "src/ngx_http_memc_response.rl"
+#line 512 "src/ngx_http_memc_response.rl"
     
-#line 506 "src/ngx_http_memc_response.rl"
+#line 513 "src/ngx_http_memc_response.rl"
     
-#line 1118 "src/ngx_http_memc_response.c"
+#line 1125 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -1256,7 +1263,7 @@ st30:
 	if ( ++p == pe )
 		goto _test_eof30;
 case 30:
-#line 1260 "src/ngx_http_memc_response.c"
+#line 1267 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -1391,7 +1398,7 @@ case 29:
 	_out: {}
 	}
 
-#line 507 "src/ngx_http_memc_response.rl"
+#line 514 "src/ngx_http_memc_response.rl"
 
     *cs_addr = cs;
 
@@ -1405,11 +1412,11 @@ parse_memc_version(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
     int cs = *cs_addr;
 
     
-#line 520 "src/ngx_http_memc_response.rl"
+#line 527 "src/ngx_http_memc_response.rl"
     
-#line 521 "src/ngx_http_memc_response.rl"
+#line 528 "src/ngx_http_memc_response.rl"
     
-#line 1413 "src/ngx_http_memc_response.c"
+#line 1420 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -1544,7 +1551,7 @@ st39:
 	if ( ++p == pe )
 		goto _test_eof39;
 case 39:
-#line 1548 "src/ngx_http_memc_response.c"
+#line 1555 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -1706,7 +1713,7 @@ st40:
 	if ( ++p == pe )
 		goto _test_eof40;
 case 40:
-#line 1710 "src/ngx_http_memc_response.c"
+#line 1717 "src/ngx_http_memc_response.c"
 	if ( (*p) == 13 )
 		goto st36;
 	goto st35;
@@ -1769,7 +1776,7 @@ case 38:
 	_out: {}
 	}
 
-#line 522 "src/ngx_http_memc_response.rl"
+#line 529 "src/ngx_http_memc_response.rl"
 
     *cs_addr = cs;
 
@@ -1783,11 +1790,11 @@ parse_memc_stats(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, n
     int cs = *cs_addr;
 
     
-#line 535 "src/ngx_http_memc_response.rl"
+#line 542 "src/ngx_http_memc_response.rl"
     
-#line 536 "src/ngx_http_memc_response.rl"
+#line 543 "src/ngx_http_memc_response.rl"
     
-#line 1791 "src/ngx_http_memc_response.c"
+#line 1798 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -1928,7 +1935,7 @@ st43:
 	if ( ++p == pe )
 		goto _test_eof43;
 case 43:
-#line 1932 "src/ngx_http_memc_response.c"
+#line 1939 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -2130,7 +2137,7 @@ st44:
 	if ( ++p == pe )
 		goto _test_eof44;
 case 44:
-#line 2134 "src/ngx_http_memc_response.c"
+#line 2141 "src/ngx_http_memc_response.c"
 	switch( (*p) ) {
 		case 13: goto st35;
 		case 69: goto st37;
@@ -2199,7 +2206,7 @@ case 42:
 	_out: {}
 	}
 
-#line 537 "src/ngx_http_memc_response.rl"
+#line 544 "src/ngx_http_memc_response.rl"
 
     *cs_addr = cs;
 
@@ -2213,11 +2220,11 @@ parse_memc_delete(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr, 
     int cs = *cs_addr;
 
     
-#line 550 "src/ngx_http_memc_response.rl"
+#line 557 "src/ngx_http_memc_response.rl"
     
-#line 551 "src/ngx_http_memc_response.rl"
+#line 558 "src/ngx_http_memc_response.rl"
     
-#line 2221 "src/ngx_http_memc_response.c"
+#line 2228 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -2373,7 +2380,7 @@ st45:
 	if ( ++p == pe )
 		goto _test_eof45;
 case 45:
-#line 2377 "src/ngx_http_memc_response.c"
+#line 2384 "src/ngx_http_memc_response.c"
 	goto st0;
 st16:
 	if ( ++p == pe )
@@ -2628,7 +2635,7 @@ case 44:
 	_out: {}
 	}
 
-#line 552 "src/ngx_http_memc_response.rl"
+#line 559 "src/ngx_http_memc_response.rl"
 
     *cs_addr = cs;
 
@@ -2642,11 +2649,11 @@ parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_add
     int cs = *cs_addr;
 
     
-#line 565 "src/ngx_http_memc_response.rl"
+#line 572 "src/ngx_http_memc_response.rl"
     
-#line 566 "src/ngx_http_memc_response.rl"
+#line 573 "src/ngx_http_memc_response.rl"
     
-#line 2650 "src/ngx_http_memc_response.c"
+#line 2657 "src/ngx_http_memc_response.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -2675,7 +2682,7 @@ st2:
 	if ( ++p == pe )
 		goto _test_eof2;
 case 2:
-#line 2679 "src/ngx_http_memc_response.c"
+#line 2686 "src/ngx_http_memc_response.c"
 	switch( (*p) ) {
 		case 13: goto tr6;
 		case 32: goto tr7;
@@ -2693,7 +2700,7 @@ st3:
 	if ( ++p == pe )
 		goto _test_eof3;
 case 3:
-#line 2697 "src/ngx_http_memc_response.c"
+#line 2704 "src/ngx_http_memc_response.c"
 	if ( (*p) == 10 )
 		goto tr8;
 	goto st0;
@@ -2753,7 +2760,7 @@ st40:
 	if ( ++p == pe )
 		goto _test_eof40;
 case 40:
-#line 2757 "src/ngx_http_memc_response.c"
+#line 2764 "src/ngx_http_memc_response.c"
 	goto st0;
 tr7:
 #line 26 "src/memc_common.rl"
@@ -2765,7 +2772,7 @@ st4:
 	if ( ++p == pe )
 		goto _test_eof4;
 case 4:
-#line 2769 "src/ngx_http_memc_response.c"
+#line 2776 "src/ngx_http_memc_response.c"
 	switch( (*p) ) {
 		case 13: goto tr6;
 		case 32: goto tr7;
@@ -2781,7 +2788,7 @@ st5:
 	if ( ++p == pe )
 		goto _test_eof5;
 case 5:
-#line 2785 "src/ngx_http_memc_response.c"
+#line 2792 "src/ngx_http_memc_response.c"
 	if ( (*p) == 76 )
 		goto tr9;
 	goto st0;
@@ -2795,7 +2802,7 @@ st6:
 	if ( ++p == pe )
 		goto _test_eof6;
 case 6:
-#line 2799 "src/ngx_http_memc_response.c"
+#line 2806 "src/ngx_http_memc_response.c"
 	if ( (*p) == 73 )
 		goto tr10;
 	goto st0;
@@ -2809,7 +2816,7 @@ st7:
 	if ( ++p == pe )
 		goto _test_eof7;
 case 7:
-#line 2813 "src/ngx_http_memc_response.c"
+#line 2820 "src/ngx_http_memc_response.c"
 	if ( (*p) == 69 )
 		goto tr11;
 	goto st0;
@@ -2823,7 +2830,7 @@ st8:
 	if ( ++p == pe )
 		goto _test_eof8;
 case 8:
-#line 2827 "src/ngx_http_memc_response.c"
+#line 2834 "src/ngx_http_memc_response.c"
 	if ( (*p) == 78 )
 		goto tr12;
 	goto st0;
@@ -2837,7 +2844,7 @@ st9:
 	if ( ++p == pe )
 		goto _test_eof9;
 case 9:
-#line 2841 "src/ngx_http_memc_response.c"
+#line 2848 "src/ngx_http_memc_response.c"
 	if ( (*p) == 84 )
 		goto tr13;
 	goto st0;
@@ -2851,7 +2858,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 2855 "src/ngx_http_memc_response.c"
+#line 2862 "src/ngx_http_memc_response.c"
 	if ( (*p) == 95 )
 		goto tr14;
 	goto st0;
@@ -2865,7 +2872,7 @@ st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 2869 "src/ngx_http_memc_response.c"
+#line 2876 "src/ngx_http_memc_response.c"
 	if ( (*p) == 69 )
 		goto tr15;
 	goto st0;
@@ -2879,7 +2886,7 @@ st12:
 	if ( ++p == pe )
 		goto _test_eof12;
 case 12:
-#line 2883 "src/ngx_http_memc_response.c"
+#line 2890 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr16;
 	goto st0;
@@ -2893,7 +2900,7 @@ st13:
 	if ( ++p == pe )
 		goto _test_eof13;
 case 13:
-#line 2897 "src/ngx_http_memc_response.c"
+#line 2904 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr17;
 	goto st0;
@@ -2907,7 +2914,7 @@ st14:
 	if ( ++p == pe )
 		goto _test_eof14;
 case 14:
-#line 2911 "src/ngx_http_memc_response.c"
+#line 2918 "src/ngx_http_memc_response.c"
 	if ( (*p) == 79 )
 		goto tr18;
 	goto st0;
@@ -2921,7 +2928,7 @@ st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-#line 2925 "src/ngx_http_memc_response.c"
+#line 2932 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr19;
 	goto st0;
@@ -2935,7 +2942,7 @@ st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-#line 2939 "src/ngx_http_memc_response.c"
+#line 2946 "src/ngx_http_memc_response.c"
 	if ( (*p) == 32 )
 		goto tr20;
 	goto st0;
@@ -2949,7 +2956,7 @@ st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-#line 2953 "src/ngx_http_memc_response.c"
+#line 2960 "src/ngx_http_memc_response.c"
 	if ( (*p) == 13 )
 		goto tr21;
 	goto tr20;
@@ -2963,7 +2970,7 @@ st18:
 	if ( ++p == pe )
 		goto _test_eof18;
 case 18:
-#line 2967 "src/ngx_http_memc_response.c"
+#line 2974 "src/ngx_http_memc_response.c"
 	switch( (*p) ) {
 		case 10: goto tr22;
 		case 13: goto tr21;
@@ -2979,7 +2986,7 @@ st19:
 	if ( ++p == pe )
 		goto _test_eof19;
 case 19:
-#line 2983 "src/ngx_http_memc_response.c"
+#line 2990 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr23;
 	goto st0;
@@ -2993,7 +3000,7 @@ st20:
 	if ( ++p == pe )
 		goto _test_eof20;
 case 20:
-#line 2997 "src/ngx_http_memc_response.c"
+#line 3004 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr24;
 	goto st0;
@@ -3007,7 +3014,7 @@ st21:
 	if ( ++p == pe )
 		goto _test_eof21;
 case 21:
-#line 3011 "src/ngx_http_memc_response.c"
+#line 3018 "src/ngx_http_memc_response.c"
 	if ( (*p) == 79 )
 		goto tr25;
 	goto st0;
@@ -3021,7 +3028,7 @@ st22:
 	if ( ++p == pe )
 		goto _test_eof22;
 case 22:
-#line 3025 "src/ngx_http_memc_response.c"
+#line 3032 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr26;
 	goto st0;
@@ -3035,7 +3042,7 @@ st23:
 	if ( ++p == pe )
 		goto _test_eof23;
 case 23:
-#line 3039 "src/ngx_http_memc_response.c"
+#line 3046 "src/ngx_http_memc_response.c"
 	if ( (*p) == 13 )
 		goto tr27;
 	goto st0;
@@ -3049,7 +3056,7 @@ st24:
 	if ( ++p == pe )
 		goto _test_eof24;
 case 24:
-#line 3053 "src/ngx_http_memc_response.c"
+#line 3060 "src/ngx_http_memc_response.c"
 	if ( (*p) == 10 )
 		goto tr22;
 	goto st0;
@@ -3063,7 +3070,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 3067 "src/ngx_http_memc_response.c"
+#line 3074 "src/ngx_http_memc_response.c"
 	if ( (*p) == 79 )
 		goto tr28;
 	goto st0;
@@ -3077,7 +3084,7 @@ st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-#line 3081 "src/ngx_http_memc_response.c"
+#line 3088 "src/ngx_http_memc_response.c"
 	if ( (*p) == 84 )
 		goto tr29;
 	goto st0;
@@ -3091,7 +3098,7 @@ st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-#line 3095 "src/ngx_http_memc_response.c"
+#line 3102 "src/ngx_http_memc_response.c"
 	if ( (*p) == 95 )
 		goto tr30;
 	goto st0;
@@ -3105,7 +3112,7 @@ st28:
 	if ( ++p == pe )
 		goto _test_eof28;
 case 28:
-#line 3109 "src/ngx_http_memc_response.c"
+#line 3116 "src/ngx_http_memc_response.c"
 	if ( (*p) == 70 )
 		goto tr31;
 	goto st0;
@@ -3119,7 +3126,7 @@ st29:
 	if ( ++p == pe )
 		goto _test_eof29;
 case 29:
-#line 3123 "src/ngx_http_memc_response.c"
+#line 3130 "src/ngx_http_memc_response.c"
 	if ( (*p) == 79 )
 		goto tr32;
 	goto st0;
@@ -3133,7 +3140,7 @@ st30:
 	if ( ++p == pe )
 		goto _test_eof30;
 case 30:
-#line 3137 "src/ngx_http_memc_response.c"
+#line 3144 "src/ngx_http_memc_response.c"
 	if ( (*p) == 85 )
 		goto tr33;
 	goto st0;
@@ -3147,7 +3154,7 @@ st31:
 	if ( ++p == pe )
 		goto _test_eof31;
 case 31:
-#line 3151 "src/ngx_http_memc_response.c"
+#line 3158 "src/ngx_http_memc_response.c"
 	if ( (*p) == 78 )
 		goto tr34;
 	goto st0;
@@ -3161,7 +3168,7 @@ st32:
 	if ( ++p == pe )
 		goto _test_eof32;
 case 32:
-#line 3165 "src/ngx_http_memc_response.c"
+#line 3172 "src/ngx_http_memc_response.c"
 	if ( (*p) == 68 )
 		goto tr35;
 	goto st0;
@@ -3175,7 +3182,7 @@ st33:
 	if ( ++p == pe )
 		goto _test_eof33;
 case 33:
-#line 3179 "src/ngx_http_memc_response.c"
+#line 3186 "src/ngx_http_memc_response.c"
 	if ( (*p) == 13 )
 		goto tr36;
 	goto st0;
@@ -3189,7 +3196,7 @@ st34:
 	if ( ++p == pe )
 		goto _test_eof34;
 case 34:
-#line 3193 "src/ngx_http_memc_response.c"
+#line 3200 "src/ngx_http_memc_response.c"
 	if ( (*p) == 10 )
 		goto tr37;
 	goto st0;
@@ -3203,7 +3210,7 @@ st35:
 	if ( ++p == pe )
 		goto _test_eof35;
 case 35:
-#line 3207 "src/ngx_http_memc_response.c"
+#line 3214 "src/ngx_http_memc_response.c"
 	if ( (*p) == 69 )
 		goto tr38;
 	goto st0;
@@ -3217,7 +3224,7 @@ st36:
 	if ( ++p == pe )
 		goto _test_eof36;
 case 36:
-#line 3221 "src/ngx_http_memc_response.c"
+#line 3228 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr39;
 	goto st0;
@@ -3231,7 +3238,7 @@ st37:
 	if ( ++p == pe )
 		goto _test_eof37;
 case 37:
-#line 3235 "src/ngx_http_memc_response.c"
+#line 3242 "src/ngx_http_memc_response.c"
 	if ( (*p) == 86 )
 		goto tr40;
 	goto st0;
@@ -3245,7 +3252,7 @@ st38:
 	if ( ++p == pe )
 		goto _test_eof38;
 case 38:
-#line 3249 "src/ngx_http_memc_response.c"
+#line 3256 "src/ngx_http_memc_response.c"
 	if ( (*p) == 69 )
 		goto tr41;
 	goto st0;
@@ -3259,7 +3266,7 @@ st39:
 	if ( ++p == pe )
 		goto _test_eof39;
 case 39:
-#line 3263 "src/ngx_http_memc_response.c"
+#line 3270 "src/ngx_http_memc_response.c"
 	if ( (*p) == 82 )
 		goto tr13;
 	goto st0;
@@ -3308,7 +3315,7 @@ case 39:
 	_out: {}
 	}
 
-#line 567 "src/ngx_http_memc_response.rl"
+#line 574 "src/ngx_http_memc_response.rl"
 
     *cs_addr = cs;
 
