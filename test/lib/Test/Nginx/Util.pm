@@ -12,7 +12,6 @@ use File::Spec ();
 use HTTP::Response;
 use Module::Install::Can;
 use Cwd qw( cwd );
-use Module::Install::Can;
 use List::Util qw( shuffle );
 
 our $NoNginxManager = 0;
@@ -62,7 +61,7 @@ our @EXPORT_OK = qw(
 );
 
 our $Workers                = 1;
-our $WorkerConnections      = 1024;
+our $WorkerConnections      = 64;
 our $LogLevel               = 'debug';
 our $MasterProcessEnabled   = 'off';
 our $DaemonEnabled          = 'on';

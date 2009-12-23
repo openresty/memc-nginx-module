@@ -106,7 +106,7 @@ Description
           server 127.0.0.1:11211;
 
           # a pool with at most 1024 connections
-          # and do not distinguish the servers
+          # and do not distinguish the servers:
           keepalive 1024 single;
         }
 
@@ -308,9 +308,13 @@ Directives
     new directive introduced by this module).
 
   memc_pass
-    syntax: *memc_pass <memcached_server_ip>:<memcached_server_port>*
+    syntax: *memc_pass <memcached server IP address>:<memcached server
+    port>*
 
-    syntax (2): *memc_pass <upstream_backend_name>*
+    syntax (2): *memc_pass <memcached server hostname>:<memcached server
+    port>*
+
+    syntax (3): *memc_pass <upstream_backend_name>*
 
     default: *none*
 
