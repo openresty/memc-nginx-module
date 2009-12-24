@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.04
+    This document describes memc-nginx-module v0.05
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
-    Dec 22, 2009.
+    Dec 24, 2009.
 
 Synopsis
         # GET /foo?key=dog
@@ -379,7 +379,7 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested version is 0.8.30)
+    *   0.8.x (last tested version is 0.8.31)
 
     *   0.7.x >= 0.7.46 (last tested version is 0.7.64)
 
@@ -409,6 +409,10 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.05
+    *   removed the "memc_bind" directive since it won't compile with nginx
+        0.8.31.
+
   v0.04
     *   to ensure Maxim's ngx_http_upstream_keepalive
         (<http://mdounin.ru/hg/ngx_http_upstream_keepalive/>) module caches

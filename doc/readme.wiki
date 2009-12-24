@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.04] released on Dec 22, 2009.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.05] released on Dec 24, 2009.
 
 = Synopsis =
 
@@ -374,7 +374,7 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.30)
+* '''0.8.x'''                       (last tested version is 0.8.31)
 * '''0.7.x >= 0.7.46'''             (last tested version is 0.7.64)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
@@ -395,6 +395,9 @@ Although a lot of effort has been put into testing and code tuning, there must b
 Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc-nginx-module].
 
 = ChangeLog =
+
+== v0.05 ==
+* removed the "memc_bind" directive since it won't compile with nginx 0.8.31.
 
 == v0.04 ==
 * to ensure Maxim's [http://mdounin.ru/hg/ngx_http_upstream_keepalive/ ngx_http_upstream_keepalive] module caches our connections even if <code>u->headers_in->status</code> is 201 (Created).
