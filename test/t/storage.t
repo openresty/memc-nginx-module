@@ -679,3 +679,23 @@ exptime: 0
 NOT_STORED\r
 "
 
+
+
+=== TEST 20: eval + memc
+--- config
+    location /main {
+        eval $data {
+            proxy_pass $scheme://127.0.0.1:$server_port/foo;
+        }
+        set $memc_cmd set;
+        set $memc_key /foo;
+        set $memc_value $data;
+        memc_pass 127.0.0.1:11984;
+    }
+    location /foo {
+        echo hello;
+    }
+--- request
+    GET /main
+--- response_body
+--- SKIP
