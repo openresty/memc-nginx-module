@@ -35,7 +35,7 @@ __DATA__
       server 127.0.0.1:11984;
       server 127.0.0.1:11985;
       server 127.0.0.1:11986;
-      keepalive 2 single;
+      #keepalive 2 single;
       #hash $arg_key;
     }
 
