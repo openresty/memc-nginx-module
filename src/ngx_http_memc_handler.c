@@ -7,6 +7,20 @@
 #include "ngx_http_memc_response.h"
 #include "ngx_http_memc_util.h"
 
+static ngx_int_t ngx_http_memc_flags_as_http_time_variable(
+        ngx_http_request_t *r, ngx_http_variable_value_t *v,
+        uintptr_t data);
+
+static ngx_http_variable_t ngx_http_memc_variables[] = {
+    { ngx_string("memc_flags_as_http_time"), NULL,
+      ngx_http_memc_flags_as_http_time_variable, 0,
+      0, 0 },
+
+    { ngx_null_string, NULL, NULL, 0, 0, 0 }
+};
+
+static ngx_int_t ngx_http_memc_add_more_variables(ngx_conf_t *cf);
+
 static ngx_flag_t  ngx_http_memc_enabled = 0;
 
 static ngx_str_t  ngx_http_memc_key = ngx_string("memc_key");
@@ -481,7 +495,7 @@ ngx_http_memc_init(ngx_conf_t *cf)
         return NGX_ERROR;
     }
 
-    return NGX_OK;
+    return ngx_http_memc_add_more_variables(cf);
 }
 
 
@@ -511,6 +525,78 @@ ngx_http_memc_variable_not_found(ngx_http_request_t *r,
         ngx_http_variable_value_t *v, uintptr_t data)
 {
     v->not_found = 1;
+    return NGX_OK;
+}
+
+
+static ngx_int_t
+ngx_http_memc_add_more_variables(ngx_conf_t *cf) {
+    ngx_http_variable_t *var, *v;
+    for (v = ngx_http_memc_variables; v->name.len; v++) {
+        var = ngx_http_add_variable(cf, &v->name, v->flags);
+        if (var == NULL) {
+            return NGX_ERROR;
+        }
+        var->get_handler = v->get_handler;
+        var->data = v->data;
+    }
+    return NGX_OK;
+}
+
+
+static ngx_int_t
+ngx_http_memc_flags_as_http_time_variable(
+        ngx_http_request_t *r, ngx_http_variable_value_t *v,
+        uintptr_t data)
+{
+    u_char                      *p;
+    size_t                       len;
+    time_t                       flags_time = 0;
+    ngx_http_memc_ctx_t         *ctx;
+
+    ngx_http_variable_value_t   *flags_vv;
+
+    ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
+
+    flags_vv = ctx->memc_flags_vv;
+    if (flags_vv == NULL) {
+        goto not_found;
+    }
+
+    if (flags_vv->not_found || flags_vv->len == 0) {
+        goto not_found;
+    }
+
+    flags_time = ngx_atotm(flags_vv->data, flags_vv->len);
+    if (flags_time == NGX_ERROR) {
+        return NGX_ERROR;
+    }
+
+    len = sizeof("Mon, 28 Sep 1970 06:00:00 GMT") - 1;
+
+    p = ngx_pnalloc(r->pool, len);
+    if (p == NULL) {
+        return NGX_ERROR;
+    }
+
+    ngx_http_time(p, flags_time);
+
+    v->len = len;
+    v->data = p;
+
+    v->valid = 1;
+    v->not_found = 0;
+    v->no_cacheable = 0;
+
+    return NGX_OK;
+
+not_found:
+
+    v->len = 0;
+    v->data = NULL;
+    v->valid = 1;
+    v->not_found = 1;
+
     return NGX_OK;
 }
 

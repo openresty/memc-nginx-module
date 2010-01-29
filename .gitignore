@@ -29,3 +29,14 @@ genmobi.sh
 *.mobi
 misc/chunked
 reindex
+src/response.c
+src/handler.h
+src/util.c
+src/module.c
+src/handler.c
+src/response.rl
+src/response.h
+src/module.h
+src/util.h
+src/request.h
+src/request.c

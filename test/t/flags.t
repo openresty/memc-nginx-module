@@ -179,3 +179,35 @@ BAR"
 --- response_body_like: 400 Bad Request
 --- error_code: 400
 
+
+
+=== TEST 1: set flags and get flags in http time
+--- config
+    location /flags {
+        echo 'set foo BAR (flag: 1264680563)';
+        echo_subrequest PUT '/memc?key=foo&flags=1264680563' -b BAR;
+
+        echo 'get foo';
+        echo_subrequest GET '/memc?key=foo';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "flags: $memc_flags $memc_flags_as_http_time";
+
+        set $memc_key $arg_key;
+        set $memc_flags $arg_flags;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+    GET /flags
+--- response_body eval
+"set foo BAR (flag: 1264680563)
+status: 201
+flags: 1264680563 Thu, 28 Jan 2010 12:09:23 GMT
+STORED\r
+get foo
+status: 200
+flags: 1264680563 Thu, 28 Jan 2010 12:09:23 GMT
+BAR"
+
