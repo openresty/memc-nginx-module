@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.05
+    This document describes memc-nginx-module v0.06
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
-    Dec 24, 2009.
+    Jan 29, 2010.
 
 Synopsis
         # GET /foo?key=dog
@@ -77,6 +77,16 @@ Synopsis
         }
       }
       ...
+
+        # read the memcached flags into the Last-Modified header
+        # to respond 304 to conditional GET
+        location /memc {
+            set $memc_key $arg_key;
+
+            memc_pass 127.0.0.1:11984;
+
+            memc_flags_to_last_modified on;
+        }
 
 Description
     This module extends the standard memcached module to support almost the
@@ -343,8 +353,16 @@ Directives
            memc_cmds_allowed get;
        }
 
-    Then "/foo?cmd=set&key=foo&val=bar" and "/foo?cmd=flush_all" will both
-    fail and yield "403 Forbidden".
+  memc_flags_to_last_modified
+    syntax: *memc_flags_to_last_modified on|off*
+
+    default: *off*
+
+    context: *http, server, location, if*
+
+    Read the memcached flags as epoch seconds and set it as the value of the
+    "Last-Modified" header. For conditional GET, it will signal nginx to
+    return "304 Not Modified" response to save bandwidth.
 
 Installation
     Grab the nginx source code from nginx.net (<http://nginx.net/>), for
@@ -379,7 +397,7 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested version is 0.8.31)
+    *   0.8.x (last tested version is 0.8.32)
 
     *   0.7.x >= 0.7.46 (last tested version is 0.7.64)
 
@@ -409,6 +427,11 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.06
+    *   implemented the memc_flags_to_last_modified directive.
+
+    *   added a new variable named $memc_flags_as_http_time.
+
   v0.05
     *   removed the "memc_bind" directive since it won't compile with nginx
         0.8.31.

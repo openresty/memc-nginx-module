@@ -342,6 +342,7 @@ ngx_http_memc_get_cmd_filter(void *data, ssize_t bytes)
 ngx_int_t
 ngx_http_memc_process_get_cmd_header(ngx_http_request_t *r)
 {
+    ngx_http_memc_loc_conf_t        *conf;
     u_char                          *p, *len;
     ngx_str_t                        line;
     ngx_http_upstream_t             *u;
@@ -412,6 +413,13 @@ found:
         while (*p) {
             if (*p++ == ' ') {
                 flags_vv->len = p - 1 - flags_vv->data;
+                conf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
+
+                if (conf->flags_to_last_modified) {
+                    r->headers_out.last_modified_time = ngx_atotm(flags_vv->data,
+                            flags_vv->len);
+                }
+
                 goto length;
             }
         }

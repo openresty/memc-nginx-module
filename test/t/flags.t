@@ -3,9 +3,10 @@
 use lib 'lib';
 use Test::Nginx::LWP;
 
-plan tests => repeat_each() * 2 * blocks();
+plan tests => repeat_each() * 2 * blocks() + 4;
 
 #no_diff;
+no_shuffle;
 
 run_tests();
 
@@ -181,7 +182,7 @@ BAR"
 
 
 
-=== TEST 1: set flags and get flags in http time
+=== TEST 7: set flags and get flags in http time
 --- config
     location /flags {
         echo 'set foo BAR (flag: 1264680563)';
@@ -210,4 +211,46 @@ get foo
 status: 200
 flags: 1264680563 Thu, 28 Jan 2010 12:09:23 GMT
 BAR"
+
+
+
+=== TEST 8: last-modified (conditional GET)
+--- config
+    location /memc {
+        set $memc_key $arg_key;
+
+        memc_pass 127.0.0.1:11984;
+
+        memc_flags_to_last_modified on;
+        add_header X-Flags $memc_flags;
+    }
+--- request
+    GET /memc?key=foo
+--- request_headers
+If-Modified-Since: Thu, 28 Jan 2010 12:09:23 GMT
+--- response_headers
+Last-Modified: Thu, 28 Jan 2010 12:09:23 GMT
+X-Flags: 1264680563
+--- error_code: 304
+--- response_body:
+
+
+
+=== TEST 9: last-modified (unconditional GET)
+--- config
+    location /memc {
+        set $memc_key $arg_key;
+
+        memc_pass 127.0.0.1:11984;
+
+        memc_flags_to_last_modified on;
+        add_header X-Flags $memc_flags;
+    }
+--- request
+    GET /memc?key=foo
+--- response_headers
+Last-Modified: Thu, 28 Jan 2010 12:09:23 GMT
+X-Flags: 1264680563
+--- error_code: 200
+--- response_body: BAR
 

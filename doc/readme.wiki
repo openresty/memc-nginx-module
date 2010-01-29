@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.05] released on Dec 24, 2009.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.06] released on Jan 29, 2010.
 
 = Synopsis =
 
@@ -83,6 +83,18 @@ This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-
     }
   }
   ...
+</geshi>
+
+<geshi lang="nginx">
+    # read the memcached flags into the Last-Modified header
+    # to respond 304 to conditional GET
+    location /memc {
+        set $memc_key $arg_key;
+
+        memc_pass 127.0.0.1:11984;
+
+        memc_flags_to_last_modified on;
+    }
 </geshi>
 
 = Description =
@@ -339,7 +351,14 @@ An example is
    }
 </geshi>
 
-Then <code>/foo?cmd=set&key=foo&val=bar</code> and <code>/foo?cmd=flush_all</code> will both fail and yield <code>403 Forbidden</code>.
+== memc_flags_to_last_modified ==
+'''syntax:''' ''memc_flags_to_last_modified on|off''
+
+'''default:''' ''off''
+
+'''context:''' ''http, server, location, if''
+
+Read the memcached flags as epoch seconds and set it as the value of the <code>Last-Modified</code> header. For conditional GET, it will signal nginx to return <code>304 Not Modified</code> response to save bandwidth.
 
 = Installation =
 
@@ -374,7 +393,7 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.31)
+* '''0.8.x'''                       (last tested version is 0.8.32)
 * '''0.7.x >= 0.7.46'''             (last tested version is 0.7.64)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
@@ -396,8 +415,12 @@ Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc
 
 = ChangeLog =
 
+== v0.06 ==
+* implemented the [[#memc_flags_to_last_modified|memc_flags_to_last_modified]] directive.
+* added a new variable named [[#$memc_flags_as_http_time|$memc_flags_as_http_time]].
+
 == v0.05 ==
-* removed the "memc_bind" directive since it won't compile with nginx 0.8.31.
+* removed the <code>memc_bind</code> directive since it won't compile with nginx 0.8.31.
 
 == v0.04 ==
 * to ensure Maxim's [http://mdounin.ru/hg/ngx_http_upstream_keepalive/ ngx_http_upstream_keepalive] module caches our connections even if <code>u->headers_in->status</code> is 201 (Created).
