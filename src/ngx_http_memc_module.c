@@ -250,23 +250,14 @@ ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_http_memc_loc_conf_t *mlcf = conf;
 
     ngx_str_t                 *value;
-    ngx_url_t                  u;
+    ngx_url_t                  url;
     ngx_http_core_loc_conf_t  *clcf;
+    ngx_uint_t                 n;
+
+    ngx_http_compile_complex_value_t         ccv;
 
     if (mlcf->upstream.upstream) {
         return "is duplicate";
-    }
-
-    value = cf->args->elts;
-
-    ngx_memzero(&u, sizeof(ngx_url_t));
-
-    u.url = value[1];
-    u.no_resolve = 1;
-
-    mlcf->upstream.upstream = ngx_http_upstream_add(cf, &u, 0);
-    if (mlcf->upstream.upstream == NULL) {
-        return NGX_CONF_ERROR;
     }
 
     clcf = ngx_http_conf_get_module_loc_conf(cf, ngx_http_core_module);
@@ -278,6 +269,40 @@ ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     ngx_http_memc_set_module_enabled();
+
+    value = cf->args->elts;
+
+    n = ngx_http_script_variables_count(&value[1]);
+    if (n) {
+        mlcf->complex_target = ngx_palloc(cf->pool,
+                sizeof(ngx_http_complex_value_t));
+        if (mlcf->complex_target == NULL) {
+            return NGX_CONF_ERROR;
+        }
+
+        ngx_memzero(&ccv, sizeof(ngx_http_compile_complex_value_t));
+        ccv.cf = cf;
+        ccv.value = &value[1];
+        ccv.complex_value = mlcf->complex_target;
+
+        if (ngx_http_compile_complex_value(&ccv) != NGX_OK) {
+            return NGX_CONF_ERROR;
+        }
+
+        return NGX_CONF_OK;
+    }
+
+    mlcf->complex_target = NULL;
+
+    ngx_memzero(&url, sizeof(ngx_url_t));
+
+    url.url = value[1];
+    url.no_resolve = 1;
+
+    mlcf->upstream.upstream = ngx_http_upstream_add(cf, &url, 0);
+    if (mlcf->upstream.upstream == NULL) {
+        return NGX_CONF_ERROR;
+    }
 
     return NGX_CONF_OK;
 }

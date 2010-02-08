@@ -52,3 +52,20 @@ __DATA__
 --- error_code: 201
 --- SKIP
 
+
+
+=== TEST 3: sanity with dynamic backend
+--- http_config
+    upstream backend {
+      server 127.0.0.1:11984;
+    }
+
+--- config
+    location /stats {
+        set $memc_cmd stats;
+        memc_pass $arg_target;
+    }
+--- request
+    GET /stats?target=backend
+--- response_body_like: ^(?:STAT [^\r]*\r\n)*END\r\n$
+

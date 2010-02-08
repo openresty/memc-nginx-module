@@ -34,9 +34,11 @@ typedef enum {
 } ngx_http_memc_cmd_t;
 
 typedef struct {
-    ngx_flag_t                 flags_to_last_modified;
-    ngx_http_upstream_conf_t   upstream;
-    ngx_array_t               *cmds_allowed;
+    ngx_flag_t                       flags_to_last_modified;
+    ngx_http_upstream_conf_t         upstream;
+    ngx_array_t                     *cmds_allowed;
+    ngx_http_complex_value_t        *complex_target;
+
 } ngx_http_memc_loc_conf_t;
 
 typedef struct {

@@ -60,6 +60,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_http_upstream_t            *u;
     ngx_http_memc_ctx_t            *ctx;
     ngx_http_memc_loc_conf_t       *mlcf;
+    ngx_str_t                       target;
+    ngx_url_t                       url;
     /* ngx_int_t                       index; */
 
     ngx_http_variable_value_t      *cmd_vv;
@@ -170,6 +172,33 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     r->upstream = u;
 
 #endif
+
+    if (mlcf->complex_target) {
+        /* variables used in the memc_pass directive */
+        if (ngx_http_complex_value(r, mlcf->complex_target, &target)
+                != NGX_OK)
+        {
+            dd("failed to compile");
+            return NGX_ERROR;
+        }
+
+        if (target.len == 0) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                    "memc: handler: empty \"memc_pass\" target");
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        url.host = target;
+        url.port = 0;
+        url.no_resolve = 1;
+
+        mlcf->upstream.upstream = ngx_http_memc_upstream_add(r, &url);
+
+        if (mlcf->upstream.upstream == NULL) {
+            dd("memc: upstream \"%.*s\" not found", target.len, target.data);
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+    }
 
     u->schema.len = sizeof("memcached://") - 1;
     u->schema.data = (u_char *) "memcached://";
