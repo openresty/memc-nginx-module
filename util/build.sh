@@ -21,7 +21,7 @@ if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$
     ./configure --prefix=/opt/nginx \
           --add-module=$root/../echo-nginx-module \
           --add-module=$root $opts \
-          --add-module=/home/agentz/work/nginx_eval_module-1.0.1 \
+          --add-module=$root/../eval-nginx-module \
           --add-module=$home/work/nginx/ngx_http_upstream_keepalive-2ce9d8a1ca93 \
           --with-debug
           #--add-module=$home/work/nginx/nginx_upstream_hash-0.3 \
