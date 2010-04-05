@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.06
+    This document describes memc-nginx-module v0.07
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
-    Jan 29, 2010.
+    April 5, 2010.
 
 Synopsis
         # GET /foo?key=dog
@@ -397,9 +397,9 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested version is 0.8.32)
+    *   0.8.x (last tested version is 0.8.35)
 
-    *   0.7.x >= 0.7.46 (last tested version is 0.7.64)
+    *   0.7.x >= 0.7.46 (last tested version is 0.7.65)
 
     It's worth mentioning that some 0.7.x versions older than 0.7.46 might
     also work, but I can't easily test them because the test suite makes
@@ -427,6 +427,11 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.07
+    *   applied the patch from nginx 0.8.35 that fixed a bug that ngx_eval
+        may issue the incorrect error message "memcached sent invalid
+        trailer".
+
   v0.06
     *   implemented the memc_flags_to_last_modified directive.
 

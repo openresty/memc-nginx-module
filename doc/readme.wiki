@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.06] released on Jan 29, 2010.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.07] released on April 5, 2010.
 
 = Synopsis =
 
@@ -393,8 +393,8 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.32)
-* '''0.7.x >= 0.7.46'''             (last tested version is 0.7.64)
+* '''0.8.x'''                       (last tested version is 0.8.35)
+* '''0.7.x >= 0.7.46'''             (last tested version is 0.7.65)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
 
@@ -414,6 +414,9 @@ Although a lot of effort has been put into testing and code tuning, there must b
 Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc-nginx-module].
 
 = ChangeLog =
+
+== v0.07 ==
+* applied the patch from nginx 0.8.35 that fixed a bug that ngx_eval may issue the incorrect error message "memcached sent invalid trailer".
 
 == v0.06 ==
 * implemented the [[#memc_flags_to_last_modified|memc_flags_to_last_modified]] directive.
