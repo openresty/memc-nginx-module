@@ -237,7 +237,8 @@ exptime:
 19"
 
 
-=== TEST 7: incr an non-existent key (with fallback)
+
+=== TEST 9: incr an non-existent key (with fallback)
 --- config
     location /main {
         echo 'flush all';
