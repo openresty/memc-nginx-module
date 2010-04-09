@@ -40,3 +40,6 @@ src/module.h
 src/util.h
 src/request.h
 src/request.c
+ctags
+nginx
+t
