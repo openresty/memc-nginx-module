@@ -13,6 +13,7 @@ use HTTP::Response;
 use Module::Install::Can;
 use Cwd qw( cwd );
 use List::Util qw( shuffle );
+use Time::HiRes qw( sleep );
 
 our $NoNginxManager = 0;
 our $Profiling = 0;
@@ -43,6 +44,7 @@ our $MasterProcessEnabled   = 'off';
 our $DaemonEnabled          = 'on';
 our $ServerPort             = 1984;
 our $ServerPortForClient    = 1984;
+our $NoRootLocation = 0;
 #our $ServerPortForClient    = 1984;
 
 
@@ -60,6 +62,10 @@ sub worker_connections (@) {
     } else {
         return $WorkerConnections;
     }
+}
+
+sub no_root_location () {
+    $NoRootLocation = 1;
 }
 
 sub workers (@) {
@@ -117,6 +123,7 @@ our @EXPORT_OK = qw(
     master_process_enabled
     log_level
     no_shuffle
+    no_root_location
 );
 
 
@@ -220,11 +227,11 @@ http {
     default_type text/plain;
     keepalive_timeout  68;
 
-    $http_config
+$http_config
 
     server {
         listen          $ServerPort;
-        server_name     localhost;
+        #server_name     "_";
 
         client_max_body_size 30M;
         #client_body_buffer_size 4k;
@@ -237,10 +244,18 @@ $ConfigPreamble
 $config
         # End test case config.
 
+_EOC_
+
+    if (! $NoRootLocation) {
+        print $out <<_EOC_;
         location / {
             root $HtmlDir;
             index index.html index.htm;
         }
+_EOC_
+    }
+
+    print $out <<_EOC_;
     }
 }
 
@@ -444,6 +459,13 @@ start_nginx:
             }
 
             sleep 0.1;
+        }
+    }
+
+    if ($block->init) {
+        eval $block->init;
+        if ($@) {
+            Test::More::BAIL_OUT("$name - init failed: $@");
         }
     }
 

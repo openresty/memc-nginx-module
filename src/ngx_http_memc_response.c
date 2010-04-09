@@ -107,7 +107,8 @@ static u_char * parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
 
 
 static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
-        ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp);
+        ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx,
+        ngx_uint_t status, ngx_str_t *resp);
 
 ngx_int_t
 ngx_http_memc_process_simple_header(ngx_http_request_t *r)
@@ -298,7 +299,7 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     if (done || cs >= final_state) {
         dd("memcached response parsed (resp.len: %d)", resp.len);
 
-        rc = ngx_http_memc_write_simple_response(r, u, status, &resp);
+        rc = ngx_http_memc_write_simple_response(r, u, ctx, status, &resp);
 
         return rc;
     }
@@ -345,6 +346,13 @@ ngx_http_memc_empty_filter_init(void *data)
 ngx_int_t
 ngx_http_memc_empty_filter(void *data, ssize_t bytes)
 {
+    ngx_http_memc_ctx_t  *ctx = data;
+    ngx_http_upstream_t  *u;
+
+    u = ctx->request->upstream;
+
+    u->buffer.last += ctx->body_length;
+
     return NGX_OK;
 }
 
@@ -575,9 +583,11 @@ no_valid:
     return NGX_HTTP_UPSTREAM_INVALID_HEADER;
 }
 
+
 static ngx_int_t
 ngx_http_memc_write_simple_response(ngx_http_request_t *r,
-        ngx_http_upstream_t *u, ngx_uint_t status, ngx_str_t *resp)
+        ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx,
+        ngx_uint_t status, ngx_str_t *resp)
 {
     ngx_chain_t             *cl, **ll;
 
@@ -600,6 +610,12 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
     cl->buf->last = cl->buf->pos + resp->len;
 
     *ll = cl;
+
+    u->buffer.pos = resp->data;
+    u->buffer.last = resp->data + resp->len;
+    ctx->body_length = resp->len;
+
+    fprintf(stderr, "YYY buffer: %.*s", (int) resp->len, resp->data);
 
     return NGX_OK;
 }

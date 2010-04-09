@@ -57,6 +57,7 @@ typedef struct {
     ngx_flag_t                 is_storage_cmd;
 
     int                        parser_state;
+    size_t                     body_length;
 } ngx_http_memc_ctx_t;
 
 extern ngx_module_t  ngx_http_memc_module;

@@ -212,6 +212,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
+    ctx->body_length = 0;
     ctx->memc_key_vv = key_vv;
     ctx->memc_value_vv = NULL;
     ctx->memc_flags_vv = NULL;
