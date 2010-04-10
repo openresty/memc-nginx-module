@@ -248,6 +248,7 @@ ngx_http_memc_empty_filter(void *data, ssize_t bytes)
 
     u = ctx->request->upstream;
 
+    /* recover the buffer for subrequests in memory */
     u->buffer.last += ctx->body_length;
 
     return NGX_OK;
@@ -506,11 +507,12 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
     cl->buf->pos = resp->data;
     cl->buf->last = cl->buf->pos + resp->len;
 
+    *ll = cl;
+
+    /* for subrequests in memory */
     u->buffer.pos = resp->data;
     u->buffer.last = resp->data + resp->len;
     ctx->body_length = resp->len;
-
-    *ll = cl;
 
     return NGX_OK;
 }
