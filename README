@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.07
+    This document describes memc-nginx-module v0.08
     (<http://github.com/agentzh/memc-nginx-module/downloads>) released on
-    April 5, 2010.
+    April 10, 2010.
 
 Synopsis
         # GET /foo?key=dog
@@ -427,6 +427,11 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module>).
 
 ChangeLog
+  v0.08
+    *   now the memc commands other than get work with subrequests in
+        memory. Thanks Yao Xinming for reporting it. Using storage memcached
+        commands in ngx_eval module's eval blocks no longer hang the server.
+
   v0.07
     *   applied the patch from nginx 0.8.35 that fixed a bug that ngx_eval
         may issue the incorrect error message "memcached sent invalid
