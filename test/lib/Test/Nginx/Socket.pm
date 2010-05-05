@@ -13,6 +13,7 @@ use Test::LongString;
 use List::MoreUtils qw( any );
 use IO::Select ();
 
+our $ServerAddr = '127.0.0.1';
 our $Timeout = 2;
 
 use Test::Nginx::Util qw(
@@ -55,7 +56,9 @@ our @EXPORT = qw( plan run_tests run_test
     repeat_each config_preamble worker_connections
     master_process_enabled
     no_long_string workers master_on
-    log_level no_shuffle no_root_location);
+    log_level no_shuffle no_root_location
+    server_addr
+);
 
 sub send_request ($$$);
 
@@ -67,6 +70,15 @@ sub write_event_handler ($);
 
 sub no_long_string () {
     $NoLongString = 1;
+}
+
+sub server_addr (@) {
+    if (@_) {
+        #warn "setting server addr to $_[0]\n";
+        $ServerAddr = shift;
+    } else {
+        return $ServerAddr;
+    }
 }
 
 $RunTestHelper = \&run_test_helper;
@@ -330,7 +342,7 @@ sub send_request ($$$) {
     my @req_bits = ref $req ? @$req : ($req);
 
     my $sock = IO::Socket::INET->new(
-        PeerAddr => 'localhost',
+        PeerAddr => $ServerAddr,
         PeerPort => $ServerPortForClient,
         Proto    => 'tcp'
     ) or die "Can't connect to localhost:$ServerPortForClient: $!\n";
@@ -355,7 +367,9 @@ sub send_request ($$$) {
     my $writable_hdls = IO::Select->new($sock);
     my $err_hdls = IO::Select->new($sock);
 
+    my $i = 0;
     while (1) {
+        #warn "re-dispatch...";
         if ($readable_hdls->count == 0 && $writable_hdls->count == 0 && $err_hdls->count == 0) {
             last;
         }
@@ -371,6 +385,10 @@ sub send_request ($$$) {
             timeout_event_handler($ctx);
             last;
         }
+
+        #warn $i++, ": e ", scalar(@$new_err), ", ",
+        #"w ", scalar(@$new_writable), ", ",
+        #"r ", scalar(@$new_readable), "\n";
 
         for my $hdl (@$new_err) {
             next if !defined $hdl;
@@ -485,7 +503,7 @@ sub write_event_handler ($) {
         return undef if !defined $ctx->{write_buf};
 
         my $rest = length($ctx->{write_buf}) - $ctx->{write_offset};
-        #warn "offset: $write_offset, rest: $rest, length ", length($write_buf), "\n";
+        #warn "offset: $ctx->{write_offset}, rest: $rest, length ", length($ctx->{write_buf}), "\n";
         #die;
 
         if ($rest > 0) {
@@ -508,6 +526,7 @@ sub write_event_handler ($) {
             #warn "wrote $bytes bytes.\n";
             $ctx->{write_offset} += $bytes;
         } else {
+            #warn "rest: $rest\n";
             $ctx->{write_buf} = shift @{$ctx->{req_bits}} or return 2;
             $ctx->{write_offset} = 0;
             if (defined $ctx->{middle_delay}) {
