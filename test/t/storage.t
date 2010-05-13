@@ -51,7 +51,7 @@ __DATA__
 STORED\r
 get foo
 blah"
-
+--- ONLY
 
 
 === TEST 3: set UTF-8 and get UTF-8
