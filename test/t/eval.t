@@ -3,6 +3,8 @@
 use lib 'lib';
 use Test::Nginx::Socket; # skip_all => 'ngx_memc storage commands do not work with the ngx_eval module';
 
+repeat_each(2);
+
 plan tests => repeat_each() * 2 * blocks();
 
 no_long_string();
@@ -77,4 +79,38 @@ __DATA__
 [STORED]
 --- timeout: 30
 --- error_code: 200
+
+
+
+=== TEST 3: set in eval (subrequest in memory)
+--- http_config
+   upstream mc {
+        server localhost:11984;
+   }
+
+--- config
+    location = /main {
+        echo_location /get;
+        echo_location /del?foo;
+    }
+    location = /get {
+        set $memc_cmd get;
+        set $memc_key foo;
+        memc_pass mc;
+    }
+    location = /del {
+       eval $res {
+           set $memc_cmd delete;
+           set $memc_key $query_string;
+           memc_pass mc;
+       }
+       return 200;
+   }
+--- request
+    GET /main
+--- response_body
+[STORED]
+--- timeout: 30
+--- error_code: 200
+--- SKIP
 

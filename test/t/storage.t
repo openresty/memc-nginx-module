@@ -51,7 +51,7 @@ __DATA__
 STORED\r
 get foo
 blah"
---- ONLY
+
 
 
 === TEST 3: set UTF-8 and get UTF-8
@@ -612,13 +612,14 @@ status: 404.*?404 Not Found.*$
     }
 --- request eval
 "POST /big\n" .
- 'a' x (1024 * 90) . 'efg'
+ 'a' x (1024 * 1) . 'efg'
 
 --- response_body eval
 "set big
 STORED\r
 get big
-" . 'a' x (1024 * 90) . 'efg'
+" . 'a' x (1024 * 1) . 'efg'
+--- timeout: 5
 
 
 
