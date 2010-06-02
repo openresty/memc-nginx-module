@@ -7,13 +7,14 @@ use Test::Base -Base;
 
 our $VERSION = '0.08';
 
+use Encode;
 use Data::Dumper;
 use Time::HiRes qw(sleep time);
 use Test::LongString;
 use List::MoreUtils qw( any );
 use IO::Select ();
 
-our $ServerAddr = '127.0.0.1';
+our $ServerAddr = 'localhost';
 our $Timeout = 2;
 
 use Test::Nginx::Util qw(
@@ -60,7 +61,7 @@ our @EXPORT = qw( plan run_tests run_test
     server_addr
 );
 
-sub send_request ($$$);
+sub send_request ($$$$);
 
 sub run_test_helper ($);
 
@@ -213,7 +214,7 @@ $parsed_req->{content}";
     }
 
     my $raw_resp = send_request($req, $block->raw_request_middle_delay,
-        $timeout);
+        $timeout, $block->name);
 
     #warn "raw resonse: [$raw_resp]\n";
 
@@ -257,7 +258,7 @@ $parsed_req->{content}";
                 fail "$name - invalid chunked body received: $&";
                 return;
             } else {
-                fail "$name - no last chunk found";
+                fail "$name - no last chunk found - $raw";
                 return;
             }
         }
@@ -311,6 +312,10 @@ $parsed_req->{content}";
             $expected = $block->response_body;
         }
 
+        if ($block->charset) {
+            Encode::from_to($expected, 'UTF-8', $block->charset);
+        }
+
         $expected =~ s/\$ServerPort\b/$ServerPort/g;
         $expected =~ s/\$ServerPortForClient\b/$ServerPortForClient/g;
         #warn show_all_chars($content);
@@ -336,8 +341,8 @@ $parsed_req->{content}";
     }
 }
 
-sub send_request ($$$) {
-    my ($req, $middle_delay, $timeout) = @_;
+sub send_request ($$$$) {
+    my ($req, $middle_delay, $timeout, $name) = @_;
 
     my @req_bits = ref $req ? @$req : ($req);
 
@@ -345,7 +350,8 @@ sub send_request ($$$) {
         PeerAddr => $ServerAddr,
         PeerPort => $ServerPortForClient,
         Proto    => 'tcp'
-    ) or die "Can't connect to localhost:$ServerPortForClient: $!\n";
+    ) or
+        die "Can't connect to $ServerAddr:$ServerPortForClient: $!\n";
 
     my $flags = fcntl $sock, F_GETFL, 0
         or die "Failed to get flags: $!\n";
@@ -361,15 +367,14 @@ sub send_request ($$$) {
         write_buf => shift @req_bits,
         middle_delay => $middle_delay,
         sock => $sock,
+        name => $name,
     };
 
     my $readable_hdls = IO::Select->new($sock);
     my $writable_hdls = IO::Select->new($sock);
     my $err_hdls = IO::Select->new($sock);
 
-    my $i = 0;
     while (1) {
-        #warn "re-dispatch...";
         if ($readable_hdls->count == 0 && $writable_hdls->count == 0 && $err_hdls->count == 0) {
             last;
         }
@@ -385,10 +390,6 @@ sub send_request ($$$) {
             timeout_event_handler($ctx);
             last;
         }
-
-        #warn $i++, ": e ", scalar(@$new_err), ", ",
-        #"w ", scalar(@$new_writable), ", ",
-        #"r ", scalar(@$new_readable), "\n";
 
         for my $hdl (@$new_err) {
             next if !defined $hdl;
@@ -489,7 +490,8 @@ sub send_request ($$$) {
 }
 
 sub timeout_event_handler ($) {
-    warn "socket client: timed out";
+    my $ctx = shift;
+    warn "ERROR: socket client: timed out - $ctx->{name}\n";
 }
 
 sub error_event_handler ($) {
@@ -503,7 +505,7 @@ sub write_event_handler ($) {
         return undef if !defined $ctx->{write_buf};
 
         my $rest = length($ctx->{write_buf}) - $ctx->{write_offset};
-        #warn "offset: $ctx->{write_offset}, rest: $rest, length ", length($ctx->{write_buf}), "\n";
+        #warn "offset: $write_offset, rest: $rest, length ", length($write_buf), "\n";
         #die;
 
         if ($rest > 0) {
@@ -526,7 +528,6 @@ sub write_event_handler ($) {
             #warn "wrote $bytes bytes.\n";
             $ctx->{write_offset} += $bytes;
         } else {
-            #warn "rest: $rest\n";
             $ctx->{write_buf} = shift @{$ctx->{req_bits}} or return 2;
             $ctx->{write_offset} = 0;
             if (defined $ctx->{middle_delay}) {
