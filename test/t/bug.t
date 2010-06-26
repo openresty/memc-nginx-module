@@ -6,6 +6,7 @@ use Test::Nginx::Socket;
 plan tests => repeat_each() * 2 * blocks();
 
 #no_diff;
+no_long_string();
 
 run_tests();
 
@@ -73,4 +74,60 @@ GET /main
 ~~
 STORED\r
 "
+
+
+=== TEST 19: reuse request body
+--- config
+    location /main {
+        echo_read_request_body;
+
+        echo 'flush_all';
+        echo_location '/memc?cmd=flush_all';
+
+        echo 'set foo';
+        echo_subrequest POST '/memc?key=foo&cmd=set';
+
+        echo 'set bar';
+        echo_subrequest POST '/memc?key=bar&cmd=set';
+
+        echo 'get bar';
+        echo_location '/memc?key=bar&cmd=get';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        echo_before_body "status: $echo_response_status";
+        echo_before_body "exptime: $memc_exptime";
+
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        #set $memc_value $arg_val;
+        set $memc_exptime $arg_exptime;
+
+        memc_pass 127.0.0.1:11984;
+    }
+--- request
+POST /main
+Hello
+--- response_body eval
+"flush_all
+status: 200
+exptime: 
+OK\r
+set foo
+status: 201
+exptime: 0
+STORED\r
+set bar
+status: 201
+exptime: 0
+STORED\r
+get bar
+status: 200
+exptime: 
+Helloget foo
+status: 200
+exptime: 
+Hello"
 

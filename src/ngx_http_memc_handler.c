@@ -369,7 +369,6 @@ ngx_http_memc_handler(ngx_http_request_t *r)
                  &r->method_name, &ctx->cmd_str);
 
                 return NGX_HTTP_BAD_REQUEST;
-
             }
 
             rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);

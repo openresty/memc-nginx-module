@@ -14,7 +14,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
     size_t                          bytes_len;
     uintptr_t                       escape;
     ngx_buf_t                      *b;
-    ngx_chain_t                    *cl;
+    ngx_chain_t                    *cl, *in;
     ngx_chain_t                   **ll;
     ngx_http_memc_ctx_t            *ctx;
 
@@ -200,14 +200,32 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
         *ll = cl;
         ll = &cl->next;
     } else {
-        *ll = r->request_body->bufs;
-        for (cl = *ll; cl; cl = cl->next) {
+        /* to preserve the r->request_body->bufs untouched */
+
+        in = r->request_body->bufs;
+
+        while (in) {
+            cl = ngx_alloc_chain_link(r->pool);
+            if (cl == NULL) {
+                return NGX_ERROR;
+            }
+
+            cl->buf = ngx_calloc_buf(r->pool);
+            if (cl->buf == NULL) {
+                return NGX_ERROR;
+            }
+
+            cl->buf->memory = 1;
+            cl->buf->pos = in->buf->pos;
+            cl->buf->last = in->buf->last;
+
+            *ll = cl;
             ll = &cl->next;
+            in = in->next;
         }
     }
 
     /* append the trailing CRLF */
-
 
     b = ngx_calloc_buf(r->pool);
 
