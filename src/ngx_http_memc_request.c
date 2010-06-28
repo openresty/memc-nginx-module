@@ -216,8 +216,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
             }
 
             cl->buf->memory = 1;
-            cl->buf->pos = in->buf->pos;
-            cl->buf->last = in->buf->last;
+            *cl->buf = *in->buf;
 
             *ll = cl;
             ll = &cl->next;
