@@ -5,6 +5,8 @@ use Test::Nginx::LWP;
 
 plan tests => repeat_each() * 2 * blocks() + 4;
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 no_shuffle;
 
@@ -28,7 +30,7 @@ __DATA__
         set $memc_key $arg_key;
         set $memc_flags $arg_flags;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flags
@@ -61,7 +63,7 @@ BAR"
         set $memc_key $arg_key;
         set $memc_flags $arg_flags;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flags
@@ -94,7 +96,7 @@ BAR"
         set $memc_key $arg_key;
         set $memc_flags $arg_flags;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flags
@@ -130,7 +132,7 @@ BAR"
         set $memc_key $arg_key;
         set $memc_flags $arg_flags;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flags
@@ -157,7 +159,7 @@ BAR"
         set $memc_key 'foo';
         set $memc_value 'nice';
         set $memc_flags 'invalid';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -173,7 +175,7 @@ BAR"
         set $memc_key 'sun';
         set $memc_value 'tree';
         set $memc_flags '-1';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -198,7 +200,7 @@ BAR"
         set $memc_key $arg_key;
         set $memc_flags $arg_flags;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flags
@@ -219,7 +221,7 @@ BAR"
     location /memc {
         set $memc_key $arg_key;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
 
         memc_flags_to_last_modified on;
         add_header X-Flags $memc_flags;
@@ -241,7 +243,7 @@ X-Flags: 1264680563
     location /memc {
         set $memc_key $arg_key;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
 
         memc_flags_to_last_modified on;
         add_header X-Flags $memc_flags;

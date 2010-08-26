@@ -5,6 +5,8 @@ use Test::Nginx::LWP;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 
 run_tests();
@@ -43,7 +45,7 @@ __DATA__
         set $memc_key $arg_key;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /exptime
@@ -90,7 +92,7 @@ exptime:
         set $memc_key $arg_key;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flags
@@ -113,7 +115,7 @@ BAR"
         set $memc_key 'foo';
         set $memc_value 'nice';
         set $memc_exptime 'invalid';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -129,7 +131,7 @@ BAR"
         set $memc_key 'foo';
         set $memc_value 'nice';
         set $memc_exptime 'invalid';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -145,7 +147,7 @@ BAR"
         set $memc_key 'foo';
         set $memc_value 'nice';
         set $memc_exptime 'invalid';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -161,7 +163,7 @@ BAR"
         set $memc_key 'sun';
         set $memc_value 'tree';
         set $memc_exptime '-1';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
