@@ -134,3 +134,5 @@ status: 201
 exptime: 0
 STORED\r
 "
+--- SKIP
+
