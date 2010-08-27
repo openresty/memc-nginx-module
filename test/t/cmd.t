@@ -5,6 +5,8 @@ use Test::Nginx::LWP;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 
 run_tests();
@@ -16,7 +18,7 @@ __DATA__
     location /foo {
         set $memc_cmd blah;
         set $memc_key foo;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /foo
@@ -29,7 +31,7 @@ __DATA__
 --- config
     location /foo {
         set $memc_key foo;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     COPY /foo
@@ -43,7 +45,7 @@ __DATA__
     location /foo {
         set $memc_cmd GET;
         set $memc_key foo;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /foo
@@ -58,7 +60,7 @@ __DATA__
         set $memc_cmd version;
         memc_cmds_allowed get version;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -72,7 +74,7 @@ __DATA__
         set $memc_cmd version;
         memc_cmds_allowed version get;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -86,7 +88,7 @@ __DATA__
         set $memc_cmd version;
         memc_cmds_allowed set get add delete;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -101,7 +103,7 @@ __DATA__
         memc_cmds_allowed set add delete version;
 
         set $memcached_key foo;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
@@ -122,7 +124,7 @@ __DATA__
     location /memc {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
 POST /main

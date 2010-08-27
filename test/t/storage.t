@@ -5,6 +5,8 @@ use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_shuffle();
 
 #no_diff;
@@ -19,7 +21,7 @@ __DATA__
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /memc?key=foo&cmd=set&val=blah
@@ -42,7 +44,7 @@ __DATA__
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -67,7 +69,7 @@ blah"
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -95,7 +97,7 @@ get foo
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -128,7 +130,7 @@ get foo
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -164,7 +166,7 @@ added"
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
 POST /main
@@ -205,7 +207,7 @@ hello, world"
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
 GET /main
@@ -249,7 +251,7 @@ BAR
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
 POST /main
@@ -294,7 +296,7 @@ BAR
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
 POST /main
@@ -339,7 +341,7 @@ howdy
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -384,7 +386,7 @@ bah"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -423,7 +425,7 @@ bah"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -461,7 +463,7 @@ status: 404.*?404 Not Found.*$
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -500,7 +502,7 @@ hello,world"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -538,7 +540,7 @@ status: 404.*?404 Not Found.*$
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -577,7 +579,7 @@ world,hello"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -608,7 +610,7 @@ status: 404.*?404 Not Found.*$
     location /memc {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request eval
 "POST /big\n" .
@@ -638,7 +640,7 @@ get big
     location /memc {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request eval
 "POST /big\n" .
@@ -667,7 +669,7 @@ get big
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -693,7 +695,7 @@ NOT_STORED\r
         set $memc_cmd set;
         set $memc_key /foo;
         set $memc_value $data;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
     location /foo {
         echo hello;

@@ -5,6 +5,8 @@ use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 
 run_tests();
@@ -14,8 +16,8 @@ __DATA__
 === TEST 1: sanity
 --- http_config
     upstream backend {
-      server 127.0.0.1:11984;
-      server 127.0.0.1:11984;
+      server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+      server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 
 --- config
@@ -32,7 +34,7 @@ __DATA__
 === TEST 2: sanity
 --- http_config
     upstream backend {
-      server 127.0.0.1:11984;
+      server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
       server 127.0.0.1:11985;
       server 127.0.0.1:11986;
       #keepalive 2 single;
@@ -57,7 +59,7 @@ __DATA__
 === TEST 3: sanity with dynamic backend
 --- http_config
     upstream backend {
-      server 127.0.0.1:11984;
+      server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 
 --- config

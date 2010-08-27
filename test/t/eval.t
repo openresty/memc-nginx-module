@@ -7,6 +7,8 @@ repeat_each(2);
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 no_long_string();
 #no_diff;
 
@@ -17,7 +19,7 @@ __DATA__
 === TEST 1: set in eval (NO subrequest in memory)
 --- http_config
    upstream mc {
-        server localhost:11984;
+        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
    }
 
 --- config
@@ -51,7 +53,7 @@ __DATA__
 === TEST 2: set in eval (subrequest in memory)
 --- http_config
    upstream mc {
-        server localhost:11984;
+        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
    }
 
 --- config
@@ -85,7 +87,7 @@ __DATA__
 === TEST 3: set in eval (subrequest in memory)
 --- http_config
    upstream mc {
-        server localhost:11984;
+        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
    }
 
 --- config

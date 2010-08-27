@@ -5,6 +5,8 @@ use Test::Nginx::LWP;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 
 run_tests();
@@ -15,7 +17,7 @@ __DATA__
 --- config
     location /flush {
         set $memc_cmd flush_all;
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /flush
@@ -44,7 +46,7 @@ __DATA__
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -89,7 +91,7 @@ status: 404.*?404 Not Found.*$
         set $memc_key $arg_key;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /exptime

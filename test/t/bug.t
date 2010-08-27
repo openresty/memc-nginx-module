@@ -5,6 +5,8 @@ use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 no_long_string();
 
@@ -15,7 +17,7 @@ __DATA__
 === TEST 1: set only
 --- http_config
    upstream mc {
-        server agentzh.org:11984;
+        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
    }
 
 --- config
@@ -59,7 +61,7 @@ __DATA__
         set $memc_cmd 'set';
         set $memc_key 'foo';
         set $memc_value 'blah';
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
     location /main {
         default_type 'text/html';
@@ -105,7 +107,7 @@ STORED\r
         #set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
 POST /main

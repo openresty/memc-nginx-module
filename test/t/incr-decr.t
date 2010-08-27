@@ -5,6 +5,8 @@ use Test::Nginx::LWP;
 
 plan tests => repeat_each() * 2 * blocks();
 
+$ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
 #no_diff;
 
 run_tests();
@@ -19,7 +21,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /memc?cmd=incr&key=foo
@@ -36,7 +38,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /memc?cmd=incr&key=foo&val=nice
@@ -53,7 +55,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /memc?cmd=incr&key=foo&val=-5
@@ -70,7 +72,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /memc?cmd=incr&val=2
@@ -102,7 +104,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -143,7 +145,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -181,7 +183,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -218,7 +220,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /main
@@ -257,7 +259,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:11984;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
 
         error_page 404 = /set_and_incr?$query_string;
     }
