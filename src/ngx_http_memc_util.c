@@ -8,12 +8,12 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
 {
     switch (len) {
         case 3:
-            if (ngx_str3cmp(data, 's', 'e', 't')) {
+            if (ngx_http_memc_strcmp_const(data, "set") == 0) {
                 *is_storage_cmd = 1;
                 return ngx_http_memc_cmd_set;
             }
 
-            if (ngx_str3cmp(data, 'a', 'd', 'd')) {
+            if (ngx_http_memc_strcmp_const(data, "add") == 0) {
                 *is_storage_cmd = 1;
                 return ngx_http_memc_cmd_add;
             }
@@ -25,7 +25,7 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
             }
             */
 
-            if (ngx_str3cmp(data, 'g', 'e', 't')) {
+            if (ngx_http_memc_strcmp_const(data, "get") == 0) {
                 return ngx_http_memc_cmd_get;
             }
 
@@ -38,55 +38,54 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
             }
             */
 
-            if (ngx_str4cmp(data, 'i', 'n', 'c', 'r')) {
+            if (ngx_http_memc_strcmp_const(data, "incr") == 0) {
                 return ngx_http_memc_cmd_incr;
             }
 
-            if (ngx_str4cmp(data, 'd', 'e', 'c', 'r')) {
+            if (ngx_http_memc_strcmp_const(data, "decr") == 0) {
                 return ngx_http_memc_cmd_decr;
             }
 
             break;
 
         case 5:
-            if (ngx_str5cmp(data, 's', 't', 'a', 't', 's')) {
+            if (ngx_http_memc_strcmp_const(data, "stats") == 0) {
                 return ngx_http_memc_cmd_stats;
             }
 
             break;
 
         case 6:
-            if (ngx_str6cmp(data, 'a', 'p', 'p', 'e', 'n', 'd')) {
+            if (ngx_http_memc_strcmp_const(data, "append") == 0) {
                 *is_storage_cmd = 1;
                 return ngx_http_memc_cmd_append;
             }
 
-            if (ngx_str6cmp(data, 'd', 'e', 'l', 'e', 't', 'e')) {
+            if (ngx_http_memc_strcmp_const(data, "delete") == 0) {
                 return ngx_http_memc_cmd_delete;
             }
 
             break;
 
         case 7:
-            if (ngx_str7cmp(data, 'r', 'e', 'p', 'l', 'a', 'c', 'e')) {
+            if (ngx_http_memc_strcmp_const(data, "replace") == 0) {
                 *is_storage_cmd = 1;
                 return ngx_http_memc_cmd_replace;
             }
 
-            if (ngx_str7cmp(data, 'p', 'r', 'e', 'p', 'e', 'n', 'd')) {
+            if (ngx_http_memc_strcmp_const(data, "prepend") == 0) {
                 *is_storage_cmd = 1;
                 return ngx_http_memc_cmd_prepend;
             }
 
-            if (ngx_str7cmp(data, 'v', 'e', 'r', 's', 'i', 'o', 'n')) {
+            if (ngx_http_memc_strcmp_const(data, "version") == 0) {
                 return ngx_http_memc_cmd_version;
             }
 
             break;
 
         case 9:
-            if (ngx_str9cmp(data, 'f', 'l', 'u', 's', 'h', '_', 'a', 'l', 'l'))
-            {
+            if (ngx_http_memc_strcmp_const(data, "flush_all") == 0) {
                 return ngx_http_memc_cmd_flush_all;
             }
 
