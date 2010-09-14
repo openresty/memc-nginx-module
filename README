@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.08
-    (<http://github.com/agentzh/memc-nginx-module/downloads >) released on
-    April 10, 2010.
+    This document describes memc-nginx-module v0.10
+    (<http://github.com/agentzh/memc-nginx-module/tarball/v0.10 >) released
+    on September 14, 2010.
 
 Synopsis
         # GET /foo?key=dog
@@ -103,6 +103,11 @@ Description
     This module is not supposed to be merged into the Nginx core because
     I've used Ragel (<http://www.complang.org/ragel/ >) to generate the
     memcached response parsers (in C) for joy :)
+
+    If you are going to use this module to cache location responses out of
+    the box, try my ngx_srcache module with this module to achieve that:
+
+        http://github.com/agentzh/srcache-nginx-module
 
   Keep-alive connections to memcached servers
     You need Maxim Dounin's ngx_upstream_keepalive module
@@ -366,12 +371,12 @@ Directives
 
 Installation
     Grab the nginx source code from nginx.net (<http://nginx.net/ >), for
-    example, the version 0.8.29 (see nginx compatibility), and then build
+    example, the version 0.8.41 (see nginx compatibility), and then build
     the source with this module:
 
-        $ wget 'http://sysoev.ru/nginx/nginx-0.8.29.tar.gz'
-        $ tar -xzvf nginx-0.8.29.tar.gz
-        $ cd nginx-0.8.29/
+        $ wget 'http://sysoev.ru/nginx/nginx-0.8.41.tar.gz'
+        $ tar -xzvf nginx-0.8.41.tar.gz
+        $ cd nginx-0.8.41/
 
         # Here we assume you would install you nginx under /opt/nginx/.
         $ ./configure --prefix=/opt/nginx \
@@ -397,9 +402,9 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested version is 0.8.38)
+    *   0.8.x (last tested version is 0.8.49)
 
-    *   0.7.x >= 0.7.46 (last tested version is 0.7.65)
+    *   0.7.x >= 0.7.46 (last tested version is 0.7.67)
 
     It's worth mentioning that some 0.7.x versions older than 0.7.46 might
     also work, but I can't easily test them because the test suite makes
@@ -427,6 +432,15 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module >).
 
 ChangeLog
+  v0.10
+    *   we no longer use the problematic "ngx_strXcmp" macros in our source
+        because it may cause invalid reads and thus segmentation faults.
+        thanks Piotr Sikora.
+
+  v0.09
+    *   now we copy out "r->request_body->bufs" for our memcached request to
+        avoid modifying the original request body. Thanks Matthieu Tourne.
+
   v0.08
     *   now the memc commands other than get work with subrequests in
         memory. Thanks Yao Xinming for reporting it. Using storage memcached
@@ -561,9 +575,17 @@ See Also
         delete, and many more commands"
         (<http://forum.nginx.org/read.php?2,28359 >)
 
+    *   My slides demonstrating various ngx_memc usage:
+        http://agentzh.org/misc/slides/nginx-conf-scripting/nginx-conf-scrip
+        ting.html#34 (use the arrow or pageup/pagedown keys on the keyboard
+        to swith pages)
+
     *   The latest memcached TCP protocol
         (<http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.t
         xt>).
+
+    *   The ngx_srcache (<http://github.com/agentzh/srcache-nginx-module >)
+        module
 
     *   The standard memcached module.
 

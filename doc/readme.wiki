@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.08] released on April 10, 2010.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/tarball/v0.10 v0.10] released on September 14, 2010.
 
 = Synopsis =
 
@@ -104,6 +104,10 @@ This module extends the standard [[NginxHttpMemcachedModule|memcached module]] t
 It allows you to define a custom [http://en.wikipedia.org/wiki/REST REST] interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [http://github.com/srlindsay/nginx-independent-subrequest independent fake requests].
 
 This module is not supposed to be merged into the Nginx core because I've used [http://www.complang.org/ragel/ Ragel] to generate the memcached response parsers (in C) for joy :)
+
+If you are going to use this module to cache location responses out of the box, try my ngx_srcache module with this module to achieve that:
+
+    http://github.com/agentzh/srcache-nginx-module
 
 == Keep-alive connections to memcached servers ==
 
@@ -363,12 +367,12 @@ Read the memcached flags as epoch seconds and set it as the value of the <code>L
 = Installation =
 
 Grab the nginx source code from [http://nginx.net/ nginx.net], for example,
-the version 0.8.29 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
+the version 0.8.41 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
 
 <geshi lang="bash">
-    $ wget 'http://sysoev.ru/nginx/nginx-0.8.29.tar.gz'
-    $ tar -xzvf nginx-0.8.29.tar.gz
-    $ cd nginx-0.8.29/
+    $ wget 'http://sysoev.ru/nginx/nginx-0.8.41.tar.gz'
+    $ tar -xzvf nginx-0.8.41.tar.gz
+    $ cd nginx-0.8.41/
     
     # Here we assume you would install you nginx under /opt/nginx/.
     $ ./configure --prefix=/opt/nginx \
@@ -393,8 +397,8 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.35)
-* '''0.7.x >= 0.7.46'''             (last tested version is 0.7.65)
+* '''0.8.x'''                       (last tested version is 0.8.49)
+* '''0.7.x >= 0.7.46'''             (last tested version is 0.7.67)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
 
@@ -414,6 +418,12 @@ Although a lot of effort has been put into testing and code tuning, there must b
 Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc-nginx-module].
 
 = ChangeLog =
+
+== v0.10 ==
+* we no longer use the problematic <code>ngx_strXcmp</code> macros in our source because it may cause invalid reads and thus segmentation faults. thanks Piotr Sikora.
+
+== v0.09 ==
+* now we copy out <code>r->request_body->bufs</code> for our memcached request to avoid modifying the original request body. Thanks Matthieu Tourne.
 
 == v0.08 ==
 * now the memc commands other than get work with subrequests in memory. Thanks Yao Xinming for reporting it. Using storage memcached commands in ngx_eval module's eval blocks no longer hang the server.
@@ -511,7 +521,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 = See Also =
 
 * The original announcement email on the nginx mailing list: [http://forum.nginx.org/read.php?2,28359 ngx_memc: "an extended version of ngx_memcached that supports set, add, delete, and many more commands"]
+* My slides demonstrating various ngx_memc usage: http://agentzh.org/misc/slides/nginx-conf-scripting/nginx-conf-scripting.html#34 (use the arrow or pageup/pagedown keys on the keyboard to swith pages)
 * The latest [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
+* The [http://github.com/agentzh/srcache-nginx-module ngx_srcache] module
 * The standard [[NginxHttpMemcachedModule|memcached]] module.
 * The [[NginxHttpEchoModule|echo module]] for Nginx module's automated testing.
 * The standard [[NginxHttpHeadersModule|headers]] module and the 3rd-parth [[NginxHttpHeadersMoreModule|headers-more]] module.
