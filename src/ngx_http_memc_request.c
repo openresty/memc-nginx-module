@@ -177,28 +177,30 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
     *b->last++ = CR; *b->last++ = LF;
 
     if (memc_value_vv) {
-        dd("copy $memc_value to the request");
-        b = ngx_calloc_buf(r->pool);
+        if (memc_value_vv->len) {
+            dd("copy $memc_value to the request");
+            b = ngx_calloc_buf(r->pool);
 
-        if (b == NULL) {
-            return NGX_ERROR;
+            if (b == NULL) {
+                return NGX_ERROR;
+            }
+
+            b->memory = 1;
+
+            b->start = b->pos = memc_value_vv->data;
+            b->last  = b->end = b->start + memc_value_vv->len;
+
+            cl = ngx_alloc_chain_link(r->pool);
+            if (cl == NULL) {
+                return NGX_ERROR;
+            }
+
+            cl->buf = b;
+            cl->next = NULL;
+
+            *ll = cl;
+            ll = &cl->next;
         }
-
-        b->memory = 1;
-
-        b->start = b->pos = memc_value_vv->data;
-        b->last  = b->end = b->start + memc_value_vv->len;
-
-        cl = ngx_alloc_chain_link(r->pool);
-        if (cl == NULL) {
-            return NGX_ERROR;
-        }
-
-        cl->buf = b;
-        cl->next = NULL;
-
-        *ll = cl;
-        ll = &cl->next;
     } else {
         /* to preserve the r->request_body->bufs untouched */
 
