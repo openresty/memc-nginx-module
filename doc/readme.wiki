@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/tarball/v0.10 v0.10] released on September 14, 2010.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/tarball/v0.11 v0.11] released on Oct 28, 2010.
 
 = Synopsis =
 
@@ -364,6 +364,47 @@ An example is
 
 Read the memcached flags as epoch seconds and set it as the value of the <code>Last-Modified</code> header. For conditional GET, it will signal nginx to return <code>304 Not Modified</code> response to save bandwidth.
 
+== memc_connect_timeout ==
+'''syntax:''' ''memc_connect_timeout <time>''
+
+'''default:''' ''60s''
+
+'''context:''' ''http, server, location''
+
+The timeout for connecting to the memcached server. You can specify a time unit like "s" (for seconds), "ms" (for milliseconds). The default time unit is "ms".
+
+== memc_send_timeout ==
+'''syntax:''' ''memc_send_timeout <time>''
+
+'''default:''' ''60s''
+
+'''context:''' ''http, server, location''
+
+The timeout for sending TCP requests to the memcached server. You can specify a time unit like "s" (for seconds), "ms" (for milliseconds). The default time unit is "ms".
+
+== memc_read_timeout ==
+'''syntax:''' ''memc_read_timeout <time>''
+
+'''default:''' ''60s''
+
+'''context:''' ''http, server, location''
+
+The timeout for reading TCP responses from the memcached server. You can specify a time unit like "s" (for seconds), "ms" (for milliseconds). The default time unit is "ms".
+
+== memc_buffer_size ==
+'''syntax:''' ''memc_buffer_size <time>''
+
+'''default:''' ''4k/8k''
+
+'''context:''' ''http, server, location''
+
+This buffer size is used for the memory buffer to hold
+
+* the complete response for memcached commands other than "get",
+* the complete response header (i.e., the first line of the response) for the "get" memcached command.
+
+This default size is the page size, may be 4k or 8k.
+
 = Installation =
 
 Grab the nginx source code from [http://nginx.net/ nginx.net], for example,
@@ -418,6 +459,9 @@ Although a lot of effort has been put into testing and code tuning, there must b
 Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc-nginx-module].
 
 = ChangeLog =
+
+== v0.11 ==
+* fixed the zero size buf alert in error.log when $memc_value is set to empty (). thanks iframist.
 
 == v0.10 ==
 * we no longer use the problematic <code>ngx_strXcmp</code> macros in our source because it may cause invalid reads and thus segmentation faults. thanks Piotr Sikora.
