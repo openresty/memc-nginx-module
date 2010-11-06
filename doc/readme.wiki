@@ -99,7 +99,7 @@ This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-
 
 = Description =
 
-This module extends the standard [[NginxHttpMemcachedModule|memcached module]] to support almost the whole [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
+This module extends the standard [[NginxHttpMemcachedModule|memcached module]] to support almost the whole [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached ascii protocol].
 
 It allows you to define a custom [http://en.wikipedia.org/wiki/REST REST] interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [http://github.com/srlindsay/nginx-independent-subrequest independent fake requests].
 
@@ -438,7 +438,7 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.49)
+* '''0.8.x'''                       (last tested version is 0.8.53)
 * '''0.7.x >= 0.7.46'''             (last tested version is 0.7.67)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
@@ -461,7 +461,7 @@ Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc
 = ChangeLog =
 
 == v0.11 ==
-* fixed the zero size buf alert in error.log when $memc_value is set to empty (). thanks iframist.
+* fixed the zero size buf alert in error.log when $memc_value is set to empty (""). thanks iframist.
 
 == v0.10 ==
 * we no longer use the problematic <code>ngx_strXcmp</code> macros in our source because it may cause invalid reads and thus segmentation faults. thanks Piotr Sikora.
