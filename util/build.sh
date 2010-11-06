@@ -12,7 +12,7 @@ fi
 root=`pwd`
 cd ~/work
 version=$1
-opts=$2
+#opts=$2
 home=~
 
 if [ ! -s "nginx-$version.tar.gz" ]; then
@@ -28,7 +28,11 @@ fi
 #cp $root/../no-pool-nginx/nginx-0.8.41-no_pool.patch ./
 #patch -p0 < nginx-0.8.41-no_pool.patch
 
-cd nginx-$version/
+if [ -n "$2" ]; then
+    cd nginx-$version-$2/
+else
+    cd nginx-$version/
+fi
 
 if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$root/util/build.sh" -nt Makefile ]]; then
     ./configure --prefix=/opt/nginx \
