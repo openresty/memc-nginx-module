@@ -13,8 +13,7 @@ run_tests();
 
 __DATA__
 
-
-=== TEST 8: empty pass
+=== TEST 1: empty pass
 little-endian systems only
 
 --- http_config eval: $::http_config
