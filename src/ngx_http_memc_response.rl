@@ -52,18 +52,18 @@ static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
 ngx_int_t
 ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 {
-    ngx_int_t               rc;
-    int                     cs;
+    ngx_int_t                rc;
+    int                      cs;
     u_char                  *p;
     u_char                  *pe;
     /* u_char                  *eof = NULL; */
-    ngx_str_t               resp;
+    ngx_str_t                resp;
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
-    ngx_uint_t              status;
-    ngx_flag_t              done = 0;
-    int                     error_state;
-    int                     final_state;
+    ngx_uint_t               status;
+    ngx_flag_t               done = 0;
+    int                      error_state;
+    int                      final_state;
 
     if (r->headers_out.status) {
         status = r->headers_out.status;
