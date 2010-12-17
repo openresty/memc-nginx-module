@@ -38,6 +38,7 @@ if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$
     ./configure --prefix=/opt/nginx \
           --with-http_addition_module \
           --add-module=$root $opts \
+          --add-module=$root/../ndk-nginx-module \
           --add-module=$root/../eval-nginx-module \
           --add-module=$root/../echo-nginx-module \
           --add-module=$home/work/nginx/ngx_http_upstream_keepalive-2ce9d8a1ca93 \
