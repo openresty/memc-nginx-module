@@ -195,7 +195,9 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         mlcf->upstream.upstream = ngx_http_memc_upstream_add(r, &url);
 
         if (mlcf->upstream.upstream == NULL) {
-            dd("memc: upstream \"%.*s\" not found", target.len, target.data);
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                   "memc: upstream \"%V\" not found", &target);
+
             return NGX_HTTP_INTERNAL_SERVER_ERROR;
         }
     }

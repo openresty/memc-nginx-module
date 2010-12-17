@@ -27,7 +27,8 @@ __DATA__
 --- response_body_like: ^(?:STAT [^\r]*\r\n)*END\r\n$
 
 
-=== TEST 1: timeout
+
+=== TEST 2: timeout
 --- config
     memc_connect_timeout 10ms;
     memc_send_timeout 10ms;
