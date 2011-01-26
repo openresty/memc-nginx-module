@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.10
-    (<http://github.com/agentzh/memc-nginx-module/tarball/v0.10 >) released
-    on September 14, 2010.
+    This document describes memc-nginx-module v0.11
+    (<http://github.com/agentzh/memc-nginx-module/tarball/v0.11 >) released
+    on Oct 28, 2010.
 
 Synopsis
         # GET /foo?key=dog
@@ -90,7 +90,7 @@ Synopsis
 
 Description
     This module extends the standard memcached module to support almost the
-    whole memcached TCP protocol
+    whole memcached ascii protocol
     (<http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt >)
     .
 
@@ -369,14 +369,63 @@ Directives
     "Last-Modified" header. For conditional GET, it will signal nginx to
     return "304 Not Modified" response to save bandwidth.
 
+  memc_connect_timeout
+    syntax: *memc_connect_timeout <time>*
+
+    default: *60s*
+
+    context: *http, server, location*
+
+    The timeout for connecting to the memcached server. You can specify a
+    time unit like "s" (for seconds), "ms" (for milliseconds). The default
+    time unit is "ms".
+
+  memc_send_timeout
+    syntax: *memc_send_timeout <time>*
+
+    default: *60s*
+
+    context: *http, server, location*
+
+    The timeout for sending TCP requests to the memcached server. You can
+    specify a time unit like "s" (for seconds), "ms" (for milliseconds). The
+    default time unit is "ms".
+
+  memc_read_timeout
+    syntax: *memc_read_timeout <time>*
+
+    default: *60s*
+
+    context: *http, server, location*
+
+    The timeout for reading TCP responses from the memcached server. You can
+    specify a time unit like "s" (for seconds), "ms" (for milliseconds). The
+    default time unit is "ms".
+
+  memc_buffer_size
+    syntax: *memc_buffer_size <time>*
+
+    default: *4k/8k*
+
+    context: *http, server, location*
+
+    This buffer size is used for the memory buffer to hold
+
+    *   the complete response for memcached commands other than "get",
+
+    *   the complete response header (i.e., the first line of the response)
+        for the "get" memcached command.
+
+    This default size is the page size, may be 4k or 8k.
+
 Installation
     Grab the nginx source code from nginx.net (<http://nginx.net/ >), for
-    example, the version 0.8.41 (see nginx compatibility), and then build
+    example, the version 0.8.54 (see nginx compatibility), and then build
     the source with this module:
 
-        $ wget 'http://sysoev.ru/nginx/nginx-0.8.41.tar.gz'
-        $ tar -xzvf nginx-0.8.41.tar.gz
-        $ cd nginx-0.8.41/
+        $ wget 'http://sysoev.ru/nginx/nginx-0.8.54.tar.gz'
+        $ tar -xzvf nginx-0.8.54.tar.gz
+        $ cd nginx-0.8.54/
 
         # Here we assume you would install you nginx under /opt/nginx/.
         $ ./configure --prefix=/opt/nginx \
@@ -434,6 +483,10 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module >).
 
 ChangeLog
+  v0.11
+    *   fixed the zero size buf alert in error.log when $memc_value is set
+        to empty (""). thanks iframist.
+
   v0.10
     *   we no longer use the problematic "ngx_strXcmp" macros in our source
         because it may cause invalid reads and thus segmentation faults.
@@ -486,15 +539,14 @@ ChangeLog
 
 Test Suite
     This module comes with a Perl-driven test suite. The test cases
-    (<http://github.com/agentzh/memc-nginx-module/tree/master/test/t/ >) are
+    (<http://github.com/agentzh/memc-nginx-module/tree/master/t/ >) are
     declarative
-    (<http://github.com/agentzh/memc-nginx-module/blob/master/test/t/storage
-    .t>) too. Thanks to the Test::Base
+    (<http://github.com/agentzh/memc-nginx-module/blob/master/t/storage.t >)
+    too. Thanks to the Test::Base
     (<http://search.cpan.org/perldoc?Test::Base >) module in the Perl world.
 
     To run it on your side:
 
-        $ cd test
         $ PATH=/path/to/your/nginx-with-memc-module:$PATH prove -r t
 
     You need to terminate any Nginx processes before running the test suite
@@ -511,7 +563,7 @@ Test Suite
     test suite in parallel by specifying "-jN" when invoking the "prove"
     utility.
 
-    You should also keep a memcached server listening on the 11984 port at
+    You should also keep a memcached server listening on the 11211 port at
     localhost before running the test suite.
 
     Some parts of the test suite requires modules rewrite and echo to be
@@ -537,10 +589,11 @@ Copyright & License
     The code base is borrowed directly from the standard memcached module in
     the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
 
-    Copyright (c) 2009, Taobao Inc., Alibaba Group ( http://www.taobao.com
-    ).
+    Copyright (c) 2009, 2010, 2011, Taobao Inc., Alibaba Group (
+    http://www.taobao.com ).
 
-    Copyright (c) 2009, agentzh <agentzh@gmail.com>.
+    Copyright (c) 2009, 2010, 2011, Yichun "agentzh" Zhang (章亦春)
+    <agentzh@gmail.com>.
 
     This module is licensed under the terms of the BSD license.
 

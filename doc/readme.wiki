@@ -408,12 +408,12 @@ This default size is the page size, may be 4k or 8k.
 = Installation =
 
 Grab the nginx source code from [http://nginx.net/ nginx.net], for example,
-the version 0.8.41 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
+the version 0.8.54 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
 
 <geshi lang="bash">
-    $ wget 'http://sysoev.ru/nginx/nginx-0.8.41.tar.gz'
-    $ tar -xzvf nginx-0.8.41.tar.gz
-    $ cd nginx-0.8.41/
+    $ wget 'http://sysoev.ru/nginx/nginx-0.8.54.tar.gz'
+    $ tar -xzvf nginx-0.8.54.tar.gz
+    $ cd nginx-0.8.54/
     
     # Here we assume you would install you nginx under /opt/nginx/.
     $ ./configure --prefix=/opt/nginx \
@@ -438,8 +438,9 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''0.8.x'''                       (last tested version is 0.8.53)
-* '''0.7.x >= 0.7.46'''             (last tested version is 0.7.67)
+* '''0.9.x'''                       (last tested: 0.9.4)
+* '''0.8.x'''                       (last tested: 0.8.54)
+* '''0.7.x >= 0.7.46'''             (last tested: 0.7.68)
 
 It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [[NginxHttpEchoModule|echo module]]'s [[NginxHttpEchoModule#echo_location|echo_location directive]], which requires at least nginx 0.7.46 :)
 
@@ -497,13 +498,12 @@ Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc
 
 = Test Suite =
 
-This module comes with a Perl-driven test suite. The [http://github.com/agentzh/memc-nginx-module/tree/master/test/t/ test cases] are
-[http://github.com/agentzh/memc-nginx-module/blob/master/test/t/storage.t declarative] too. Thanks to the [http://search.cpan.org/perldoc?Test::Base Test::Base] module in the Perl world.
+This module comes with a Perl-driven test suite. The [http://github.com/agentzh/memc-nginx-module/tree/master/t/ test cases] are
+[http://github.com/agentzh/memc-nginx-module/blob/master/t/storage.t declarative] too. Thanks to the [http://search.cpan.org/perldoc?Test::Base Test::Base] module in the Perl world.
 
 To run it on your side:
 
 <geshi lang="bash">
-    $ cd test
     $ PATH=/path/to/your/nginx-with-memc-module:$PATH prove -r t
 </geshi>
 
@@ -513,7 +513,7 @@ Either [http://search.cpan.org/perldoc?LWP::UserAgent LWP::UserAgent] or [http:/
 
 Because a single nginx server (by default, <code>localhost:1984</code>) is used across all the test scripts (<code>.t</code> files), it's meaningless to run the test suite in parallel by specifying <code>-jN</code> when invoking the <code>prove</code> utility.
 
-You should also keep a memcached server listening on the <code>11984</code> port at localhost before running the test suite.
+You should also keep a memcached server listening on the <code>11211</code> port at localhost before running the test suite.
 
 Some parts of the test suite requires modules [[NginxHttpRewriteModule|rewrite]] and [[NginxHttpEchoModule|echo]] to be enabled as well when building Nginx.
 
@@ -536,9 +536,9 @@ This wiki page is also maintained by the author himself, and everybody is encour
 
 The code base is borrowed directly from the standard [[NginxHttpMemcachedModule|memcached module]] in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
 
-Copyright (c) 2009, Taobao Inc., Alibaba Group ( http://www.taobao.com ).
+Copyright (c) 2009, 2010, 2011, Taobao Inc., Alibaba Group ( http://www.taobao.com ).
 
-Copyright (c) 2009, agentzh <agentzh@gmail.com>.
+Copyright (c) 2009, 2010, 2011, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>.
 
 This module is licensed under the terms of the BSD license.
 
@@ -548,7 +548,6 @@ are met:
 
 * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-* Neither the name of the Taobao Inc. nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
