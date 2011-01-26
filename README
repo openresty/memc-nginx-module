@@ -402,9 +402,11 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   0.8.x (last tested version is 0.8.49)
+    *   0.9.x (last tested: 0.9.4)
 
-    *   0.7.x >= 0.7.46 (last tested version is 0.7.67)
+    *   0.8.x (last tested: 0.8.54)
+
+    *   0.7.x >= 0.7.46 (last tested: 0.7.68)
 
     It's worth mentioning that some 0.7.x versions older than 0.7.46 might
     also work, but I can't easily test them because the test suite makes

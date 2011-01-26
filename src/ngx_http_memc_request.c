@@ -201,6 +201,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
             *ll = cl;
             ll = &cl->next;
         }
+
     } else {
         /* to preserve the r->request_body->bufs untouched */
 

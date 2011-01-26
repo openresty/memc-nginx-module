@@ -37,11 +37,21 @@ fi
 if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$root/util/build.sh" -nt Makefile ]]; then
     ./configure --prefix=/opt/nginx \
           --with-http_addition_module \
+            --without-mail_pop3_module \
+            --without-mail_imap_module \
+            --without-mail_smtp_module \
+            --without-http_upstream_ip_hash_module \
+            --without-http_empty_gif_module \
+            --without-http_memcached_module \
+            --without-http_referer_module \
+            --without-http_autoindex_module \
+            --without-http_auth_basic_module \
+            --without-http_userid_module \
           --add-module=$root $opts \
           --add-module=$root/../ndk-nginx-module \
           --add-module=$root/../eval-nginx-module \
           --add-module=$root/../echo-nginx-module \
-          --add-module=$home/work/nginx/ngx_http_upstream_keepalive-cad8bc39d98d \
+          --add-module=$home/work/nginx/ngx_http_upstream_keepalive-2ce9d8a1ca93 \
           --with-debug
           #--add-module=$home/work/nginx/nginx_upstream_hash-0.3 \
   #--without-http_ssi_module  # we cannot disable ssi because echo_location_async depends on it (i dunno why?!)
