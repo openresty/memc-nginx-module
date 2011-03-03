@@ -56,7 +56,7 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     int                      cs;
     u_char                  *p;
     u_char                  *pe;
-    /* u_char                  *eof = NULL; */
+    u_char                  *orig;
     ngx_str_t                resp;
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
@@ -131,6 +131,8 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 
     u = r->upstream;
 
+    orig = u->buffer.pos;
+
     p  = u->buffer.pos;
     pe = u->buffer.last;
 
@@ -203,8 +205,8 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 
     if (cs == error_state) {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-                  "memcached sent invalid response for command \"%V\": %V",
-                      &ctx->cmd_str, &resp);
+                  "memcached sent invalid response for command \"%V\" at pos %O: %V",
+                  &ctx->cmd_str, (off_t) (p - orig), &resp);
 
         status = NGX_HTTP_BAD_GATEWAY;
         u->headers_in.status_n = status;

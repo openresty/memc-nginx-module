@@ -24,7 +24,8 @@
     }
 
     action check {
-        dd("state %d, left %d, reading char '%c'", cs, pe - p, *p);
+        dd("state %d, left %d, reading char '%c'", cs,
+        (int) (pe - p), *p);
     }
 
     action handle_stored {

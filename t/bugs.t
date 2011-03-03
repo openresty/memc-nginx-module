@@ -3,6 +3,8 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
+repeat_each(100);
+
 plan tests => repeat_each() * 2 * blocks();
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
@@ -151,4 +153,53 @@ GET /memc
 "STORED\r
 "
 --- error_code: 201
+
+
+
+=== TEST 5: zero buf when $memc_value is empty
+http://github.com/agentzh/memc-nginx-module/issues#issue/2
+--- config
+    location /memc {
+        set $memc_cmd 'set';
+        set $memc_key 'foo';
+        set $memc_value '';
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+GET /memc
+--- response_body eval
+"STORED\r
+"
+--- error_code: 201
+
+
+
+=== TEST 6: set too long keys
+--- config
+    location /memc {
+        set $memc_cmd 'set';
+        set $memc_key 'foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+        set $memc_value 'hi';
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+GET /memc
+--- response_body eval
+"CLIENT_ERROR bad command line format\r
+"
+--- error_code: 502
+
+
+
+=== TEST 7: get too long keys
+--- config
+    location /memc {
+        set $memc_cmd 'get';
+        set $memc_key 'foooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+GET /memc
+--- response_body_like: 502 Bad Gateway
+--- error_code: 502
 
