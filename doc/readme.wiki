@@ -371,7 +371,11 @@ Read the memcached flags as epoch seconds and set it as the value of the <code>L
 
 '''context:''' ''http, server, location''
 
-The timeout for connecting to the memcached server. You can specify a time unit like "s" (for seconds), "ms" (for milliseconds). The default time unit is "ms".
+The timeout for connecting to the memcached server, in seconds by default.
+
+It's wise to always explicitly specify the time unit to avoid confusion. Time units supported are "s"(seconds), "ms"(milliseconds), "y"(years), "M"(months), "w"(weeks), "d"(days), "h"(hours), and "m"(minutes).
+
+This time must be less than 597 hours.
 
 == memc_send_timeout ==
 '''syntax:''' ''memc_send_timeout <time>''
@@ -380,7 +384,11 @@ The timeout for connecting to the memcached server. You can specify a time unit 
 
 '''context:''' ''http, server, location''
 
-The timeout for sending TCP requests to the memcached server. You can specify a time unit like "s" (for seconds), "ms" (for milliseconds). The default time unit is "ms".
+The timeout for sending TCP requests to the memcached server, in seconds by default.
+
+It's wise to always explicitly specify the time unit to avoid confusion. Time units supported are "s"(seconds), "ms"(milliseconds), "y"(years), "M"(months), "w"(weeks), "d"(days), "h"(hours), and "m"(minutes).
+
+This time must be less than 597 hours.
 
 == memc_read_timeout ==
 '''syntax:''' ''memc_read_timeout <time>''
@@ -389,7 +397,11 @@ The timeout for sending TCP requests to the memcached server. You can specify a 
 
 '''context:''' ''http, server, location''
 
-The timeout for reading TCP responses from the memcached server. You can specify a time unit like "s" (for seconds), "ms" (for milliseconds). The default time unit is "ms".
+The timeout for reading TCP responses from the memcached server, in seconds by default.
+
+It's wise to always explicitly specify the time unit to avoid confusion. Time units supported are "s"(seconds), "ms"(milliseconds), "y"(years), "M"(months), "w"(weeks), "d"(days), "h"(hours), and "m"(minutes).
+
+This time must be less than 597 hours.
 
 == memc_buffer_size ==
 '''syntax:''' ''memc_buffer_size <time>''
