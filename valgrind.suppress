@@ -1,4 +1,11 @@
 {
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:memalign
+   fun:posix_memalign
+   fun:ngx_memalign
+}
+{
    nginx-core-process-init
    Memcheck:Leak
    fun:malloc

@@ -62,7 +62,6 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_http_memc_loc_conf_t       *mlcf;
     ngx_str_t                       target;
     ngx_url_t                       url;
-    /* ngx_int_t                       index; */
 
     ngx_http_variable_value_t      *cmd_vv;
     ngx_http_variable_value_t      *key_vv;
@@ -72,6 +71,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     ngx_http_memc_cmd_t             memc_cmd;
     ngx_flag_t                      is_storage_cmd = 0;
+
+    dd("memc handler");
 
     key_vv = ngx_http_get_indexed_variable(r, ngx_http_memc_key_index);
 
@@ -133,6 +134,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     }
 
     mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
+
+    dd("XXX connect timeout %d", (int) mlcf->upstream.connect_timeout);
 
     if ( ! ngx_http_memc_in_cmds_allowed(mlcf, memc_cmd) ) {
         ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
