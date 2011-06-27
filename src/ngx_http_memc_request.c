@@ -23,12 +23,9 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
     ngx_http_variable_value_t      *exptime_vv;
     ngx_http_variable_value_t      *memc_value_vv;
 
-    ngx_http_memc_loc_conf_t       *mlcf;
     u_char                          bytes_buf[NGX_UINT32_LEN];
 
     /* TODO add support for the "cas" command */
-
-    mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
 
@@ -263,9 +260,6 @@ ngx_http_memc_create_get_cmd_request(ngx_http_request_t *r)
     ngx_chain_t                    *cl;
     ngx_http_memc_ctx_t            *ctx;
     ngx_http_variable_value_t      *vv;
-    ngx_http_memc_loc_conf_t       *mlcf;
-
-    mlcf = ngx_http_get_module_loc_conf(r, ngx_http_memc_module);
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
 
