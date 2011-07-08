@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.11
-    (<http://github.com/agentzh/memc-nginx-module/tarball/v0.11 >) released
-    on Oct 28, 2010.
+    This document describes memc-nginx-module v0.12
+    (<http://github.com/agentzh/memc-nginx-module/downloads >) released on 8
+    July 2011.
 
 Synopsis
         # GET /foo?key=dog
@@ -500,6 +500,21 @@ Source Repository
     (<http://github.com/agentzh/memc-nginx-module >).
 
 ChangeLog
+  v0.12
+    *   fixed the spots that trigger the unused-but-set-variable warning by
+        gcc 4.6.
+
+    *   added more debug information when memcached sends back "invalid"
+        responses.
+
+    *   we now document the timeout units properly. it should default to
+        seconds.
+
+    *   now we use the 2-clause bsd license.
+
+    *   added an error message when no upstream backend is found in
+        "memc_pass $backend".
+
   v0.11
     *   fixed the zero size buf alert in error.log when $memc_value is set
         to empty (""). thanks iframist.
