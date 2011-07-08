@@ -28,14 +28,15 @@ if [ ! -s "nginx-$version.tar.gz" ]; then
         cp ~/work/nginx-$version.tar.gz ./ || exit 1
     else
         wget "http://sysoev.ru/nginx/nginx-$version.tar.gz" -O nginx-$version.tar.gz || exit 1
+        cp nginx-$version.tar.gz ~/work/
     fi
 
     tar -xzvf nginx-$version.tar.gz || exit 1
+    cp $root/../no-pool-nginx/nginx-$version-no_pool.patch ./ || exit 1
+    patch -p0 < nginx-$version-no_pool.patch || exit 1
 fi
 
 #tar -xzvf nginx-$version.tar.gz || exit 1
-#cp $root/../no-pool-nginx/nginx-$version-no_pool.patch ./ || exit 1
-#patch -p0 < nginx-$version-no_pool.patch || exit 1
 
 cd nginx-$version/
 
@@ -48,7 +49,6 @@ if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$
             --without-mail_smtp_module \
             --without-http_upstream_ip_hash_module \
             --without-http_empty_gif_module \
-            --without-http_memcached_module \
             --without-http_referer_module \
             --without-http_autoindex_module \
             --without-http_auth_basic_module \
@@ -57,8 +57,8 @@ if [[ "$BUILD_CLEAN" -eq 1 || ! -f Makefile || "$root/config" -nt Makefile || "$
           --add-module=$root/../ndk-nginx-module \
           --add-module=$root/../eval-nginx-module \
           --add-module=$root/../echo-nginx-module \
-          --add-module=$home/work/nginx/ngx_http_upstream_keepalive-2ce9d8a1ca93
-          #--with-debug
+          --add-module=$home/work/nginx/ngx_http_upstream_keepalive-2ce9d8a1ca93 \
+          --with-debug
           #--add-module=$home/work/nginx/nginx_upstream_hash-0.3 \
   #--without-http_ssi_module  # we cannot disable ssi because echo_location_async depends on it (i dunno why?!)
 

@@ -142,4 +142,17 @@
    fun:ngx_alloc
    fun:ngx_malloc
 }
-
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:ngx_alloc
+   fun:ngx_create_pool
+}
+{
+   <insert_a_suppression_name_here>
+   Memcheck:Leak
+   fun:malloc
+   fun:ngx_alloc
+   fun:ngx_palloc_large
+}
