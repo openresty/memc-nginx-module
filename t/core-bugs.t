@@ -35,6 +35,7 @@ GET /set
 --- error_code: 201
 
 
+
 === TEST 2: bug in nginx core? (2)
 --- http_config
     upstream foo {
