@@ -123,7 +123,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
             return NGX_HTTP_BAD_REQUEST;
         }
     } else {
-        memc_cmd = ngx_http_memc_parse_cmd(cmd_vv->data, cmd_vv->len, &is_storage_cmd);
+        memc_cmd = ngx_http_memc_parse_cmd(cmd_vv->data, cmd_vv->len,
+                &is_storage_cmd);
 
         if (memc_cmd == ngx_http_memc_cmd_unknown) {
             ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,

@@ -39,7 +39,8 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
         return NGX_ERROR;
     }
 
-    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len, NGX_ESCAPE_MEMCACHED);
+    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len,
+            NGX_ESCAPE_MEMCACHED);
 
     /* prepare the "bytes" argument */
 
@@ -65,7 +66,8 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
         }
     }
 
-    bytes_len = ngx_snprintf(bytes_buf, sizeof(bytes_buf), "%O", bytes) - bytes_buf;
+    bytes_len = ngx_snprintf(bytes_buf, sizeof(bytes_buf), "%O", bytes)
+        - bytes_buf;
 
     /* prepare the "flags" argument */
 
@@ -429,7 +431,8 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
         return NGX_ERROR;
     }
 
-    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len, NGX_ESCAPE_MEMCACHED);
+    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len,
+            NGX_ESCAPE_MEMCACHED);
 
     /* prepare the (optional) "exptime" argument */
 
@@ -510,7 +513,8 @@ ngx_http_memc_create_incr_decr_cmd_request(ngx_http_request_t *r)
         return NGX_ERROR;
     }
 
-    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len, NGX_ESCAPE_MEMCACHED);
+    escape = 2 * ngx_escape_uri(NULL, key_vv->data, key_vv->len,
+            NGX_ESCAPE_MEMCACHED);
 
     /* prepare the "value" argument */
 
