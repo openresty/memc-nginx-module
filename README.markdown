@@ -3,7 +3,7 @@ Name
 
 **memc-nginx-module** - An extended version of the standard memcached module that supports set, add, delete, and many more memcached commands.
 
-*This module is not distributed with the Nginx source.* See `the installation instructions`.
+*This module is not distributed with the Nginx source.* See [the installation instructions](http://wiki.nginx.org/NginxHttpMemcModule#Installation).
 
 Version
 =======
@@ -146,14 +146,14 @@ How it works
 
 It implements the memcached TCP protocol all by itself, based upon the `upstream` mechansim. Everything involving I/O is non-blocking.
 
-The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section `Keep-alive connections to memcached servers`.
+The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section [Keep-alive connections to memcached servers](http://wiki.nginx.org/NginxHttpMemcModule#Keep-alive_connections_to_memcached_servers).
 
 Memcached commands supported
 ============================
 
-The memcached storage commands `set`, `add`, `replace`, `prepend`, and `append` uses the `$memc_key` as the key, `$memc_exptime` as the expiration time (or delay) (defaults to 0), `$memc_flags` as the flags (defaults to 0), to build the corresponding memcached queries.
+The memcached storage commands [set](http://wiki.nginx.org/NginxHttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), [add](http://wiki.nginx.org/NginxHttpMemcModule#add_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), [replace](http://wiki.nginx.org/NginxHttpMemcModule#replace_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), [prepend](http://wiki.nginx.org/NginxHttpMemcModule#prepend_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), and [append](http://wiki.nginx.org/NginxHttpMemcModule#append_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value) uses the `$memc_key` as the key, `$memc_exptime` as the expiration time (or delay) (defaults to 0), `$memc_flags` as the flags (defaults to 0), to build the corresponding memcached queries.
 
-If `$memc_value` is not defined at all, then the request body will be used as the value of the `$memc_value` except for the `incr` and `decr` commands. Note that if `$memc_value` is defined as an empty string (`""`), that empty string will still be used as the value as is.
+If `$memc_value` is not defined at all, then the request body will be used as the value of the `$memc_value` except for the [incr](http://wiki.nginx.org/NginxHttpMemcModule#incr_.24memc_key_.24memc_value) and [decr](http://wiki.nginx.org/NginxHttpMemcModule#decr_.24memc_key_.24memc_value) commands. Note that if `$memc_value` is defined as an empty string (`""`), that empty string will still be used as the value as is.
 
 The following memcached commands have been implemented and tested (with their parameters marked by corresponding
 nginx variables defined by this module):
@@ -217,24 +217,24 @@ The original memcached responses are returned as the response body except for `4
 add $memc_key $memc_flags $memc_exptime $memc_value
 ---------------------------------------------------
 
-Similar to the `set command`.
+Similar to the [set command](http://wiki.nginx.org/NginxHttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
 
 replace $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
-Similar to the `set command`.
+Similar to the [set command](http://wiki.nginx.org/NginxHttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
 
 append $memc_key $memc_flags $memc_exptime $memc_value
 ------------------------------------------------------
 
-Similar to the `set command`.
+Similar to the [set command](http://wiki.nginx.org/NginxHttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
 
 Note that at least memcached version 1.2.2 does not support the "append" and "prepend" commands. At least 1.2.4 and later versions seem to supports these two commands.
 
 prepend $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
-Similar to the `append command`.
+Similar to the [append command](http://wiki.nginx.org/NginxHttpMemcModule#append_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
 
 delete $memc_key
 ----------------
@@ -257,7 +257,7 @@ The original memcached responses are returned as the response body except for `4
 delete $memc_key $memc_exptime
 ------------------------------
 
-Similar to the `delete $memc_key` command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
+Similar to the [delete $memc_key](http://wiki.nginx.org/NginxHttpMemcModule#delete_.24memc_key) command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
 
 This command is no longer available in the latest memcached version 1.4.4.
 
@@ -283,7 +283,7 @@ It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 decr $memc_key $memc_value
 --------------------------
 
-Similar to `incr $memc_key $memc_value`.
+Similar to [incr $memc_key $memc_value](http://wiki.nginx.org/NginxHttpMemcModule#incr_.24memc_key_.24memc_value).
 
 flush_all
 ---------
@@ -300,7 +300,7 @@ Mark all the keys on the memcached server as expired:
 flush_all $memc_exptime
 -----------------------
 
-Just like `flush_all` but also accepts an expiration time specified by the `$memc_exptime` variable.
+Just like [flush_all](http://wiki.nginx.org/NginxHttpMemcModule#flush_all) but also accepts an expiration time specified by the `$memc_exptime` variable.
 
 stats
 -----
@@ -450,7 +450,7 @@ Installation
 ============
 
 Grab the nginx source code from [nginx.net](http://nginx.net/), for example,
-the version 0.8.54 (see `nginx compatibility`), and then build the source with this module:
+the version 0.8.54 (see [nginx compatibility](http://wiki.nginx.org/NginxHttpMemcModule#Compatibility)), and then build the source with this module:
 
 
     $ wget 'http://sysoev.ru/nginx/nginx-0.8.54.tar.gz'
@@ -491,7 +491,7 @@ It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work
 
 Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
-If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider `reporting a bug`.
+If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [reporting a bug](http://wiki.nginx.org/NginxHttpMemcModule#Report_Bugs).
 
 Report Bugs
 ===========
@@ -539,8 +539,8 @@ v0.07
 
 v0.06
 -----
-* implemented the `memc_flags_to_last_modified` directive.
-* added a new variable named `$memc_flags_as_http_time`.
+* implemented the [memc_flags_to_last_modified](http://wiki.nginx.org/NginxHttpMemcModule#memc_flags_to_last_modified) directive.
+* added a new variable named [$memc_flags_as_http_time](http://wiki.nginx.org/NginxHttpMemcModule#.24memc_flags_as_http_time).
 
 v0.05
 -----
@@ -557,7 +557,7 @@ v0.03
 
 v0.02
 -----
-* applied the (minor) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the `memc_pass` directive is actually used in the config file.
+* applied the (minor) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the [memc_pass](http://wiki.nginx.org/NginxHttpMemcModule#memc_pass) directive is actually used in the config file.
 
 v0.01
 -----
@@ -594,7 +594,7 @@ TODO
 Getting involved
 ================
 
-You'll be very welcomed to submit patches to the `author` or just ask for a commit bit to the `source repository` on GitHub.
+You'll be very welcomed to submit patches to the [author](http://wiki.nginx.org/NginxHttpMemcModule#Author) or just ask for a commit bit to the [source repository](http://wiki.nginx.org/NginxHttpMemcModule#Source_Repository) on GitHub.
 
 Author
 ======
