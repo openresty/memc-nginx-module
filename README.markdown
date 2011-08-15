@@ -146,14 +146,14 @@ How it works
 
 It implements the memcached TCP protocol all by itself, based upon the `upstream` mechansim. Everything involving I/O is non-blocking.
 
-The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section [[#Keep-alive connections to memcached servers|Keep-alive connections to memcached servers]].
+The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section `Keep-alive connections to memcached servers`.
 
 Memcached commands supported
 ============================
 
-The memcached storage commands [[#set $memc_key $memc_flags $memc_exptime $memc_value|set]], [[#add $memc_key $memc_flags $memc_exptime $memc_value|add]], [[#replace $memc_key $memc_flags $memc_exptime $memc_value|replace]], [[#prepend $memc_key $memc_flags $memc_exptime $memc_value|prepend]], and [[#append $memc_key $memc_flags $memc_exptime $memc_value|append]] uses the `$memc_key` as the key, `$memc_exptime` as the expiration time (or delay) (defaults to 0), `$memc_flags` as the flags (defaults to 0), to build the corresponding memcached queries.
+The memcached storage commands `set`, `add`, `replace`, `prepend`, and `append` uses the `$memc_key` as the key, `$memc_exptime` as the expiration time (or delay) (defaults to 0), `$memc_flags` as the flags (defaults to 0), to build the corresponding memcached queries.
 
-If `$memc_value` is not defined at all, then the request body will be used as the value of the `$memc_value` except for the [[#incr $memc_key $memc_value|incr]] and [[#decr $memc_key $memc_value|decr]] commands. Note that if `$memc_value` is defined as an empty string (`""`), that empty string will still be used as the value as is.
+If `$memc_value` is not defined at all, then the request body will be used as the value of the `$memc_value` except for the `incr` and `decr` commands. Note that if `$memc_value` is defined as an empty string (`""`), that empty string will still be used as the value as is.
 
 The following memcached commands have been implemented and tested (with their parameters marked by corresponding
 nginx variables defined by this module):
@@ -217,24 +217,24 @@ The original memcached responses are returned as the response body except for `4
 add $memc_key $memc_flags $memc_exptime $memc_value
 ---------------------------------------------------
 
-Similar to the [[#set $memc_key $memc_flags $memc_exptime $memc_value|set command]].
+Similar to the `set command`.
 
 replace $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
-Similar to the [[#set $memc_key $memc_flags $memc_exptime $memc_value|set command]].
+Similar to the `set command`.
 
 append $memc_key $memc_flags $memc_exptime $memc_value
 ------------------------------------------------------
 
-Similar to the [[#set $memc_key $memc_flags $memc_exptime $memc_value|set command]].
+Similar to the `set command`.
 
 Note that at least memcached version 1.2.2 does not support the "append" and "prepend" commands. At least 1.2.4 and later versions seem to supports these two commands.
 
 prepend $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
-Similar to the [[#append $memc_key $memc_flags $memc_exptime $memc_value|append command]].
+Similar to the `append command`.
 
 delete $memc_key
 ----------------
@@ -257,7 +257,7 @@ The original memcached responses are returned as the response body except for `4
 delete $memc_key $memc_exptime
 ------------------------------
 
-Similar to the [[#delete $memc_key|delete $memc_key]] command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
+Similar to the `delete $memc_key` command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
 
 This command is no longer available in the latest memcached version 1.4.4.
 
@@ -283,7 +283,7 @@ It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 decr $memc_key $memc_value
 --------------------------
 
-Similar to [[#incr $memc_key $memc_value|incr $memc_key $memc_value]].
+Similar to `incr $memc_key $memc_value`.
 
 flush_all
 ---------
@@ -337,7 +337,7 @@ The raw `version` command output from the upstream memcached server will be put 
 Directives
 ==========
 
-All the standard `memcached module` directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`. Consult the [[NginxHttpMemcachedModule]] documentation for more details.
+All the standard `memcached module` directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`. Consult the `NginxHttpMemcachedModule` documentation for more details.
 
 Here we only document the most important two directives (the latter is a new directive introduced by this module).
 
@@ -491,7 +491,7 @@ It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work
 
 Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
-If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [[#Report Bugs|reporting a bug]].
+If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider `reporting a bug`.
 
 Report Bugs
 ===========
@@ -594,7 +594,7 @@ TODO
 Getting involved
 ================
 
-You'll be very welcomed to submit patches to the `author` or just ask for a commit bit to the [[#Source Repository|source repository]] on GitHub.
+You'll be very welcomed to submit patches to the `author` or just ask for a commit bit to the `source repository` on GitHub.
 
 Author
 ======
