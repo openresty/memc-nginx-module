@@ -103,7 +103,7 @@ Synopsis
 Description
 ===========
 
-This module extends the standard `memcached module` to support almost the whole [memcached ascii protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
+This module extends the standard [memcached module](http://wiki.nginx.org/NginxHttpMemcachedModule) to support almost the whole [memcached ascii protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
 
 It allows you to define a custom [REST](http://en.wikipedia.org/wiki/REST) interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [independent fake requests](http://github.com/srlindsay/nginx-independent-subrequest).
 
@@ -174,7 +174,7 @@ Retrieves the value using a key.
       }
 
 
-Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard `add_header directive`.
+Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard [add_header directive](http://wiki.nginx.org/NginxHttpHeadersModule#add_header).
 
 It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
@@ -337,7 +337,7 @@ The raw `version` command output from the upstream memcached server will be put 
 Directives
 ==========
 
-All the standard `memcached module` directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`. Consult the `NginxHttpMemcachedModule` documentation for more details.
+All the standard [memcached module](http://wiki.nginx.org/NginxHttpMemcachedModule) directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`. Consult the [NginxHttpMemcachedModule](http://wiki.nginx.org/NginxHttpMemcachedModule) documentation for more details.
 
 Here we only document the most important two directives (the latter is a new directive introduced by this module).
 
@@ -487,7 +487,7 @@ The following versions of Nginx should work with this module:
 * **0.8.x**                       (last tested: 0.8.54)
 * **0.7.x >= 0.7.46**             (last tested: 0.7.68)
 
-It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the `echo module`'s `echo_location directive`, which requires at least nginx 0.7.46 :)
+It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [echo module](http://wiki.nginx.org/NginxHttpEchoModule)'s [echo_location directive](http://wiki.nginx.org/NginxHttpEchoModule#echo_location), which requires at least nginx 0.7.46 :)
 
 Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
@@ -583,7 +583,7 @@ Because a single nginx server (by default, `localhost:1984`) is used across all 
 
 You should also keep a memcached server listening on the `11211` port at localhost before running the test suite.
 
-Some parts of the test suite requires modules `rewrite` and `echo` to be enabled as well when building Nginx.
+Some parts of the test suite requires modules [rewrite](http://wiki.nginx.org/NginxHttpRewriteModule) and [echo](http://wiki.nginx.org/NginxHttpEchoModule) to be enabled as well when building Nginx.
 
 TODO
 ====
@@ -606,7 +606,7 @@ This wiki page is also maintained by the author himself, and everybody is encour
 Copyright & License
 ===================
 
-The code base is borrowed directly from the standard `memcached module` in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
+The code base is borrowed directly from the standard [memcached module](http://wiki.nginx.org/NginxHttpMemcachedModule) in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
 
 Copyright (c) 2009, 2010, 2011, Taobao Inc., Alibaba Group ( <http://www.taobao.com> ).
 
@@ -640,7 +640,7 @@ See Also
 * My slides demonstrating various ngx_memc usage: <http://agentzh.org/misc/slides/nginx-conf-scripting/nginx-conf-scripting.html#34> (use the arrow or pageup/pagedown keys on the keyboard to swith pages)
 * The latest [memcached TCP protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
 * The [ngx_srcache](http://github.com/agentzh/srcache-nginx-module) module
-* The standard `memcached` module.
-* The `echo module` for Nginx module's automated testing.
-* The standard `headers` module and the 3rd-parth `headers-more` module.
+* The standard [memcached](http://wiki.nginx.org/NginxHttpMemcachedModule) module.
+* The [echo module](http://wiki.nginx.org/NginxHttpEchoModule) for Nginx module's automated testing.
+* The standard [headers](http://wiki.nginx.org/NginxHttpHeadersModule) module and the 3rd-parth [headers-more](http://wiki.nginx.org/NginxHttpHeadersMoreModule) module.
 
