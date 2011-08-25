@@ -342,7 +342,7 @@ Here we only document the most important two directives (the latter is a new dir
 memc_pass
 ---------
 
-**syntax:** *memc_pass <memcached server IP address>:<memcached server port>*
+**syntax:** *memc_pass <memcached_server_IP_address>:<memcached_server_port>*
 
 **syntax:** *memc_pass <memcached server hostname>:<memcached server port>*
 
