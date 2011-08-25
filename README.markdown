@@ -344,13 +344,15 @@ memc_pass
 
 **syntax:** *memc_pass <memcached server IP address>:<memcached server port>*
 
-**syntax (2):** *memc_pass <memcached server hostname>:<memcached server port>*
+**syntax:** *memc_pass <memcached server hostname>:<memcached server port>*
 
-**syntax (3):** *memc_pass <upstream_backend_name>*
+**syntax:** *memc_pass <upstream_backend_name>*
 
 **default:** *none*
 
 **context:** *http, server, location, if*
+
+**phase:** *content*
 
 Specify the memcached server backend.
 
