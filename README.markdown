@@ -358,7 +358,7 @@ Specify the memcached server backend.
 
 memc_cmds_allowed
 -----------------
-**syntax:** *memc_cmds_allowed <cmd>...*
+**syntax:** *memc_cmds_allowed &lt;cmd&gt;...*
 
 **default:** *none*
 
