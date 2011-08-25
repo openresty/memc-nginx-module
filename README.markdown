@@ -342,11 +342,11 @@ Here we only document the most important two directives (the latter is a new dir
 memc_pass
 ---------
 
-**syntax:** *memc_pass <memcached-server-IP-address>:<memcached-server-port>*
+**syntax:** *memc_pass &lt;memcached server IP address&gt:&lt;memcached server port&gt*
 
-**syntax:** *memc_pass <memcached server hostname>:<memcached server port>*
+**syntax:** *memc_pass &lt;memcached server hostname&gt:&lt;memcached server port&gt*
 
-**syntax:** *memc_pass <upstream_backend_name>*
+**syntax:** *memc_pass &lt;upstream_backend_name&gt*
 
 **default:** *none*
 
@@ -358,7 +358,7 @@ Specify the memcached server backend.
 
 memc_cmds_allowed
 -----------------
-**syntax:** *memc_cmds_allowed &lt;cmd&gt;...*
+**syntax:** *memc_cmds_allowed &lt;cmd&gt...*
 
 **default:** *none*
 
@@ -391,7 +391,7 @@ Read the memcached flags as epoch seconds and set it as the value of the `Last-M
 
 memc_connect_timeout
 --------------------
-**syntax:** *memc_connect_timeout <time>*
+**syntax:** *memc_connect_timeout &lt;time&gt*
 
 **default:** *60s*
 
@@ -405,7 +405,7 @@ This time must be less than 597 hours.
 
 memc_send_timeout
 -----------------
-**syntax:** *memc_send_timeout <time>*
+**syntax:** *memc_send_timeout &lt;time&gt*
 
 **default:** *60s*
 
@@ -419,7 +419,7 @@ This time must be less than 597 hours.
 
 memc_read_timeout
 -----------------
-**syntax:** *memc_read_timeout <time>*
+**syntax:** *memc_read_timeout &lt;time&gt*
 
 **default:** *60s*
 
@@ -433,7 +433,7 @@ This time must be less than 597 hours.
 
 memc_buffer_size
 ----------------
-**syntax:** *memc_buffer_size <time>*
+**syntax:** *memc_buffer_size &lt;time&gt*
 
 **default:** *4k/8k*
 
@@ -603,7 +603,7 @@ You'll be very welcomed to submit patches to the [author](http://wiki.nginx.org/
 Author
 ======
 
-agentzh (章亦春) *<agentzh@gmail.com>*
+agentzh (章亦春) *&lt;agentzh@gmail.com&gt*
 
 This wiki page is also maintained by the author himself, and everybody is encouraged to improve this page as well.
 
