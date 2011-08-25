@@ -417,6 +417,10 @@ This default size is the page size, may be 4k or 8k.
 
 = Installation =
 
+You're recommended to install this module (as well as the Nginx core and many other goodies) via the [http://openresty.org ngx_openresty bundle]. See the [http://openresty.org/#Installation installation steps] for <code>ngx_openresty</code>.
+
+Alternatively, you can compile this module into the standard Nginx source distribution by hand:
+
 Grab the nginx source code from [http://nginx.org/ nginx.org], for example,
 the version 1.0.5 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
 
@@ -434,8 +438,6 @@ the version 1.0.5 (see [[#Compatibility|nginx compatibility]]), and then build t
 </geshi>
 
 Download the latest version of the release tarball of this module from [http://github.com/agentzh/memc-nginx-module/downloads memc-nginx-module file list].
-
-Also, this module is included and enabled by default in the [http://openresty.org ngx_openresty bundle].
 
 == For Developers ==
 
@@ -465,8 +467,8 @@ If you find that any particular version of Nginx above 0.7.46 does not work with
 
 Although a lot of effort has been put into testing and code tuning, there must be some serious bugs lurking somewhere in this module. So whenever you are bitten by any quirks, please don't hesitate to
 
-# send a bug report or even patches to <agentzh@gmail.com>,
-# or create a ticket on the [http://github.com/agentzh/memc-nginx-module/issues issue tracking interface] provided by GitHub.
+# create a ticket on the [http://github.com/agentzh/memc-nginx-module/issues issue tracking interface] provided by GitHub.
+# or send a bug report or even patches to the [http://mailman.nginx.org/mailman/listinfo/nginx nginx mailing list],
 
 = Source Repository =
 

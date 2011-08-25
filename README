@@ -89,8 +89,8 @@ Synopsis
         }
 
 Description
-    This module extends the standard memcached module to support almost the
-    whole memcached ascii protocol
+    This module extends the standard [module (HttpMemcachedModule)] to
+    support almost the whole memcached ascii protocol
     (<http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt>)
     .
 
@@ -105,14 +105,11 @@ Description
     memcached response parsers (in C) for joy :)
 
     If you are going to use this module to cache location responses out of
-    the box, try my ngx_srcache module with this module to achieve that:
-
-        http://github.com/agentzh/srcache-nginx-module
+    the box, try [[HttpSRCacheModule]] with this module to achieve that.
 
   Keep-alive connections to memcached servers
-    You need Maxim Dounin's ngx_upstream_keepalive module
-    (<http://mdounin.ru/hg/ngx_http_upstream_keepalive/>) together with this
-    module for keep-alive TCP connections to your backend memcached servers.
+    You need [[HttpUpstreamKeepaliveModule]] together with this module for
+    keep-alive TCP connections to your backend memcached servers.
 
     Here's a sample configuration:
 
@@ -174,7 +171,8 @@ Memcached commands supported
     Returns "200 OK" with the value put into the response body if the key is
     found, or "404 Not Found" otherwise. The "flags" number will be set into
     the $memc_flags variable so it's often desired to put that info into the
-    response headers by means of the standard add_header directive.
+    response headers by means of the standard [directive
+    (HttpHeadersModule#add_header)].
 
     It returns 502 for "ERROR", "CLIENT_ERROR", or "SERVER_ERROR".
 
@@ -314,10 +312,10 @@ Memcached commands supported
     be put into the response body.
 
 Directives
-    All the standard memcached module directives in nginx 0.8.28 are
-    directly inherited, with the "memcached_" prefixes replaced by "memc_".
-    For example, the "memcached_pass" directive is spelled "memc_pass".
-    Consult the [[NginxHttpMemcachedModule]] documentation for more details.
+    All the standard [module (HttpMemcachedModule)] directives in nginx
+    0.8.28 are directly inherited, with the "memcached_" prefixes replaced
+    by "memc_". For example, the "memcached_pass" directive is spelled
+    "memc_pass".
 
     Here we only document the most important two directives (the latter is a
     new directive introduced by this module).
@@ -434,13 +432,21 @@ Directives
     This default size is the page size, may be 4k or 8k.
 
 Installation
-    Grab the nginx source code from nginx.net (<http://nginx.net/>), for
-    example, the version 0.8.54 (see nginx compatibility), and then build
-    the source with this module:
+    You're recommended to install this module (as well as the Nginx core and
+    many other goodies) via the ngx_openresty bundle
+    (<http://openresty.org>). See the installation steps
+    (<http://openresty.org/#Installation>) for "ngx_openresty".
 
-        $ wget 'http://sysoev.ru/nginx/nginx-0.8.54.tar.gz'
-        $ tar -xzvf nginx-0.8.54.tar.gz
-        $ cd nginx-0.8.54/
+    Alternatively, you can compile this module into the standard Nginx
+    source distribution by hand:
+
+    Grab the nginx source code from nginx.org (<http://nginx.org/>), for
+    example, the version 1.0.5 (see nginx compatibility), and then build the
+    source with this module:
+
+        $ wget 'http://sysoev.ru/nginx/nginx-1.0.5.tar.gz'
+        $ tar -xzvf nginx-1.0.5.tar.gz
+        $ cd nginx-1.0.5/
 
         # Here we assume you would install you nginx under /opt/nginx/.
         $ ./configure --prefix=/opt/nginx \
@@ -476,8 +482,8 @@ Compatibility
 
     It's worth mentioning that some 0.7.x versions older than 0.7.46 might
     also work, but I can't easily test them because the test suite makes
-    extensive use of the echo module's echo_location directive, which
-    requires at least nginx 0.7.46 :)
+    extensive use of the [module (HttpEchoModule)]'s [directive
+    (HttpEchoModule#echo_location)], which requires at least nginx 0.7.46 :)
 
     Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
@@ -489,11 +495,12 @@ Report Bugs
     there must be some serious bugs lurking somewhere in this module. So
     whenever you are bitten by any quirks, please don't hesitate to
 
-    1.  send a bug report or even patches to <agentzh@gmail.com>,
-
-    2.  or create a ticket on the issue tracking interface
+    1.  create a ticket on the issue tracking interface
         (<http://github.com/agentzh/memc-nginx-module/issues>) provided by
         GitHub.
+
+    2.  or send a bug report or even patches to the nginx mailing list
+        (<http://mailman.nginx.org/mailman/listinfo/nginx>),
 
 Source Repository
     Available on github at agentzh/memc-nginx-module
@@ -618,13 +625,14 @@ Author
     is encouraged to improve this page as well.
 
 Copyright & License
-    The code base is borrowed directly from the standard memcached module in
-    the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
+    The code base is borrowed directly from the standard [module
+    (HttpMemcachedModule)] in the Nginx 0.8.28 core. This part of code is
+    copyrighted by Igor Sysoev.
 
     Copyright (c) 2009, 2010, 2011, Taobao Inc., Alibaba Group (
     http://www.taobao.com ).
 
-    Copyright (c) 2009, 2010, 2011, Yichun "agentzh" Zhang (章亦春)
+    Copyright (c) 2009, 2010, 2011, Zhang "agentzh" Yichun (章亦春)
     <agentzh@gmail.com>.
 
     This module is licensed under the terms of the BSD license.
@@ -672,7 +680,7 @@ See Also
 
     *   The standard memcached module.
 
-    *   The echo module for Nginx module's automated testing.
+    *   The [module (HttpEchoModule)] for Nginx module's automated testing.
 
     *   The standard headers module and the 3rd-parth headers-more module.
 
