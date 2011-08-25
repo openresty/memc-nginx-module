@@ -497,10 +497,10 @@ Report Bugs
 
     1.  create a ticket on the issue tracking interface
         (<http://github.com/agentzh/memc-nginx-module/issues>) provided by
-        GitHub.
+        GitHub,
 
     2.  or send a bug report or even patches to the nginx mailing list
-        (<http://mailman.nginx.org/mailman/listinfo/nginx>),
+        (<http://mailman.nginx.org/mailman/listinfo/nginx>).
 
 Source Repository
     Available on github at agentzh/memc-nginx-module

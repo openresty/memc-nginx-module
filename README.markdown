@@ -500,8 +500,8 @@ Report Bugs
 
 Although a lot of effort has been put into testing and code tuning, there must be some serious bugs lurking somewhere in this module. So whenever you are bitten by any quirks, please don't hesitate to
 
-1. create a ticket on the [issue tracking interface](http://github.com/agentzh/memc-nginx-module/issues) provided by GitHub.
-1. or send a bug report or even patches to the [nginx mailing list](http://mailman.nginx.org/mailman/listinfo/nginx),
+1. create a ticket on the [issue tracking interface](http://github.com/agentzh/memc-nginx-module/issues) provided by GitHub,
+1. or send a bug report or even patches to the [nginx mailing list](http://mailman.nginx.org/mailman/listinfo/nginx).
 
 Source Repository
 =================

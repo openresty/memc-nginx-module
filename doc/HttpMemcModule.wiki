@@ -467,8 +467,8 @@ If you find that any particular version of Nginx above 0.7.46 does not work with
 
 Although a lot of effort has been put into testing and code tuning, there must be some serious bugs lurking somewhere in this module. So whenever you are bitten by any quirks, please don't hesitate to
 
-# create a ticket on the [http://github.com/agentzh/memc-nginx-module/issues issue tracking interface] provided by GitHub.
-# or send a bug report or even patches to the [http://mailman.nginx.org/mailman/listinfo/nginx nginx mailing list],
+# create a ticket on the [http://github.com/agentzh/memc-nginx-module/issues issue tracking interface] provided by GitHub,
+# or send a bug report or even patches to the [http://mailman.nginx.org/mailman/listinfo/nginx nginx mailing list].
 
 = Source Repository =
 
