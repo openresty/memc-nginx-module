@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (C) agentzh (章亦春)
+ * Copyright (C) Zhang "agentzh" Yichun
  */
 
 #include "ngx_http_memc_module.h"

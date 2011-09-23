@@ -42,7 +42,12 @@ typedef struct {
 } ngx_http_memc_loc_conf_t;
 
 typedef struct {
+#if defined(nginx_version) && nginx_version >= 1001004
+    off_t                      rest;
+#else
     size_t                     rest;
+#endif
+
     ngx_http_request_t        *request;
     ngx_str_t                  key;
 
