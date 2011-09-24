@@ -3,6 +3,8 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
+repeat_each(2);
+
 plan tests => repeat_each() * 2 * blocks();
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
@@ -28,6 +30,7 @@ __DATA__
 --- request
     GET /stats
 --- response_body_like: ^(?:STAT [^\r]*\r\n)*END\r\n$
+--- timeout: 3
 
 
 
@@ -52,6 +55,7 @@ __DATA__
     GET /memc?key=dog
 --- response_body
 --- error_code: 201
+--- timeout: 3
 --- SKIP
 
 
@@ -70,5 +74,5 @@ __DATA__
 --- request
     GET /stats?target=backend
 --- response_body_like: ^(?:STAT [^\r]*\r\n)*END\r\n$
-
+--- timeout: 3
 
