@@ -25,25 +25,19 @@
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
+
 static u_char * parse_memc_storage(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
-
 static u_char * parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
-
 static u_char * parse_memc_version(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
-
 static u_char * parse_memc_stats(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
-
 static u_char * parse_memc_delete(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
-
 static u_char * parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, ngx_flag_t *done_addr);
-
-
 static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
         ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx,
         ngx_uint_t status, ngx_str_t *resp);
@@ -65,11 +59,7 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     int                      error_state;
     int                      final_state;
 
-    if (r->headers_out.status) {
-        status = r->headers_out.status;
-    } else {
-        status = NGX_HTTP_OK;
-    }
+    status = NGX_HTTP_OK;
 
     dd("process simple cmd header");
 
@@ -308,6 +298,12 @@ ngx_http_memc_get_cmd_filter(void *data, ssize_t bytes)
         u->length -= bytes;
         ctx->rest -= bytes;
 
+#if defined(nginx_version) && nginx_version >= 1001004
+        if (u->length == 0) {
+            u->keepalive = 1;
+        }
+#endif
+
         return NGX_OK;
     }
 
@@ -345,12 +341,27 @@ ngx_http_memc_get_cmd_filter(void *data, ssize_t bytes)
     if (ngx_strncmp(last, ngx_http_memc_end, b->last - last) != 0) {
         ngx_log_error(NGX_LOG_ERR, ctx->request->connection->log, 0,
                       "memcached sent invalid trailer");
+
+#if defined(nginx_version) && nginx_version >= 1001004
+        b->last = last;
+        cl->buf->last = last;
+        u->length = 0;
+        ctx->rest = 0;
+
+        return NGX_OK;
+#endif
     }
 
     ctx->rest -= b->last - last;
     b->last = last;
     cl->buf->last = last;
     u->length = ctx->rest;
+
+#if defined(nginx_version) && nginx_version >= 1001004
+    if (u->length == 0) {
+        u->keepalive = 1;
+    }
+#endif
 
     return NGX_OK;
 }
@@ -449,8 +460,13 @@ found:
 
         while (*p && *p++ != CR) { /* void */ }
 
+#if defined(nginx_version) && nginx_version >= 1001004
+        u->headers_in.content_length_n = ngx_atoof(len, p - len - 1);
+        if (u->headers_in.content_length_n == -1) {
+#else
         r->headers_out.content_length_n = ngx_atoof(len, p - len - 1);
         if (r->headers_out.content_length_n == -1) {
+#endif
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                           "memcached sent invalid length in response \"%V\" "
                           "for key \"%V\"",
@@ -472,6 +488,10 @@ found:
         u->headers_in.status_n = NGX_HTTP_NOT_FOUND;
         u->state->status = NGX_HTTP_NOT_FOUND;
 
+#if defined(nginx_version) && nginx_version >= 1001004
+        u->keepalive = 1;
+#endif
+
         return NGX_OK;
     }
 
@@ -490,10 +510,6 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
         ngx_uint_t status, ngx_str_t *resp)
 {
     ngx_chain_t             *cl, **ll;
-
-    r->headers_out.content_length_n = resp->len;
-    u->headers_in.status_n = status;
-    u->state->status = status;
 
     for (cl = u->out_bufs, ll = &u->out_bufs; cl; cl = cl->next) {
         ll = &cl->next;
@@ -515,6 +531,16 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
     u->buffer.pos = resp->data;
     u->buffer.last = resp->data + resp->len;
     ctx->body_length = resp->len;
+
+#if defined(nginx_version) && nginx_version >= 1001004
+    u->headers_in.content_length_n = resp->len;
+    u->keepalive = 1;
+#else
+    r->headers_out.content_length_n = resp->len;
+#endif
+
+    u->headers_in.status_n = status;
+    u->state->status = status;
 
     return NGX_OK;
 }
