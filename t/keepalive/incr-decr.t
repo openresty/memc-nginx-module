@@ -3,9 +3,18 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
+repeat_each(2);
+
 plan tests => repeat_each() * 2 * blocks();
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
+
+our $http_config = <<'_EOC_';
+    upstream foo {
+        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        keepalive 1 single;
+    }
+_EOC_
 
 #no_diff;
 
@@ -14,6 +23,7 @@ run_tests();
 __DATA__
 
 === TEST 1: value required for incr
+--- http_config eval: $::http_config
 --- config
     location /memc {
         set $memc_cmd $arg_cmd;
@@ -21,7 +31,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /memc?cmd=incr&key=foo
@@ -31,6 +41,7 @@ __DATA__
 
 
 === TEST 2: invalid value for incr
+--- http_config eval: $::http_config
 --- config
     location /memc {
         set $memc_cmd $arg_cmd;
@@ -38,7 +49,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /memc?cmd=incr&key=foo&val=nice
@@ -48,6 +59,7 @@ __DATA__
 
 
 === TEST 3: invalid value (negative intenger) for incr
+--- http_config eval: $::http_config
 --- config
     location /memc {
         set $memc_cmd $arg_cmd;
@@ -55,7 +67,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /memc?cmd=incr&key=foo&val=-5
@@ -65,6 +77,7 @@ __DATA__
 
 
 === TEST 4: key required for incr
+--- http_config eval: $::http_config
 --- config
     location /memc {
         set $memc_cmd $arg_cmd;
@@ -72,7 +85,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /memc?cmd=incr&val=2
@@ -84,6 +97,7 @@ __DATA__
 
 
 === TEST 5: incr
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo 32';
@@ -104,7 +118,7 @@ __DATA__
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -125,6 +139,7 @@ exptime:
 
 
 === TEST 6: decr
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo 32';
@@ -145,7 +160,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -166,6 +181,7 @@ exptime:
 
 
 === TEST 7: incr an non-existent key
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -183,7 +199,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -200,6 +216,7 @@ exptime:
 
 
 === TEST 8: decr
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo 32';
@@ -220,7 +237,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -241,6 +258,7 @@ exptime:
 
 
 === TEST 9: incr an non-existent key (with fallback)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -259,7 +277,7 @@ exptime:
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
 
         error_page 404 = /set_and_incr?$query_string;
     }

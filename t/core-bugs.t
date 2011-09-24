@@ -9,6 +9,8 @@ plan tests => repeat_each() * 2 * blocks();
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
+no_shuffle();
+
 #no_diff;
 #no_long_string();
 

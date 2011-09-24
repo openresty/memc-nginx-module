@@ -1,7 +1,7 @@
 # vi:filetype=
 
 use lib 'lib';
-use Test::Nginx::LWP;
+use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks() + 4;
 
@@ -228,7 +228,7 @@ BAR"
     }
 --- request
     GET /memc?key=foo
---- request_headers
+--- more_headers
 If-Modified-Since: Thu, 28 Jan 2010 12:09:23 GMT
 --- response_headers
 Last-Modified: Thu, 28 Jan 2010 12:09:23 GMT

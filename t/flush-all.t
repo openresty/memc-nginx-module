@@ -1,7 +1,7 @@
 # vi:filetype=
 
 use lib 'lib';
-use Test::Nginx::LWP;
+use Test::Nginx::Socket;
 
 plan tests => repeat_each() * 2 * blocks();
 
@@ -116,4 +116,5 @@ get foo - 2 sec
 status: 404
 exptime: 
 <html>.*?404 Not Found.*$
+--- timeout: 3
 

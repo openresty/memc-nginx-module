@@ -9,6 +9,13 @@ plan tests => repeat_each() * 2 * blocks();
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
+our $http_config = <<'_EOC_';
+    upstream foo {
+        server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        keepalive 1 single;
+    }
+_EOC_
+
 #no_shuffle();
 
 #no_diff;
@@ -18,12 +25,13 @@ run_tests();
 __DATA__
 
 === TEST 1: set only
+--- http_config eval: $::http_config
 --- config
     location /memc {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /memc?key=foo&cmd=set&val=blah
@@ -34,6 +42,7 @@ __DATA__
 
 
 === TEST 2: set and get
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo blah';
@@ -46,7 +55,7 @@ __DATA__
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -59,6 +68,7 @@ blah"
 
 
 === TEST 3: set UTF-8 and get UTF-8
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo 你好';
@@ -71,7 +81,7 @@ blah"
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -84,6 +94,7 @@ get foo
 
 
 === TEST 4: set and get empty values
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -99,7 +110,7 @@ get foo
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
         set $memc_value $arg_val;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -114,6 +125,7 @@ get foo
 
 
 === TEST 5: add
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -132,7 +144,7 @@ get foo
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -150,6 +162,7 @@ added"
 
 
 === TEST 6: set using POST
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -168,7 +181,7 @@ added"
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
 POST /main
@@ -187,6 +200,7 @@ hello, world"
 
 
 === TEST 7: default REST interface when no $memc_cmd is set
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo FOO';
@@ -209,7 +223,7 @@ hello, world"
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
 GET /main
@@ -231,6 +245,7 @@ BAR
 
 
 === TEST 8: default REST interface when no $memc_cmd is set (read client req body)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -253,7 +268,7 @@ BAR
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
 POST /main
@@ -276,6 +291,7 @@ BAR
 
 
 === TEST 9: default REST interface when no $memc_cmd is set (read client req body)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'set foo <client req body>';
@@ -298,7 +314,7 @@ BAR
         set $memc_key $arg_key;
         #set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
 POST /main
@@ -321,6 +337,7 @@ howdy
 
 
 === TEST 10: test replace (stored) (without sleep)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -343,7 +360,7 @@ howdy
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -364,6 +381,7 @@ bah"
 
 
 === TEST 11: test replace (stored) (with sleep)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -388,7 +406,7 @@ bah"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -409,6 +427,7 @@ bah"
 
 
 === TEST 12: test replace (not stored)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -427,7 +446,7 @@ bah"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -444,6 +463,7 @@ status: 404.*?404 Not Found.*$
 
 
 === TEST 13: test append (stored)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -465,7 +485,7 @@ status: 404.*?404 Not Found.*$
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -486,6 +506,7 @@ hello,world"
 
 
 === TEST 14: test append (not stored)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -504,7 +525,7 @@ hello,world"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -521,6 +542,7 @@ status: 404.*?404 Not Found.*$
 
 
 === TEST 15: test prepend (stored)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -542,7 +564,7 @@ status: 404.*?404 Not Found.*$
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -563,6 +585,7 @@ world,hello"
 
 
 === TEST 16: test prepend (not stored)
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush all';
@@ -581,7 +604,7 @@ world,hello"
         set $memc_key $arg_key;
         set $memc_value $arg_val;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -598,6 +621,7 @@ status: 404.*?404 Not Found.*$
 
 
 === TEST 17: set and get big value
+--- http_config eval: $::http_config
 --- config
     location /big {
         client_body_buffer_size 1k;
@@ -612,7 +636,7 @@ status: 404.*?404 Not Found.*$
     location /memc {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request eval
 "POST /big\n" .
@@ -628,6 +652,7 @@ get big
 
 
 === TEST 18: set and get too big values
+--- http_config eval: $::http_config
 --- config
     location /big {
         client_body_buffer_size 1k;
@@ -642,7 +667,7 @@ get big
     location /memc {
         set $memc_cmd $arg_cmd;
         set $memc_key $arg_key;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request eval
 "POST /big\n" .
@@ -654,6 +679,7 @@ get big
 
 
 === TEST 19: replace non-existent item
+--- http_config eval: $::http_config
 --- config
     location /main {
         echo 'flush_all';
@@ -671,7 +697,7 @@ get big
         set $memc_value $arg_val;
         set $memc_exptime $arg_exptime;
 
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
 --- request
     GET /main
@@ -689,6 +715,7 @@ NOT_STORED\r
 
 
 === TEST 20: eval + memc
+--- http_config eval: $::http_config
 --- config
     location /main {
         eval $data {
@@ -697,7 +724,7 @@ NOT_STORED\r
         set $memc_cmd set;
         set $memc_key /foo;
         set $memc_value $data;
-        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+        memc_pass foo;
     }
     location /foo {
         echo hello;
