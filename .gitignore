@@ -45,6 +45,6 @@ nginx
 *.html
 t/servroot/
 all
-build10
+build1[10]
 go
 buildroot/
