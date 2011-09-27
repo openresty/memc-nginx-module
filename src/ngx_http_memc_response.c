@@ -89,17 +89,17 @@ u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
 
 static u_char * parse_memc_storage(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+        ngx_uint_t *status_addr, unsigned *done_addr);
 static u_char * parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+        ngx_uint_t *status_addr, unsigned *done_addr);
 static u_char * parse_memc_version(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+        ngx_uint_t *status_addr, unsigned *done_addr);
 static u_char * parse_memc_stats(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+        ngx_uint_t *status_addr, unsigned *done_addr);
 static u_char * parse_memc_delete(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+        ngx_uint_t *status_addr, unsigned *done_addr);
 static u_char * parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr);
+        ngx_uint_t *status_addr, unsigned *done_addr);
 static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
         ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx,
         ngx_uint_t status, ngx_str_t *resp);
@@ -117,7 +117,7 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
     ngx_uint_t               status;
-    ngx_flag_t               done = 0;
+    unsigned                 done = 0;
     int                      error_state;
     int                      final_state;
 
@@ -230,7 +230,7 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     p  = u->buffer.pos;
     pe = u->buffer.last;
 
-    dd("buffer len: %d", pe - p);
+    dd("buffer len: %d", (int) (pe - p));
 
     if (ctx->is_storage_cmd) {
         error_state = memc_storage_error;
@@ -287,10 +287,10 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     u->buffer.pos = p;
 
     dd("machine state: %d (done: %d)", cs, done);
-    dd("memcached response: (len: %d) %s", resp.len, resp.data);
+    dd("memcached response: (len: %d) %s", (int) resp.len, resp.data);
 
     if (done || cs >= final_state) {
-        dd("memcached response parsed (resp.len: %d)", resp.len);
+        dd("memcached response parsed (resp.len: %d)", (int) resp.len);
 
         rc = ngx_http_memc_write_simple_response(r, u, ctx, status, &resp);
 
@@ -360,11 +360,11 @@ ngx_http_memc_get_cmd_filter_init(void *data)
 
     u = ctx->request->upstream;
 
-    dd("filter init: u->length: %d", u->length);
+    dd("filter init: u->length: %d", (int) u->length);
 
     u->length += NGX_HTTP_MEMC_END;
 
-    dd("filter init (2): u->length: %d", u->length);
+    dd("filter init (2): u->length: %d", (int) u->length);
 
     return NGX_OK;
 }
@@ -483,7 +483,7 @@ ngx_http_memc_process_get_cmd_header(ngx_http_request_t *r)
 
     u = r->upstream;
 
-    dd("process header: u->length: %d", u->length);
+    dd("process header: u->length: %u", (unsigned) u->length);
 
     for (p = u->buffer.pos; p < u->buffer.last; p++) {
         if (*p == LF) {
@@ -652,7 +652,7 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
 
 static u_char *
 parse_memc_storage(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+        ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -1172,7 +1172,7 @@ case 53:
 
 static u_char *
 parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+        ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -1468,7 +1468,7 @@ case 29:
 
 static u_char *
 parse_memc_version(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+        ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -1847,7 +1847,7 @@ case 38:
 
 static u_char *
 parse_memc_stats(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
-        ngx_flag_t *done_addr)
+        unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -2278,7 +2278,7 @@ case 42:
 
 static u_char *
 parse_memc_delete(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
-        ngx_flag_t *done_addr)
+        unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -2708,7 +2708,7 @@ case 44:
 
 static u_char *
 parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, ngx_flag_t *done_addr)
+        ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
