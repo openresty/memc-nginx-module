@@ -346,6 +346,8 @@ memc_pass
 
 **syntax:** *memc_pass &lt;memcached server hostname&gt;:&lt;memcached server port&gt;*
 
+**syntax:** *memc_pass &lt;unix:/full/path/for/memcached.socket&gt;*
+
 **syntax:** *memc_pass &lt;upstream_backend_name&gt;*
 
 **default:** *none*
