@@ -100,6 +100,16 @@ Synopsis
     }
 
 
+
+    location /memc {
+        set $memc_key foo;
+        set $memc_cmd get;
+
+        # access the unix domain socket listend by memcached
+        memc_pass unix:/tmp/memcached.sock;
+    }
+
+
 Description
 ===========
 
@@ -346,9 +356,9 @@ memc_pass
 
 **syntax:** *memc_pass &lt;memcached server hostname&gt;:&lt;memcached server port&gt;*
 
-**syntax:** *memc_pass &lt;unix:/full/path/for/memcached.socket&gt;*
-
 **syntax:** *memc_pass &lt;upstream_backend_name&gt;*
+
+**syntax:** *memc_pass unix:&lt;path_to_unix_domain_socket&gt;*
 
 **default:** *none*
 
@@ -435,7 +445,7 @@ This time must be less than 597 hours.
 
 memc_buffer_size
 ----------------
-**syntax:** *memc_buffer_size &lt;time&gt;*
+**syntax:** *memc_buffer_size &lt;size&gt;*
 
 **default:** *4k/8k*
 
@@ -443,10 +453,10 @@ memc_buffer_size
 
 This buffer size is used for the memory buffer to hold
 
-* the complete response for memcached commands other than "get",
-* the complete response header (i.e., the first line of the response) for the "get" memcached command.
+* the complete response for memcached commands other than `get`,
+* the complete response header (i.e., the first line of the response) for the `get` memcached command.
 
-This default size is the page size, may be 4k or 8k.
+This default size is the page size, may be `4k` or `8k`.
 
 Installation
 ============
@@ -459,7 +469,7 @@ Grab the nginx source code from [nginx.org](http://nginx.org/), for example,
 the version 1.0.5 (see [nginx compatibility](http://wiki.nginx.org/HttpMemcModule#Compatibility)), and then build the source with this module:
 
 
-    $ wget 'http://sysoev.ru/nginx/nginx-1.0.5.tar.gz'
+    $ wget 'http://nginx.org/download/nginx-1.0.5.tar.gz'
     $ tar -xzvf nginx-1.0.5.tar.gz
     $ cd nginx-1.0.5/
     
