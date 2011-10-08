@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.12] released on 8 July 2011.
+This document describes memc-nginx-module [http://github.com/agentzh/memc-nginx-module/downloads v0.13rc1] released on 8 October 2011.
 
 = Synopsis =
 
@@ -436,19 +436,19 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [http://nginx.org/ nginx.org], for example,
-the version 1.0.5 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
+the version 1.0.8 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
 
 <geshi lang="bash">
-    $ wget 'http://nginx.org/download/nginx-1.0.5.tar.gz'
-    $ tar -xzvf nginx-1.0.5.tar.gz
-    $ cd nginx-1.0.5/
+    wget 'http://nginx.org/download/nginx-1.0.8.tar.gz'
+    tar -xzvf nginx-1.0.8.tar.gz
+    cd nginx-1.0.8/
     
     # Here we assume you would install you nginx under /opt/nginx/.
-    $ ./configure --prefix=/opt/nginx \
+    ./configure --prefix=/opt/nginx \
         --add-module=/path/to/memc-nginx-module
      
-    $ make -j2
-    $ make install
+    make -j2
+    make install
 </geshi>
 
 Download the latest version of the release tarball of this module from [http://github.com/agentzh/memc-nginx-module/downloads memc-nginx-module file list].
@@ -466,7 +466,8 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
-* '''1.0.x'''                       (last tested: 1.0.5)
+* '''1.1.x'''                       (last tested: 1.1.5)
+* '''1.0.x'''                       (last tested: 1.0.8)
 * '''0.9.x'''                       (last tested: 0.9.4)
 * '''0.8.x'''                       (last tested: 0.8.54)
 * '''0.7.x >= 0.7.46'''             (last tested: 0.7.68)
