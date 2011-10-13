@@ -8,7 +8,7 @@ Name
 Version
 =======
 
-This document describes memc-nginx-module [v0.13rc1](http://github.com/agentzh/memc-nginx-module/downloads) released on 8 October 2011.
+This document describes memc-nginx-module [v0.13rc1](http://github.com/agentzh/memc-nginx-module/tags) released on 8 October 2011.
 
 Synopsis
 ========
@@ -481,7 +481,7 @@ the version 1.0.8 (see [nginx compatibility](http://wiki.nginx.org/HttpMemcModul
     make install
 
 
-Download the latest version of the release tarball of this module from [memc-nginx-module file list](http://github.com/agentzh/memc-nginx-module/downloads).
+Download the latest version of the release tarball of this module from [memc-nginx-module file list](http://github.com/agentzh/memc-nginx-module/tags).
 
 For Developers
 --------------
