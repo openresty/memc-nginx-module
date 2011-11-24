@@ -165,6 +165,8 @@ added"
 --- http_config eval: $::http_config
 --- config
     location /main {
+        echo_read_request_body;
+
         echo 'flush all';
         echo_location '/memc?cmd=flush_all';
 
@@ -203,6 +205,8 @@ hello, world"
 --- http_config eval: $::http_config
 --- config
     location /main {
+        echo_read_request_body;
+
         echo 'set foo FOO';
         echo_subrequest PUT '/memc?key=foo' -b FOO;
 
@@ -248,6 +252,8 @@ BAR
 --- http_config eval: $::http_config
 --- config
     location /main {
+        echo_read_request_body;
+
         echo 'set foo <client req body>';
         echo_subrequest PUT '/memc?key=foo';
 
@@ -294,6 +300,8 @@ BAR
 --- http_config eval: $::http_config
 --- config
     location /main {
+        echo_read_request_body;
+
         echo 'set foo <client req body>';
         echo_subrequest PUT '/memc?key=foo';
 
@@ -624,6 +632,8 @@ status: 404.*?404 Not Found.*$
 --- http_config eval: $::http_config
 --- config
     location /big {
+        echo_read_request_body;
+
         client_body_buffer_size 1k;
         client_max_body_size 100k;
 

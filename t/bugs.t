@@ -10,6 +10,7 @@ plan tests => repeat_each() * 2 * blocks();
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
 #no_diff;
+no_shuffle();
 no_long_string();
 
 run_tests();
@@ -202,4 +203,37 @@ GET /memc
 GET /memc
 --- response_body_like: 502 Bad Gateway
 --- error_code: 502
+
+
+
+=== TEST 8: set only
+--- config
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $echo_request_body;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+POST /memc?key=foo&cmd=set
+hello, world
+--- response_body eval
+"STORED\r\n"
+--- error_code: 201
+--- SKIP
+
+
+=== TEST 9: get
+--- config
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+GET /memc?key=foo&cmd=get
+--- response_body
+hello, world
+--- error_code: 200
+--- SKIP
 

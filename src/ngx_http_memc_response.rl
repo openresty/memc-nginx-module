@@ -4,6 +4,14 @@
 #include "ngx_http_memc_response.h"
 #include "ngx_http_memc_module.h"
 
+
+#ifdef s_char
+#undef s_char
+#endif
+
+#define s_char signed char
+
+
 %% machine memc_storage;
 %% write data;
 
@@ -48,9 +56,9 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 {
     ngx_int_t                rc;
     int                      cs;
-    u_char                  *p;
-    u_char                  *pe;
-    u_char                  *orig;
+    s_char                  *p;
+    s_char                  *pe;
+    s_char                  *orig;
     ngx_str_t                resp;
     ngx_http_upstream_t     *u;
     ngx_http_memc_ctx_t     *ctx;
@@ -121,10 +129,10 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
 
     u = r->upstream;
 
-    orig = u->buffer.pos;
+    orig = (s_char *) u->buffer.pos;
 
-    p  = u->buffer.pos;
-    pe = u->buffer.last;
+    p  = (s_char *) u->buffer.pos;
+    pe = (s_char *) u->buffer.last;
 
     dd("buffer len: %d", (int) (pe - p));
 
@@ -132,31 +140,36 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
         error_state = memc_storage_error;
         final_state = memc_storage_first_final;
 
-        p = parse_memc_storage(&cs, p, pe, &status, &done);
+        p = (s_char *) parse_memc_storage(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
 
     } else if (ctx->cmd == ngx_http_memc_cmd_flush_all) {
         error_state = memc_flush_all_error;
         final_state = memc_flush_all_first_final;
 
-        p = parse_memc_flush_all(&cs, p, pe, &status, &done);
+        p = (s_char *) parse_memc_flush_all(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
 
     } else if (ctx->cmd == ngx_http_memc_cmd_version) {
         error_state = memc_version_error;
         final_state = memc_version_first_final;
 
-        p = parse_memc_version(&cs, p, pe, &status, &done);
+        p = (s_char *) parse_memc_version(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
 
     } else if (ctx->cmd == ngx_http_memc_cmd_stats) {
         error_state = memc_stats_error;
         final_state = memc_stats_first_final;
 
-        p = parse_memc_stats(&cs, p, pe, &status, &done);
+        p = (s_char *) parse_memc_stats(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
 
     } else if (ctx->cmd == ngx_http_memc_cmd_delete) {
         error_state = memc_delete_error;
         final_state = memc_delete_first_final;
 
-        p = parse_memc_delete(&cs, p, pe, &status, &done);
+        p = (s_char *) parse_memc_delete(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
 
     } else if (ctx->cmd == ngx_http_memc_cmd_incr
             || ctx->cmd == ngx_http_memc_cmd_decr)
@@ -164,7 +177,8 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
         error_state = memc_incr_decr_error;
         final_state = memc_incr_decr_first_final;
 
-        p = parse_memc_incr_decr(&cs, p, pe, &status, &done);
+        p = (s_char *) parse_memc_incr_decr(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
 
     } else {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
@@ -178,9 +192,9 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
     ctx->parser_state = cs;
 
     resp.data = u->buffer.start;
-    resp.len  = p - resp.data;
+    resp.len  = (u_char *) p - resp.data;
 
-    u->buffer.pos = p;
+    u->buffer.pos = (u_char *) p;
 
     dd("machine state: %d (done: %d)", cs, done);
     dd("memcached response: (len: %d) %s", (int) resp.len, resp.data);

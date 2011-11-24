@@ -115,6 +115,7 @@ __DATA__
 === TEST 8: $memc_cmd has its default values when it's an empty string
 --- config
     location /main {
+        echo_read_request_body;
         echo 'set big2';
         echo_subrequest PUT '/memc?key=big2';
 

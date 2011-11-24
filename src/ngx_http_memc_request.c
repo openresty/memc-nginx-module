@@ -44,7 +44,7 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
 
     /* prepare the "bytes" argument */
 
-    if (ctx->memc_value_vv && ! ctx->memc_value_vv->not_found) {
+    if (ctx->memc_value_vv && !ctx->memc_value_vv->not_found) {
         dd("found variable $memc_value");
 
         memc_value_vv = ctx->memc_value_vv;

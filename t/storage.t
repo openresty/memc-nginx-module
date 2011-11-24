@@ -152,6 +152,8 @@ added"
 === TEST 6: set using POST
 --- config
     location /main {
+        echo_read_request_body;
+
         echo 'flush all';
         echo_location '/memc?cmd=flush_all';
 
@@ -233,6 +235,7 @@ BAR
 === TEST 8: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
+        echo_read_request_body;
         echo 'set foo <client req body>';
         echo_subrequest PUT '/memc?key=foo';
 
@@ -278,6 +281,7 @@ BAR
 === TEST 9: default REST interface when no $memc_cmd is set (read client req body)
 --- config
     location /main {
+        echo_read_request_body;
         echo 'set foo <client req body>';
         echo_subrequest PUT '/memc?key=foo';
 
@@ -603,6 +607,7 @@ status: 404.*?404 Not Found.*$
         client_body_buffer_size 1k;
         client_max_body_size 100k;
 
+        echo_read_request_body;
         echo 'set big';
         echo_subrequest POST '/memc?key=big&cmd=set';
 
