@@ -8,7 +8,7 @@ Name
 Version
 =======
 
-This document describes memc-nginx-module [v0.13rc1](http://github.com/agentzh/memc-nginx-module/tags) released on 8 October 2011.
+This document describes memc-nginx-module [v0.13rc2](http://github.com/agentzh/memc-nginx-module/tags) released on 24 November 2011.
 
 Synopsis
 ========
@@ -499,7 +499,7 @@ Compatibility
 The following versions of Nginx should work with this module:
 
 * **1.1.x**                       (last tested: 1.1.5)
-* **1.0.x**                       (last tested: 1.0.8)
+* **1.0.x**                       (last tested: 1.0.10)
 * **0.9.x**                       (last tested: 0.9.4)
 * **0.8.x**                       (last tested: 0.8.54)
 * **0.7.x >= 0.7.46**             (last tested: 0.7.68)
@@ -624,8 +624,6 @@ Copyright & License
 ===================
 
 The code base is borrowed directly from the standard [memcached module](http://wiki.nginx.org/HttpMemcachedModule) in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
-
-Copyright (c) 2009, 2010, 2011, Taobao Inc., Alibaba Group ( <http://www.taobao.com> ).
 
 Copyright (c) 2009, 2010, 2011, Zhang "agentzh" Yichun (章亦春) <agentzh@gmail.com>.
 
