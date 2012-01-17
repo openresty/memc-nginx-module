@@ -145,7 +145,7 @@ ngx_http_memc_upstream_add(ngx_http_request_t *r, ngx_url_t *url)
         return uscfp[i];
     }
 
-    dd("No upstream found: %.*s", url->host.len, url->host.data);
+    dd("No upstream found: %.*s", (int) url->host.len, url->host.data);
 
     return NULL;
 }
