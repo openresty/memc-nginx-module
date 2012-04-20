@@ -17,6 +17,7 @@ run_tests();
 __DATA__
 
 === TEST 1: sanity
+--- timeout: 5
 --- config
     location /stats {
         set $memc_cmd stats;
