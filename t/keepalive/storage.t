@@ -20,6 +20,8 @@ _EOC_
 
 #no_diff;
 
+log_level('warn');
+
 run_tests();
 
 __DATA__
@@ -657,7 +659,7 @@ status: 404.*?404 Not Found.*$
 STORED\r
 get big
 " . 'a' x (1024 * 1) . 'efg'
---- timeout: 2
+--- timeout: 5
 
 
 
@@ -685,6 +687,7 @@ get big
 
 --- response_body_like: 413 Request Entity Too Large
 --- error_code: 413
+--- timeout: 5
 
 
 
