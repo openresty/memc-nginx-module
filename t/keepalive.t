@@ -21,7 +21,7 @@ __DATA__
       server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
       #server 127.0.0.1:11985;
       #server 127.0.0.1:11986;
-      keepalive 2 single;
+      keepalive 2;
       #hash $arg_key;
     }
 

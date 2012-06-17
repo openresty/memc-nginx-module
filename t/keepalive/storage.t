@@ -12,7 +12,7 @@ $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 our $http_config = <<'_EOC_';
     upstream foo {
         server 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
-        keepalive 1 single;
+        keepalive 1;
     }
 _EOC_
 
