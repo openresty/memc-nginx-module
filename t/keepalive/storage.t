@@ -5,7 +5,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * 2 * blocks();
+plan tests => repeat_each() * (2 * blocks() - 1);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
@@ -684,9 +684,9 @@ get big
 --- request eval
 "POST /big\n" .
  'a' x (1024 * 100) . 'efg'
-
---- response_body_like: 413 Request Entity Too Large
---- error_code: 413
+--- ignore_response
+--- error_log
+client intended to send too large body: 102403 bytes
 --- timeout: 5
 
 
