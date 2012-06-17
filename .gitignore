@@ -45,6 +45,7 @@ nginx
 *.html
 t/servroot/
 all
-build1[10]
+Changes
+build1[012]
 go
 buildroot/
