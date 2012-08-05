@@ -15,6 +15,7 @@ home=~
 force=$2
 
 ngx-build $force $version \
+    --with-ld-opt="-L$PCRE_LIB -Wl,-rpath,$PCRE_LIB:$LIBDRIZZLE_LIB:$LUAJIT_LIB:/usr/local/lib" \
     --with-cc-opt="-O2" \
     --with-http_addition_module \
     --without-mail_pop3_module \
