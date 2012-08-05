@@ -130,7 +130,7 @@ Here's a sample configuration:
 
       # a pool with at most 1024 connections
       # and do not distinguish the servers:
-      keepalive 1024 single;
+      keepalive 1024;
     }
 
     server {
@@ -436,12 +436,12 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [http://nginx.org/ nginx.org], for example,
-the version 1.0.8 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
+the version 1.2.1 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
 
 <geshi lang="bash">
-    wget 'http://nginx.org/download/nginx-1.0.8.tar.gz'
-    tar -xzvf nginx-1.0.8.tar.gz
-    cd nginx-1.0.8/
+    wget 'http://nginx.org/download/nginx-1.2.1.tar.gz'
+    tar -xzvf nginx-1.2.1.tar.gz
+    cd nginx-1.2.1/
     
     # Here we assume you would install you nginx under /opt/nginx/.
     ./configure --prefix=/opt/nginx \
@@ -466,6 +466,7 @@ regenerate the parser's C file, i.e., [http://github.com/agentzh/memc-nginx-modu
 
 The following versions of Nginx should work with this module:
 
+* '''1.2.x'''                       (last tested: 1.2.1)
 * '''1.1.x'''                       (last tested: 1.1.5)
 * '''1.0.x'''                       (last tested: 1.0.10)
 * '''0.9.x'''                       (last tested: 0.9.4)
@@ -478,6 +479,16 @@ Earlier versions of Nginx like 0.6.x and 0.5.x will ''not'' work.
 
 If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [[#Report Bugs|reporting a bug]].
 
+= Community =
+
+== English Mailing List ==
+
+The [https://groups.google.com/group/openresty-en openresty-en] mailing list is for English speakers.
+
+== Chinese Mailing List ==
+
+The [https://groups.google.com/group/openresty openresty] mailing list is for Chinese speakers.
+
 = Report Bugs =
 
 Although a lot of effort has been put into testing and code tuning, there must be some serious bugs lurking somewhere in this module. So whenever you are bitten by any quirks, please don't hesitate to
@@ -489,49 +500,11 @@ Although a lot of effort has been put into testing and code tuning, there must b
 
 Available on github at [http://github.com/agentzh/memc-nginx-module agentzh/memc-nginx-module].
 
-= ChangeLog =
+= Changes =
 
-== v0.12 ==
-* fixed the spots that trigger the unused-but-set-variable warning by gcc 4.6.
-* added more debug information when memcached sends back "invalid" responses.
-* we now document the timeout units properly. it should default to seconds.
-* now we use the 2-clause bsd license.
-* added an error message when no upstream backend is found in "memc_pass $backend".
+The changes of every release of this module can be obtained from the ngx_openresty bundle's change logs:
 
-== v0.11 ==
-* fixed the zero size buf alert in error.log when $memc_value is set to empty (""). thanks iframist.
-
-== v0.10 ==
-* we no longer use the problematic <code>ngx_strXcmp</code> macros in our source because it may cause invalid reads and thus segmentation faults. thanks Piotr Sikora.
-
-== v0.09 ==
-* now we copy out <code>r->request_body->bufs</code> for our memcached request to avoid modifying the original request body. Thanks Matthieu Tourne.
-
-== v0.08 ==
-* now the memc commands other than get work with subrequests in memory. Thanks Yao Xinming for reporting it. Using storage memcached commands in ngx_eval module's eval blocks no longer hang the server.
-
-== v0.07 ==
-* applied the patch from nginx 0.8.35 that fixed a bug that ngx_eval may issue the incorrect error message "memcached sent invalid trailer".
-
-== v0.06 ==
-* implemented the [[#memc_flags_to_last_modified|memc_flags_to_last_modified]] directive.
-* added a new variable named [[#$memc_flags_as_http_time|$memc_flags_as_http_time]].
-
-== v0.05 ==
-* removed the <code>memc_bind</code> directive since it won't compile with nginx 0.8.31.
-
-== v0.04 ==
-* to ensure Maxim's [http://mdounin.ru/hg/ngx_http_upstream_keepalive/ ngx_http_upstream_keepalive] module caches our connections even if <code>u->headers_in->status</code> is 201 (Created).
-* updated docs to make it clear that this module can work with "upstream" multi-server backends. thanks Bernd Dorn for reporting it.
-
-== v0.03 ==
-* fixed a connection leak caused by an extra <code>r->main->count++</code> operation: we should NOT do <code>r->main->count++</code> after calling the <code>ngx_http_read_client_request_body</code> function in our content handler.
-
-== v0.02 ==
-* applied the (minor) optimization trick suggested by Marcus Clyne: creating our variables and save their indexes at post-config phase when the [[#memc_pass|memc_pass]] directive is actually used in the config file.
-
-== v0.01 ==
-* initial release.
+http://openresty.org/#Changes
 
 = Test Suite =
 
@@ -565,7 +538,7 @@ You'll be very welcomed to submit patches to the [[#Author|author]] or just ask 
 
 = Author =
 
-agentzh (章亦春) ''<agentzh@gmail.com>''
+Yichun "agentzh" Zhang (章亦春) ''<agentzh@gmail.com>''
 
 This wiki page is also maintained by the author himself, and everybody is encouraged to improve this page as well.
 
@@ -573,7 +546,7 @@ This wiki page is also maintained by the author himself, and everybody is encour
 
 The code base is borrowed directly from the standard [[HttpMemcachedModule|memcached module]] in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
 
-Copyright (c) 2009, 2010, 2011, Zhang "agentzh" Yichun (章亦春) <agentzh@gmail.com>.
+Copyright (c) 2009-2012, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>.
 
 This module is licensed under the terms of the BSD license.
 
@@ -602,6 +575,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * My slides demonstrating various ngx_memc usage: http://agentzh.org/misc/slides/nginx-conf-scripting/nginx-conf-scripting.html#34 (use the arrow or pageup/pagedown keys on the keyboard to swith pages)
 * The latest [http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt memcached TCP protocol].
 * The [http://github.com/agentzh/srcache-nginx-module ngx_srcache] module
+* The [https://github.com/agentzh/lua-resty-memcached lua-resty-memcached] library based on the [[HttpLuaModule]] cosocket API.
 * The standard [[HttpMemcachedModule|memcached]] module.
 * The [[HttpEchoModule|echo module]] for Nginx module's automated testing.
 * The standard [[HttpHeadersModule|headers]] module and the 3rd-parth [[HttpHeadersMoreModule|headers-more]] module.
