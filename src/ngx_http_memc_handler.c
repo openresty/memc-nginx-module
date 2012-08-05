@@ -10,8 +10,7 @@
 #include "ngx_http_memc_util.h"
 
 static ngx_int_t ngx_http_memc_flags_as_http_time_variable(
-        ngx_http_request_t *r, ngx_http_variable_value_t *v,
-        uintptr_t data);
+        ngx_http_request_t *r, ngx_http_variable_value_t *v, uintptr_t data);
 
 static ngx_http_variable_t ngx_http_memc_variables[] = {
     { ngx_string("memc_flags_as_http_time"), NULL,
