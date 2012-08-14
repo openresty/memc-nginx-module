@@ -28,13 +28,13 @@ __DATA__
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 0.05;
+        echo_blocking_sleep 0.05;
 
         echo 'get foo - 0.05 sec';
         echo_location '/memc?key=foo';
         echo;
 
-        echo_sleep 1.5;
+        echo_blocking_sleep 1.5;
 
         echo 'get foo - 1.55 sec';
         echo_location '/memc?key=foo';
