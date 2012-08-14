@@ -3,6 +3,8 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
+repeat_each(2);
+
 plan tests => repeat_each() * 2 * blocks();
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
@@ -26,15 +28,15 @@ __DATA__
         echo_location '/memc?key=foo';
         echo;
 
-        echo_blocking_sleep 0.1;
+        echo_sleep 0.05;
 
-        echo 'get foo - 0.1 sec';
+        echo 'get foo - 0.05 sec';
         echo_location '/memc?key=foo';
         echo;
 
-        echo_blocking_sleep 1.5;
+        echo_sleep 1.5;
 
-        echo 'get foo - 1.6 sec';
+        echo 'get foo - 1.55 sec';
         echo_location '/memc?key=foo';
     }
     location /memc {
@@ -62,11 +64,11 @@ get foo - 0 sec
 status: 200
 exptime: 
 BAR
-get foo - 0\.1 sec
+get foo - 0\.05 sec
 status: 200
 exptime: 
 BAR
-get foo - 1\.6 sec
+get foo - 1\.55 sec
 status: 404
 exptime: 
 <html>.*?404 Not Found.*$
