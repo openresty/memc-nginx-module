@@ -208,7 +208,7 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     ngx_http_memc_loc_conf_t *conf = child;
 
     ngx_conf_merge_value(conf->flags_to_last_modified,
-            prev->flags_to_last_modified, 0);
+                         prev->flags_to_last_modified, 0);
 
     ngx_conf_merge_msec_value(conf->upstream.connect_timeout,
                               prev->upstream.connect_timeout, 60000);
@@ -224,10 +224,10 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
                               (size_t) ngx_pagesize);
 
     ngx_conf_merge_bitmask_value(conf->upstream.next_upstream,
-                              prev->upstream.next_upstream,
-                              (NGX_CONF_BITMASK_SET
-                               |NGX_HTTP_UPSTREAM_FT_ERROR
-                               |NGX_HTTP_UPSTREAM_FT_TIMEOUT));
+                                 prev->upstream.next_upstream,
+                                 (NGX_CONF_BITMASK_SET
+                                  |NGX_HTTP_UPSTREAM_FT_ERROR
+                                  |NGX_HTTP_UPSTREAM_FT_TIMEOUT));
 
     if (conf->upstream.next_upstream & NGX_HTTP_UPSTREAM_FT_OFF) {
         conf->upstream.next_upstream = NGX_CONF_BITMASK_SET
@@ -277,7 +277,7 @@ ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     n = ngx_http_script_variables_count(&value[1]);
     if (n) {
         mlcf->complex_target = ngx_palloc(cf->pool,
-                sizeof(ngx_http_complex_value_t));
+                                          sizeof(ngx_http_complex_value_t));
         if (mlcf->complex_target == NULL) {
             return NGX_CONF_ERROR;
         }
@@ -315,9 +315,9 @@ ngx_http_memc_upstream_max_fails_unsupported(ngx_conf_t *cf,
     ngx_command_t *cmd, void *conf)
 {
     ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-         "\"memc_upstream_max_fails\" is not supported, "
-         "use the \"max_fails\" parameter of the \"server\" directive ",
-         "inside the \"upstream\" block");
+                       "\"memc_upstream_max_fails\" is not supported, "
+                       "use the \"max_fails\" parameter of the \"server\" "
+                       "directive inside the \"upstream\" block");
 
     return NGX_CONF_ERROR;
 }
@@ -328,9 +328,9 @@ ngx_http_memc_upstream_fail_timeout_unsupported(ngx_conf_t *cf,
     ngx_command_t *cmd, void *conf)
 {
     ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-         "\"memc_upstream_fail_timeout\" is not supported, "
-         "use the \"fail_timeout\" parameter of the \"server\" directive ",
-         "inside the \"upstream\" block");
+                       "\"memc_upstream_fail_timeout\" is not supported, "
+                       "use the \"fail_timeout\" parameter of the \"server\" "
+                       "directive inside the \"upstream\" block");
 
     return NGX_CONF_ERROR;
 }
@@ -357,12 +357,12 @@ ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     for (i = 1; i < cf->args->nelts; i++) {
         memc_cmd = ngx_http_memc_parse_cmd(value[i].data, value[i].len,
-                &is_storage_cmd);
+                                           &is_storage_cmd);
 
         if (memc_cmd == ngx_http_memc_cmd_unknown) {
             ngx_conf_log_error(NGX_LOG_EMERG, cf, 0,
-                 "Unknown memcached command \"%V\" used in "
-                 "\"memc_cmds_allowed\"", &value[i]);
+                               "Unknown memcached command \"%V\" used in "
+                               "\"memc_cmds_allowed\"", &value[i]);
 
             return NGX_CONF_ERROR;
         }
