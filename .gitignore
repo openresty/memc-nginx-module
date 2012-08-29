@@ -46,7 +46,9 @@ nginx
 t/servroot/
 all
 Changes
-build1[012]
+build1[0-3]
 go
 buildroot/
 analyze
+*.plist
+Makefile
