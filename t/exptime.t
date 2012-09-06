@@ -28,15 +28,9 @@ __DATA__
         echo_location '/memc?key=foo';
         echo;
 
-        echo_blocking_sleep 0.05;
+        echo_blocking_sleep 1.1;
 
-        echo 'get foo - 0.05 sec';
-        echo_location '/memc?key=foo';
-        echo;
-
-        echo_blocking_sleep 1.5;
-
-        echo 'get foo - 1.55 sec';
+        echo 'get foo - 1.1 sec';
         echo_location '/memc?key=foo';
     }
     location /memc {
@@ -64,11 +58,7 @@ get foo - 0 sec
 status: 200
 exptime: 
 BAR
-get foo - 0\.05 sec
-status: 200
-exptime: 
-BAR
-get foo - 1\.55 sec
+get foo - 1\.1 sec
 status: 404
 exptime: 
 <html>.*?404 Not Found.*$
