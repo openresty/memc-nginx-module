@@ -6,7 +6,7 @@ Don't edit this file manually! Instead you should generate it by using:
 Name
 ====
 
-**memc-nginx-module** - An extended version of the standard memcached module that supports set, add, delete, and many more memcached commands.
+**ngx_memc** - An extended version of the standard memcached module that supports set, add, delete, and many more memcached commands.
 
 *This module is not distributed with the Nginx source.* See [the installation instructions](http://wiki.nginx.org/HttpMemcModule#Installation).
 
