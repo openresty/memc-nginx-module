@@ -126,6 +126,8 @@ This module is not supposed to be merged into the Nginx core because I've used [
 
 If you are going to use this module to cache location responses out of the box, try [HttpSRCacheModule](http://wiki.nginx.org/HttpSRCacheModule) with this module to achieve that.
 
+When used in conjunction with [HttpLuaModule](http://wiki.nginx.org/HttpLuaModule), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
+
 Keep-alive connections to memcached servers
 -------------------------------------------
 
