@@ -31,6 +31,7 @@ ngx-build $force $version \
     --add-module=$root/../ndk-nginx-module \
     --add-module=$root/../eval-nginx-module \
     --add-module=$root/../echo-nginx-module \
+    --add-module=$root/../set-misc-nginx-module \
     --add-module=$root/../lua-nginx-module \
     --add-module=$home/work/nginx/ngx_http_upstream_keepalive-0.7 \
           --with-select_module \

@@ -223,6 +223,7 @@ hello, world
 --- SKIP
 
 
+
 === TEST 9: get
 --- config
     location /memc {

@@ -713,3 +713,28 @@ NOT_STORED\r
 --- response_body
 --- SKIP
 
+
+
+=== TEST 21: set and get (binary data containing \0)
+--- config
+    location /main {
+        echo 'set foo blah';
+        echo_location '/memc?key=foo&cmd=set&val=blah%00blah';
+
+        echo 'get foo';
+        echo_location '/memc?key=foo&cmd=get';
+    }
+    location /memc {
+        set $memc_cmd $arg_cmd;
+        set_unescape_uri $memc_key $arg_key;
+        set_unescape_uri $memc_value $arg_val;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+    GET /main
+--- response_body eval
+"set foo blah
+STORED\r
+get foo
+blah\0blah"
+
