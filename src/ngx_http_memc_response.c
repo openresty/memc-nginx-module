@@ -378,7 +378,7 @@ ngx_http_memc_get_cmd_filter_init(void *data)
 
     dd("filter init: u->length: %d", (int) u->length);
 
-    u->length += NGX_HTTP_MEMC_END;
+    u->length = u->headers_in.content_length_n + NGX_HTTP_MEMC_END;
 
     dd("filter init (2): u->length: %d", (int) u->length);
 
