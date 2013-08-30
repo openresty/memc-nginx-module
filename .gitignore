@@ -46,7 +46,7 @@ nginx
 t/servroot/
 all
 Changes
-build1[0-3]
+build1[0-9]
 go
 buildroot/
 analyze
