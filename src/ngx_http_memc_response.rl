@@ -522,8 +522,8 @@ no_valid:
 
 static ngx_int_t
 ngx_http_memc_write_simple_response(ngx_http_request_t *r,
-        ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx,
-        ngx_uint_t status, ngx_str_t *resp)
+    ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx, ngx_uint_t status,
+    ngx_str_t *resp)
 {
     ngx_chain_t             *cl, **ll;
 
@@ -564,7 +564,7 @@ ngx_http_memc_write_simple_response(ngx_http_request_t *r,
 
 static u_char *
 parse_memc_storage(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, unsigned *done_addr)
+    ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -580,7 +580,7 @@ parse_memc_storage(int *cs_addr, u_char *p, u_char *pe,
 
 static u_char *
 parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, unsigned *done_addr)
+    ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -596,7 +596,7 @@ parse_memc_flush_all(int *cs_addr, u_char *p, u_char *pe,
 
 static u_char *
 parse_memc_version(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, unsigned *done_addr)
+    ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -612,7 +612,7 @@ parse_memc_version(int *cs_addr, u_char *p, u_char *pe,
 
 static u_char *
 parse_memc_stats(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
-        unsigned *done_addr)
+    unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -628,7 +628,7 @@ parse_memc_stats(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
 
 static u_char *
 parse_memc_delete(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
-        unsigned *done_addr)
+    unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -644,7 +644,7 @@ parse_memc_delete(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
 
 static u_char *
 parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
-        ngx_uint_t *status_addr, unsigned *done_addr)
+    ngx_uint_t *status_addr, unsigned *done_addr)
 {
     int cs = *cs_addr;
 
@@ -656,4 +656,3 @@ parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
 
     return p;
 }
-
