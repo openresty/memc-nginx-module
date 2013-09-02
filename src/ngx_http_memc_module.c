@@ -31,6 +31,7 @@ static char *ngx_http_memc_upstream_max_fails_unsupported(ngx_conf_t *cf,
     ngx_command_t *cmd, void *conf);
 static char *ngx_http_memc_upstream_fail_timeout_unsupported(ngx_conf_t *cf,
     ngx_command_t *cmd, void *conf);
+static void *ngx_http_memc_create_main_conf(ngx_conf_t *cf);
 
 
 static ngx_conf_bitmask_t  ngx_http_memc_next_upstream_masks[] = {
@@ -124,7 +125,7 @@ static ngx_http_module_t  ngx_http_memc_module_ctx = {
     NULL,                                  /* preconfiguration */
     ngx_http_memc_init,                    /* postconfiguration */
 
-    NULL,                                  /* create main configuration */
+    ngx_http_memc_create_main_conf,        /* create main configuration */
     NULL,                                  /* init main configuration */
 
     NULL,                                  /* create server configuration */
@@ -246,7 +247,8 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
 static char *
 ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 {
-    ngx_http_memc_loc_conf_t  *mlcf = conf;
+    ngx_http_memc_loc_conf_t    *mlcf = conf;
+    ngx_http_memc_main_conf_t   *mmcf;
 
     ngx_str_t                 *value;
     ngx_url_t                  url;
@@ -267,7 +269,8 @@ ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
         clcf->auto_redirect = 1;
     }
 
-    ngx_http_memc_set_module_enabled();
+    mmcf = ngx_http_conf_get_module_main_conf(cf, ngx_http_memc_module);
+    mmcf->module_used = 1;
 
     value = cf->args->elts;
 
@@ -373,4 +376,18 @@ ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     }
 
     return NGX_CONF_OK;
+}
+
+
+static void *
+ngx_http_memc_create_main_conf(ngx_conf_t *cf)
+{
+    ngx_http_memc_main_conf_t    *mmcf;
+
+    mmcf = ngx_pcalloc(cf->pool, sizeof(ngx_http_memc_main_conf_t));
+    if (mmcf == NULL) {
+        return NULL;
+    }
+
+    return mmcf;
 }

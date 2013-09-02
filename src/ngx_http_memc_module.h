@@ -46,6 +46,16 @@ typedef struct {
 
 
 typedef struct {
+    ngx_int_t       key_index;
+    ngx_int_t       cmd_index;
+    ngx_int_t       value_index;
+    ngx_int_t       flags_index;
+    ngx_int_t       exptime_index;
+    ngx_int_t       module_used;
+} ngx_http_memc_main_conf_t;
+
+
+typedef struct {
 #if defined(nginx_version) && nginx_version >= 1001004
     off_t                      rest;
 #else

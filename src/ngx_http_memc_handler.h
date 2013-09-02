@@ -6,10 +6,8 @@
 
 
 ngx_int_t ngx_http_memc_handler(ngx_http_request_t *r);
-
 ngx_int_t ngx_http_memc_init(ngx_conf_t *cf);
 
-void ngx_http_memc_set_module_enabled(void);
 
 #endif /* NGX_HTTP_MEMC_HANDLER_H */
 
