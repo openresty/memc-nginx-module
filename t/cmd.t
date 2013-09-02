@@ -3,7 +3,7 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
-plan tests => repeat_each() * 2 * blocks();
+plan tests => repeat_each() * (2 * blocks() + 3);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
@@ -24,6 +24,8 @@ __DATA__
     GET /foo
 --- response_body_like: 400 Bad Request
 --- error_code: 400
+--- error_log
+ngx_memc: unknown $memc_cmd "blah"
 
 
 
@@ -37,6 +39,8 @@ __DATA__
     COPY /foo
 --- response_body_like: 400 Bad Request
 --- error_code: 400
+--- error_log
+ngx_memc: $memc_cmd variable not found for HTTP COPY requests
 
 
 
@@ -94,6 +98,8 @@ __DATA__
     GET /allow
 --- response_body_like: 403 Forbidden
 --- error_code: 403
+--- error_log
+ngx_memc: memcached command "version" not allowed
 
 
 

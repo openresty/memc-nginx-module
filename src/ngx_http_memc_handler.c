@@ -115,10 +115,9 @@ ngx_http_memc_handler(ngx_http_request_t *r)
             memc_cmd = ngx_http_memc_cmd_delete;
 
         } else {
-            ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
-                          "ngx_memc: $memc_cmd variable requires explicit "
-                          "assignment for HTTP request method %V",
-                          &r->method_name);
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "ngx_memc: $memc_cmd variable not found for HTTP "
+                          "%V requests", &r->method_name);
 
             return NGX_HTTP_BAD_REQUEST;
         }
@@ -127,7 +126,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
                                            &is_storage_cmd);
 
         if (memc_cmd == ngx_http_memc_cmd_unknown) {
-            ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
                           "ngx_memc: unknown $memc_cmd \"%v\"", cmd_vv);
             return NGX_HTTP_BAD_REQUEST;
         }
@@ -138,9 +137,9 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     dd("XXX connect timeout %d", (int) mlcf->upstream.connect_timeout);
 
     if (!ngx_http_memc_in_cmds_allowed(mlcf, memc_cmd)) {
-        ngx_log_error(NGX_LOG_ALERT, r->connection->log, 0,
-                      "ngx_memc: User requests to run memcached command "
-                      "\"%v\"", cmd_vv);
+        ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                      "ngx_memc: memcached command \"%v\" not allowed",
+                      cmd_vv);
 
         return NGX_HTTP_FORBIDDEN;
     }
