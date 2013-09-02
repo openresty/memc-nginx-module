@@ -6,9 +6,9 @@ Name
     installation instructions.
 
 Version
-    This document describes memc-nginx-module v0.13rc2
-    (<http://github.com/agentzh/memc-nginx-module/tags>) released on 24
-    November 2011.
+    This document describes memc-nginx-module v0.13
+    (<http://github.com/agentzh/memc-nginx-module/tags>) released on 2
+    September 2013.
 
 Synopsis
         # GET /foo?key=dog
@@ -148,7 +148,7 @@ Description
 
   How it works
     It implements the memcached TCP protocol all by itself, based upon the
-    "upstream" mechansim. Everything involving I/O is non-blocking.
+    "upstream" mechanism. Everything involving I/O is non-blocking.
 
     The module itself does not keep TCP connections to the upstream
     memcached servers across requests, just like other upstream modules. For
@@ -458,12 +458,12 @@ Installation
     source distribution by hand:
 
     Grab the nginx source code from nginx.org (<http://nginx.org/>), for
-    example, the version 1.2.1 (see nginx compatibility), and then build the
+    example, the version 1.4.2 (see nginx compatibility), and then build the
     source with this module:
 
-        wget 'http://nginx.org/download/nginx-1.2.1.tar.gz'
-        tar -xzvf nginx-1.2.1.tar.gz
-        cd nginx-1.2.1/
+        wget 'http://nginx.org/download/nginx-1.4.2.tar.gz'
+        tar -xzvf nginx-1.4.2.tar.gz
+        cd nginx-1.4.2/
 
         # Here we assume you would install you nginx under /opt/nginx/.
         ./configure --prefix=/opt/nginx \
@@ -489,7 +489,11 @@ Installation
 Compatibility
     The following versions of Nginx should work with this module:
 
-    *   1.2.x (last tested: 1.2.1)
+    *   1.5.x (last tested: 1.5.4)
+
+    *   1.4.x (last tested: 1.4.2)
+
+    *   1.2.x (last tested: 1.2.9)
 
     *   1.1.x (last tested: 1.1.5)
 
@@ -585,18 +589,18 @@ Getting involved
     a commit bit to the source repository on GitHub.
 
 Author
-    Yichun "agentzh" Zhang (章亦春) *<agentzh@gmail.com>*
+    Yichun "agentzh" Zhang (章亦春) *<agentzh@gmail.com>*, CloudFlare Inc.
 
     This wiki page is also maintained by the author himself, and everybody
     is encouraged to improve this page as well.
 
 Copyright & License
     The code base is borrowed directly from the standard [module
-    (HttpMemcachedModule)] in the Nginx 0.8.28 core. This part of code is
-    copyrighted by Igor Sysoev.
+    (HttpMemcachedModule)] in the Nginx core. This part of code is
+    copyrighted by Igor Sysoev and Nginx Inc.
 
-    Copyright (c) 2009-2012, Yichun "agentzh" Zhang (章亦春)
-    <agentzh@gmail.com>.
+    Copyright (c) 2009-2013, Yichun "agentzh" Zhang (章亦春)
+    <agentzh@gmail.com>, CloudFlare Inc.
 
     This module is licensed under the terms of the BSD license.
 

@@ -13,7 +13,7 @@ Name
 Version
 =======
 
-This document describes memc-nginx-module [v0.13rc2](http://github.com/agentzh/memc-nginx-module/tags) released on 24 November 2011.
+This document describes memc-nginx-module [v0.13](http://github.com/agentzh/memc-nginx-module/tags) released on 2 September 2013.
 
 Synopsis
 ========
@@ -159,7 +159,7 @@ Here's a sample configuration:
 How it works
 ------------
 
-It implements the memcached TCP protocol all by itself, based upon the `upstream` mechansim. Everything involving I/O is non-blocking.
+It implements the memcached TCP protocol all by itself, based upon the `upstream` mechanism. Everything involving I/O is non-blocking.
 
 The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section [Keep-alive connections to memcached servers](http://wiki.nginx.org/HttpMemcModule#Keep-alive_connections_to_memcached_servers).
 
@@ -473,12 +473,12 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [nginx.org](http://nginx.org/), for example,
-the version 1.2.1 (see [nginx compatibility](http://wiki.nginx.org/HttpMemcModule#Compatibility)), and then build the source with this module:
+the version 1.4.2 (see [nginx compatibility](http://wiki.nginx.org/HttpMemcModule#Compatibility)), and then build the source with this module:
 
 
-    wget 'http://nginx.org/download/nginx-1.2.1.tar.gz'
-    tar -xzvf nginx-1.2.1.tar.gz
-    cd nginx-1.2.1/
+    wget 'http://nginx.org/download/nginx-1.4.2.tar.gz'
+    tar -xzvf nginx-1.4.2.tar.gz
+    cd nginx-1.4.2/
     
     # Here we assume you would install you nginx under /opt/nginx/.
     ./configure --prefix=/opt/nginx \
@@ -505,7 +505,9 @@ Compatibility
 
 The following versions of Nginx should work with this module:
 
-* **1.2.x**                       (last tested: 1.2.1)
+* **1.5.x**                       (last tested: 1.5.4)
+* **1.4.x**                       (last tested: 1.4.2)
+* **1.2.x**                       (last tested: 1.2.9)
 * **1.1.x**                       (last tested: 1.1.5)
 * **1.0.x**                       (last tested: 1.0.10)
 * **0.9.x**                       (last tested: 0.9.4)
@@ -587,16 +589,16 @@ You'll be very welcomed to submit patches to the [author](http://wiki.nginx.org/
 Author
 ======
 
-Yichun "agentzh" Zhang (章亦春) *&lt;agentzh@gmail.com&gt;*
+Yichun "agentzh" Zhang (章亦春) *&lt;agentzh@gmail.com&gt;*, CloudFlare Inc.
 
 This wiki page is also maintained by the author himself, and everybody is encouraged to improve this page as well.
 
 Copyright & License
 ===================
 
-The code base is borrowed directly from the standard [memcached module](http://wiki.nginx.org/HttpMemcachedModule) in the Nginx 0.8.28 core. This part of code is copyrighted by Igor Sysoev.
+The code base is borrowed directly from the standard [memcached module](http://wiki.nginx.org/HttpMemcachedModule) in the Nginx core. This part of code is copyrighted by Igor Sysoev and Nginx Inc.
 
-Copyright (c) 2009-2012, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>.
+Copyright (c) 2009-2013, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
 
 This module is licensed under the terms of the BSD license.
 
