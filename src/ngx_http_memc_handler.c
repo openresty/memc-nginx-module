@@ -121,7 +121,9 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
             return NGX_HTTP_BAD_REQUEST;
         }
+
     } else {
+
         memc_cmd = ngx_http_memc_parse_cmd(cmd_vv->data, cmd_vv->len,
                                            &is_storage_cmd);
 

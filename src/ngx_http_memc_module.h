@@ -1,9 +1,11 @@
 #ifndef NGX_HTTP_MEMC_MODULE_H
 #define NGX_HTTP_MEMC_MODULE_H
 
+
 #include <ngx_core.h>
 #include <ngx_http.h>
 #include <nginx.h>
+
 
 typedef enum {
     ngx_http_memc_cmd_set,
@@ -33,6 +35,7 @@ typedef enum {
     ngx_http_memc_cmd_unknown
 } ngx_http_memc_cmd_t;
 
+
 typedef struct {
     ngx_flag_t                       flags_to_last_modified;
     ngx_http_upstream_conf_t         upstream;
@@ -40,6 +43,7 @@ typedef struct {
     ngx_http_complex_value_t        *complex_target;
 
 } ngx_http_memc_loc_conf_t;
+
 
 typedef struct {
 #if defined(nginx_version) && nginx_version >= 1001004
@@ -68,9 +72,11 @@ typedef struct {
 
 } ngx_http_memc_ctx_t;
 
+
 extern ngx_module_t  ngx_http_memc_module;
+
 
 #define NGX_HTTP_MEMC_END   (sizeof(CRLF "END" CRLF) - 1)
 
-#endif /* NGX_HTTP_MEMC_MODULE_H */
 
+#endif /* NGX_HTTP_MEMC_MODULE_H */

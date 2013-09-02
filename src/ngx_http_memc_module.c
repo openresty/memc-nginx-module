@@ -1,16 +1,15 @@
-#ifndef DDEBUG
-#define DDEBUG 0
-#endif
-#include "ddebug.h"
 
 /*
  * Copyright (C) Igor Sysoev
- */
-
-/*
  * Copyright (C) Zhang "agentzh" Yichun
  */
 
+
+#ifndef DDEBUG
+#define DDEBUG 0
+#endif
+
+#include "ddebug.h"
 #include "ngx_http_memc_module.h"
 #include "ngx_http_memc_handler.h"
 #include "ngx_http_memc_util.h"
@@ -20,16 +19,14 @@
 #include <ngx_http.h>
 #include <nginx.h>
 
-static void *ngx_http_memc_create_loc_conf(ngx_conf_t *cf);
-static char *ngx_http_memc_merge_loc_conf(ngx_conf_t *cf,
-    void *parent, void *child);
 
+static void *ngx_http_memc_create_loc_conf(ngx_conf_t *cf);
+static char *ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent,
+    void *child);
 static char *ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
-
 static char *ngx_http_memc_pass(ngx_conf_t *cf, ngx_command_t *cmd,
     void *conf);
-
 static char *ngx_http_memc_upstream_max_fails_unsupported(ngx_conf_t *cf,
     ngx_command_t *cmd, void *conf);
 static char *ngx_http_memc_upstream_fail_timeout_unsupported(ngx_conf_t *cf,
@@ -349,7 +346,7 @@ ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     value = cf->args->elts;
 
     mlcf->cmds_allowed = ngx_array_create(cf->pool, cf->args->nelts - 1,
-            sizeof(ngx_http_memc_cmd_t));
+                                          sizeof(ngx_http_memc_cmd_t));
 
     if (mlcf->cmds_allowed == NULL) {
         return NGX_CONF_ERROR;
@@ -377,4 +374,3 @@ ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
 
     return NGX_CONF_OK;
 }
-
