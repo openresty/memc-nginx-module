@@ -8,7 +8,7 @@ Name
 
 **ngx_memc** - An extended version of the standard memcached module that supports set, add, delete, and many more memcached commands.
 
-*This module is not distributed with the Nginx source.* See [the installation instructions](http://wiki.nginx.org/HttpMemcModule#Installation).
+*This module is not distributed with the Nginx source.* See [the installation instructions](#installation).
 
 Version
 =======
@@ -118,7 +118,7 @@ Synopsis
 Description
 ===========
 
-This module extends the standard [memcached module](http://wiki.nginx.org/HttpMemcachedModule) to support almost the whole [memcached ascii protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
+This module extends the standard [memcached module](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) to support almost the whole [memcached ascii protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
 
 It allows you to define a custom [REST](http://en.wikipedia.org/wiki/REST) interface to your memcached servers or access memcached in a very efficient way from within the nginx server by means of subrequests or [independent fake requests](http://github.com/srlindsay/nginx-independent-subrequest).
 
@@ -126,7 +126,7 @@ This module is not supposed to be merged into the Nginx core because I've used [
 
 If you are going to use this module to cache location responses out of the box, try [HttpSRCacheModule](http://wiki.nginx.org/HttpSRCacheModule) with this module to achieve that.
 
-When used in conjunction with [HttpLuaModule](http://wiki.nginx.org/HttpLuaModule), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
+When used in conjunction with [HttpLuaModule](http://github.com/chaoslawful/lua-nginx-module), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
 
 Keep-alive connections to memcached servers
 -------------------------------------------
@@ -161,14 +161,14 @@ How it works
 
 It implements the memcached TCP protocol all by itself, based upon the `upstream` mechanism. Everything involving I/O is non-blocking.
 
-The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section [Keep-alive connections to memcached servers](http://wiki.nginx.org/HttpMemcModule#Keep-alive_connections_to_memcached_servers).
+The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section [Keep-alive connections to memcached servers](#keep-alive-connections-to-memcached-servers).
 
 Memcached commands supported
 ============================
 
-The memcached storage commands [set](http://wiki.nginx.org/HttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), [add](http://wiki.nginx.org/HttpMemcModule#add_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), [replace](http://wiki.nginx.org/HttpMemcModule#replace_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), [prepend](http://wiki.nginx.org/HttpMemcModule#prepend_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value), and [append](http://wiki.nginx.org/HttpMemcModule#append_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value) uses the `$memc_key` as the key, `$memc_exptime` as the expiration time (or delay) (defaults to 0), `$memc_flags` as the flags (defaults to 0), to build the corresponding memcached queries.
+The memcached storage commands [set](#set-memc_key-memc_flags-memc_exptime-memc_value), [add](#add-memc_key-memc_flags-memc_exptime-memc_value), [replace](#replace-memc_key-memc_flags-memc_exptime-memc_value), [prepend](#prepend-memc_key-memc_flags-memc_exptime-memc_value), and [append](#append-memc_key-memc_flags-memc_exptime-memc_value) uses the `$memc_key` as the key, `$memc_exptime` as the expiration time (or delay) (defaults to 0), `$memc_flags` as the flags (defaults to 0), to build the corresponding memcached queries.
 
-If `$memc_value` is not defined at all, then the request body will be used as the value of the `$memc_value` except for the [incr](http://wiki.nginx.org/HttpMemcModule#incr_.24memc_key_.24memc_value) and [decr](http://wiki.nginx.org/HttpMemcModule#decr_.24memc_key_.24memc_value) commands. Note that if `$memc_value` is defined as an empty string (`""`), that empty string will still be used as the value as is.
+If `$memc_value` is not defined at all, then the request body will be used as the value of the `$memc_value` except for the [incr](#incr-memc_key-memc_value) and [decr](#decr-memc_key-memc_value) commands. Note that if `$memc_value` is defined as an empty string (`""`), that empty string will still be used as the value as is.
 
 The following memcached commands have been implemented and tested (with their parameters marked by corresponding
 nginx variables defined by this module):
@@ -189,7 +189,7 @@ Retrieves the value using a key.
       }
 
 
-Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard [add_header directive](http://wiki.nginx.org/HttpHeadersModule#add_header).
+Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard [add_header directive](http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header).
 
 It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
@@ -232,24 +232,24 @@ The original memcached responses are returned as the response body except for `4
 add $memc_key $memc_flags $memc_exptime $memc_value
 ---------------------------------------------------
 
-Similar to the [set command](http://wiki.nginx.org/HttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
+Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
 
 replace $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
-Similar to the [set command](http://wiki.nginx.org/HttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
+Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
 
 append $memc_key $memc_flags $memc_exptime $memc_value
 ------------------------------------------------------
 
-Similar to the [set command](http://wiki.nginx.org/HttpMemcModule#set_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
+Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
 
 Note that at least memcached version 1.2.2 does not support the "append" and "prepend" commands. At least 1.2.4 and later versions seem to supports these two commands.
 
 prepend $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
-Similar to the [append command](http://wiki.nginx.org/HttpMemcModule#append_.24memc_key_.24memc_flags_.24memc_exptime_.24memc_value).
+Similar to the [append command](#append-memc_key-memc_flags-memc_exptime-memc_value).
 
 delete $memc_key
 ----------------
@@ -272,7 +272,7 @@ The original memcached responses are returned as the response body except for `4
 delete $memc_key $memc_exptime
 ------------------------------
 
-Similar to the [delete $memc_key](http://wiki.nginx.org/HttpMemcModule#delete_.24memc_key) command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
+Similar to the [delete $memc_key](#delete-memc_key) command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
 
 This command is no longer available in the latest memcached version 1.4.4.
 
@@ -298,7 +298,7 @@ It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 decr $memc_key $memc_value
 --------------------------
 
-Similar to [incr $memc_key $memc_value](http://wiki.nginx.org/HttpMemcModule#incr_.24memc_key_.24memc_value).
+Similar to [incr $memc_key $memc_value](#incr-memc_key-memc_value).
 
 flush_all
 ---------
@@ -315,7 +315,7 @@ Mark all the keys on the memcached server as expired:
 flush_all $memc_exptime
 -----------------------
 
-Just like [flush_all](http://wiki.nginx.org/HttpMemcModule#flush_all) but also accepts an expiration time specified by the `$memc_exptime` variable.
+Just like [flush_all](#flush_all) but also accepts an expiration time specified by the `$memc_exptime` variable.
 
 stats
 -----
@@ -352,7 +352,7 @@ The raw `version` command output from the upstream memcached server will be put 
 Directives
 ==========
 
-All the standard [memcached module](http://wiki.nginx.org/HttpMemcachedModule) directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`.
+All the standard [memcached module](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`.
 
 Here we only document the most important two directives (the latter is a new directive introduced by this module).
 
@@ -473,7 +473,7 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [nginx.org](http://nginx.org/), for example,
-the version 1.4.2 (see [nginx compatibility](http://wiki.nginx.org/HttpMemcModule#Compatibility)), and then build the source with this module:
+the version 1.4.2 (see [nginx compatibility](#compatibility)), and then build the source with this module:
 
 
     wget 'http://nginx.org/download/nginx-1.4.2.tar.gz'
@@ -514,11 +514,11 @@ The following versions of Nginx should work with this module:
 * **0.8.x**                       (last tested: 0.8.54)
 * **0.7.x >= 0.7.46**             (last tested: 0.7.68)
 
-It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [echo module](http://wiki.nginx.org/HttpEchoModule)'s [echo_location directive](http://wiki.nginx.org/HttpEchoModule#echo_location), which requires at least nginx 0.7.46 :)
+It's worth mentioning that some 0.7.x versions older than 0.7.46 might also work, but I can't easily test them because the test suite makes extensive use of the [echo module](http://github.com/agentzh/echo-nginx-module)'s [echo_location directive](http://github.com/agentzh/echo-nginx-module#echo_location), which requires at least nginx 0.7.46 :)
 
 Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
-If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [reporting a bug](http://wiki.nginx.org/HttpMemcModule#Report_Bugs).
+If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [reporting a bug](#report-bugs).
 
 Community
 =========
@@ -573,7 +573,7 @@ Because a single nginx server (by default, `localhost:1984`) is used across all 
 
 You should also keep a memcached server listening on the `11211` port at localhost before running the test suite.
 
-Some parts of the test suite requires modules [rewrite](http://wiki.nginx.org/HttpRewriteModule) and [echo](http://wiki.nginx.org/HttpEchoModule) to be enabled as well when building Nginx.
+Some parts of the test suite requires modules [rewrite](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html) and [echo](http://github.com/agentzh/echo-nginx-module) to be enabled as well when building Nginx.
 
 TODO
 ====
@@ -584,7 +584,7 @@ TODO
 Getting involved
 ================
 
-You'll be very welcomed to submit patches to the [author](http://wiki.nginx.org/HttpMemcModule#Author) or just ask for a commit bit to the [source repository](http://wiki.nginx.org/HttpMemcModule#Source_Repository) on GitHub.
+You'll be very welcomed to submit patches to the [author](#author) or just ask for a commit bit to the [source repository](#source-repository) on GitHub.
 
 Author
 ======
@@ -596,7 +596,7 @@ This wiki page is also maintained by the author himself, and everybody is encour
 Copyright & License
 ===================
 
-The code base is borrowed directly from the standard [memcached module](http://wiki.nginx.org/HttpMemcachedModule) in the Nginx core. This part of code is copyrighted by Igor Sysoev and Nginx Inc.
+The code base is borrowed directly from the standard [memcached module](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) in the Nginx core. This part of code is copyrighted by Igor Sysoev and Nginx Inc.
 
 Copyright (c) 2009-2013, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
 
@@ -628,8 +628,8 @@ See Also
 * My slides demonstrating various ngx_memc usage: <http://agentzh.org/misc/slides/nginx-conf-scripting/nginx-conf-scripting.html#34> (use the arrow or pageup/pagedown keys on the keyboard to swith pages)
 * The latest [memcached TCP protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
 * The [ngx_srcache](http://github.com/agentzh/srcache-nginx-module) module
-* The [lua-resty-memcached](https://github.com/agentzh/lua-resty-memcached) library based on the [HttpLuaModule](http://wiki.nginx.org/HttpLuaModule) cosocket API.
-* The standard [memcached](http://wiki.nginx.org/HttpMemcachedModule) module.
-* The [echo module](http://wiki.nginx.org/HttpEchoModule) for Nginx module's automated testing.
-* The standard [headers](http://wiki.nginx.org/HttpHeadersModule) module and the 3rd-parth [headers-more](http://wiki.nginx.org/HttpHeadersMoreModule) module.
+* The [lua-resty-memcached](https://github.com/agentzh/lua-resty-memcached) library based on the [HttpLuaModule](http://github.com/chaoslawful/lua-nginx-module) cosocket API.
+* The standard [memcached](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) module.
+* The [echo module](http://github.com/agentzh/echo-nginx-module) for Nginx module's automated testing.
+* The standard [headers](http://nginx.org/en/docs/http/ngx_http_headers_module.html) module and the 3rd-parth [headers-more](http://github.com/agentzh/headers-more-nginx-module) module.
 
