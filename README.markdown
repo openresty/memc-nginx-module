@@ -124,7 +124,7 @@ It allows you to define a custom [REST](http://en.wikipedia.org/wiki/REST) inter
 
 This module is not supposed to be merged into the Nginx core because I've used [Ragel](http://www.complang.org/ragel/) to generate the memcached response parsers (in C) for joy :)
 
-If you are going to use this module to cache location responses out of the box, try [HttpSRCacheModule](http://wiki.nginx.org/HttpSRCacheModule) with this module to achieve that.
+If you are going to use this module to cache location responses out of the box, try [HttpSRCacheModule](http://github.com/agentzh/srcache-nginx-module) with this module to achieve that.
 
 When used in conjunction with [HttpLuaModule](http://github.com/chaoslawful/lua-nginx-module), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
 
