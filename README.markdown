@@ -124,9 +124,9 @@ It allows you to define a custom [REST](http://en.wikipedia.org/wiki/REST) inter
 
 This module is not supposed to be merged into the Nginx core because I've used [Ragel](http://www.complang.org/ragel/) to generate the memcached response parsers (in C) for joy :)
 
-If you are going to use this module to cache location responses out of the box, try [HttpSRCacheModule](http://github.com/agentzh/srcache-nginx-module) with this module to achieve that.
+If you are going to use this module to cache location responses out of the box, try [srcache-nginx-module](http://github.com/agentzh/srcache-nginx-module) with this module to achieve that.
 
-When used in conjunction with [HttpLuaModule](http://github.com/chaoslawful/lua-nginx-module), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
+When used in conjunction with [lua-nginx-module](http://github.com/chaoslawful/lua-nginx-module), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
 
 Keep-alive connections to memcached servers
 -------------------------------------------
@@ -628,7 +628,7 @@ See Also
 * My slides demonstrating various ngx_memc usage: <http://agentzh.org/misc/slides/nginx-conf-scripting/nginx-conf-scripting.html#34> (use the arrow or pageup/pagedown keys on the keyboard to swith pages)
 * The latest [memcached TCP protocol](http://code.sixapart.com/svn/memcached/trunk/server/doc/protocol.txt).
 * The [ngx_srcache](http://github.com/agentzh/srcache-nginx-module) module
-* The [lua-resty-memcached](https://github.com/agentzh/lua-resty-memcached) library based on the [HttpLuaModule](http://github.com/chaoslawful/lua-nginx-module) cosocket API.
+* The [lua-resty-memcached](https://github.com/agentzh/lua-resty-memcached) library based on the [lua-nginx-module](http://github.com/chaoslawful/lua-nginx-module) cosocket API.
 * The standard [memcached](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) module.
 * The [echo module](http://github.com/agentzh/echo-nginx-module) for Nginx module's automated testing.
 * The standard [headers](http://nginx.org/en/docs/http/ngx_http_headers_module.html) module and the 3rd-parth [headers-more](http://github.com/agentzh/headers-more-nginx-module) module.
