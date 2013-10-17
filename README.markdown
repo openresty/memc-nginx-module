@@ -10,6 +10,53 @@ Name
 
 *This module is not distributed with the Nginx source.* See [the installation instructions](#installation).
 
+Table of Contents
+=================
+
+* [Version](#version)
+* [Synopsis](#synopsis)
+* [Description](#description)
+    * [Keep-alive connections to memcached servers](#keep-alive-connections-to-memcached-servers)
+    * [How it works](#how-it-works)
+* [Memcached commands supported](#memcached-commands-supported)
+    * [get $memc_key](#get-memc_key)
+    * [set $memc_key $memc_flags $memc_exptime $memc_value](#set-memc_key-memc_flags-memc_exptime-memc_value)
+    * [add $memc_key $memc_flags $memc_exptime $memc_value](#add-memc_key-memc_flags-memc_exptime-memc_value)
+    * [replace $memc_key $memc_flags $memc_exptime $memc_value](#replace-memc_key-memc_flags-memc_exptime-memc_value)
+    * [append $memc_key $memc_flags $memc_exptime $memc_value](#append-memc_key-memc_flags-memc_exptime-memc_value)
+    * [prepend $memc_key $memc_flags $memc_exptime $memc_value](#prepend-memc_key-memc_flags-memc_exptime-memc_value)
+    * [delete $memc_key](#delete-memc_key)
+    * [delete $memc_key $memc_exptime](#delete-memc_key-memc_exptime)
+    * [incr $memc_key $memc_value](#incr-memc_key-memc_value)
+    * [decr $memc_key $memc_value](#decr-memc_key-memc_value)
+    * [flush_all](#flush_all)
+    * [flush_all $memc_exptime](#flush_all-memc_exptime)
+    * [stats](#stats)
+    * [version](#version)
+* [Directives](#directives)
+    * [memc_pass](#memc_pass)
+    * [memc_cmds_allowed](#memc_cmds_allowed)
+    * [memc_flags_to_last_modified](#memc_flags_to_last_modified)
+    * [memc_connect_timeout](#memc_connect_timeout)
+    * [memc_send_timeout](#memc_send_timeout)
+    * [memc_read_timeout](#memc_read_timeout)
+    * [memc_buffer_size](#memc_buffer_size)
+* [Installation](#installation)
+    * [For Developers](#for-developers)
+* [Compatibility](#compatibility)
+* [Community](#community)
+    * [English Mailing List](#english-mailing-list)
+    * [Chinese Mailing List](#chinese-mailing-list)
+* [Report Bugs](#report-bugs)
+* [Source Repository](#source-repository)
+* [Changes](#changes)
+* [Test Suite](#test-suite)
+* [TODO](#todo)
+* [Getting involved](#getting-involved)
+* [Author](#author)
+* [Copyright & License](#copyright--license)
+* [See Also](#see-also)
+
 Version
 =======
 
@@ -128,6 +175,8 @@ If you are going to use this module to cache location responses out of the box, 
 
 When used in conjunction with [lua-nginx-module](http://github.com/chaoslawful/lua-nginx-module), it is recommended to use the [lua-resty-memcached](http://github.com/agentzh/lua-resty-memcached) library instead of this module though, because the former is much more flexible and memory-efficient.
 
+[Back to TOC](#table-of-contents)
+
 Keep-alive connections to memcached servers
 -------------------------------------------
 
@@ -156,12 +205,16 @@ Here's a sample configuration:
       }
 
 
+[Back to TOC](#table-of-contents)
+
 How it works
 ------------
 
 It implements the memcached TCP protocol all by itself, based upon the `upstream` mechanism. Everything involving I/O is non-blocking.
 
 The module itself does not keep TCP connections to the upstream memcached servers across requests, just like other upstream modules. For a working solution, see section [Keep-alive connections to memcached servers](#keep-alive-connections-to-memcached-servers).
+
+[Back to TOC](#table-of-contents)
 
 Memcached commands supported
 ============================
@@ -172,6 +225,8 @@ If `$memc_value` is not defined at all, then the request body will be used as th
 
 The following memcached commands have been implemented and tested (with their parameters marked by corresponding
 nginx variables defined by this module):
+
+[Back to TOC](#table-of-contents)
 
 get $memc_key
 -------------
@@ -192,6 +247,8 @@ Retrieves the value using a key.
 Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard [add_header directive](http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header).
 
 It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
+
+[Back to TOC](#table-of-contents)
 
 set $memc_key $memc_flags $memc_exptime $memc_value
 ---------------------------------------------------
@@ -229,15 +286,21 @@ Returns `201 Created` if the upstream memcached server replies `STORED`, `200` f
 
 The original memcached responses are returned as the response body except for `404 NOT FOUND`.
 
+[Back to TOC](#table-of-contents)
+
 add $memc_key $memc_flags $memc_exptime $memc_value
 ---------------------------------------------------
 
 Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
 
+[Back to TOC](#table-of-contents)
+
 replace $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
 Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
+
+[Back to TOC](#table-of-contents)
 
 append $memc_key $memc_flags $memc_exptime $memc_value
 ------------------------------------------------------
@@ -246,10 +309,14 @@ Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
 
 Note that at least memcached version 1.2.2 does not support the "append" and "prepend" commands. At least 1.2.4 and later versions seem to supports these two commands.
 
+[Back to TOC](#table-of-contents)
+
 prepend $memc_key $memc_flags $memc_exptime $memc_value
 -------------------------------------------------------
 
 Similar to the [append command](#append-memc_key-memc_flags-memc_exptime-memc_value).
+
+[Back to TOC](#table-of-contents)
 
 delete $memc_key
 ----------------
@@ -269,12 +336,16 @@ Returns `200 OK` if deleted successfully, `404 Not Found` for `NOT_FOUND`, or `5
 
 The original memcached responses are returned as the response body except for `404 NOT FOUND`.
 
+[Back to TOC](#table-of-contents)
+
 delete $memc_key $memc_exptime
 ------------------------------
 
 Similar to the [delete $memc_key](#delete-memc_key) command except it accepts an optional `expiration` time specified by the `$memc_exptime` variable.
 
 This command is no longer available in the latest memcached version 1.4.4.
+
+[Back to TOC](#table-of-contents)
 
 incr $memc_key $memc_value
 --------------------------
@@ -295,10 +366,14 @@ Returns `200 OK` with the new value associated with that key as the response bod
 
 It returns `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
+[Back to TOC](#table-of-contents)
+
 decr $memc_key $memc_value
 --------------------------
 
 Similar to [incr $memc_key $memc_value](#incr-memc_key-memc_value).
+
+[Back to TOC](#table-of-contents)
 
 flush_all
 ---------
@@ -312,10 +387,14 @@ Mark all the keys on the memcached server as expired:
       }
 
 
+[Back to TOC](#table-of-contents)
+
 flush_all $memc_exptime
 -----------------------
 
 Just like [flush_all](#flush_all) but also accepts an expiration time specified by the `$memc_exptime` variable.
+
+[Back to TOC](#table-of-contents)
 
 stats
 -----
@@ -333,6 +412,8 @@ Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or
 
 The raw `stats` command output from the upstream memcached server will be put into the response body. 
 
+[Back to TOC](#table-of-contents)
+
 version
 -------
 
@@ -349,12 +430,16 @@ Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or
 
 The raw `version` command output from the upstream memcached server will be put into the response body.
 
+[Back to TOC](#table-of-contents)
+
 Directives
 ==========
 
 All the standard [memcached module](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) directives in nginx 0.8.28 are directly inherited, with the `memcached_` prefixes replaced by `memc_`. For example, the `memcached_pass` directive is spelled `memc_pass`.
 
 Here we only document the most important two directives (the latter is a new directive introduced by this module).
+
+[Back to TOC](#table-of-contents)
 
 memc_pass
 ---------
@@ -374,6 +459,8 @@ memc_pass
 **phase:** *content*
 
 Specify the memcached server backend.
+
+[Back to TOC](#table-of-contents)
 
 memc_cmds_allowed
 -----------------
@@ -398,6 +485,8 @@ An example is
        }
 
 
+[Back to TOC](#table-of-contents)
+
 memc_flags_to_last_modified
 ---------------------------
 **syntax:** *memc_flags_to_last_modified on|off*
@@ -407,6 +496,8 @@ memc_flags_to_last_modified
 **context:** *http, server, location, if*
 
 Read the memcached flags as epoch seconds and set it as the value of the `Last-Modified` header. For conditional GET, it will signal nginx to return `304 Not Modified` response to save bandwidth.
+
+[Back to TOC](#table-of-contents)
 
 memc_connect_timeout
 --------------------
@@ -422,6 +513,8 @@ It's wise to always explicitly specify the time unit to avoid confusion. Time un
 
 This time must be less than 597 hours.
 
+[Back to TOC](#table-of-contents)
+
 memc_send_timeout
 -----------------
 **syntax:** *memc_send_timeout &lt;time&gt;*
@@ -435,6 +528,8 @@ The timeout for sending TCP requests to the memcached server, in seconds by defa
 It's wise to always explicitly specify the time unit to avoid confusion. Time units supported are "s"(seconds), "ms"(milliseconds), "y"(years), "M"(months), "w"(weeks), "d"(days), "h"(hours), and "m"(minutes).
 
 This time must be less than 597 hours.
+
+[Back to TOC](#table-of-contents)
 
 memc_read_timeout
 -----------------
@@ -450,6 +545,8 @@ It's wise to always explicitly specify the time unit to avoid confusion. Time un
 
 This time must be less than 597 hours.
 
+[Back to TOC](#table-of-contents)
+
 memc_buffer_size
 ----------------
 **syntax:** *memc_buffer_size &lt;size&gt;*
@@ -464,6 +561,8 @@ This buffer size is used for the memory buffer to hold
 * the complete response header (i.e., the first line of the response) for the `get` memcached command.
 
 This default size is the page size, may be `4k` or `8k`.
+
+[Back to TOC](#table-of-contents)
 
 Installation
 ============
@@ -490,6 +589,8 @@ the version 1.4.2 (see [nginx compatibility](#compatibility)), and then build th
 
 Download the latest version of the release tarball of this module from [memc-nginx-module file list](http://github.com/agentzh/memc-nginx-module/tags).
 
+[Back to TOC](#table-of-contents)
+
 For Developers
 --------------
 
@@ -499,6 +600,8 @@ regenerate the parser's C file, i.e., [src/ngx_http_memc_response.c](http://gith
 
     $ ragel -G2 src/ngx_http_memc_response.rl
 
+
+[Back to TOC](#table-of-contents)
 
 Compatibility
 =============
@@ -520,18 +623,26 @@ Earlier versions of Nginx like 0.6.x and 0.5.x will *not* work.
 
 If you find that any particular version of Nginx above 0.7.46 does not work with this module, please consider [reporting a bug](#report-bugs).
 
+[Back to TOC](#table-of-contents)
+
 Community
 =========
+
+[Back to TOC](#table-of-contents)
 
 English Mailing List
 --------------------
 
 The [openresty-en](https://groups.google.com/group/openresty-en) mailing list is for English speakers.
 
+[Back to TOC](#table-of-contents)
+
 Chinese Mailing List
 --------------------
 
 The [openresty](https://groups.google.com/group/openresty) mailing list is for Chinese speakers.
+
+[Back to TOC](#table-of-contents)
 
 Report Bugs
 ===========
@@ -541,10 +652,14 @@ Although a lot of effort has been put into testing and code tuning, there must b
 1. create a ticket on the [issue tracking interface](http://github.com/agentzh/memc-nginx-module/issues) provided by GitHub,
 1. or send a bug report or even patches to the [nginx mailing list](http://mailman.nginx.org/mailman/listinfo/nginx).
 
+[Back to TOC](#table-of-contents)
+
 Source Repository
 =================
 
 Available on github at [agentzh/memc-nginx-module](http://github.com/agentzh/memc-nginx-module).
+
+[Back to TOC](#table-of-contents)
 
 Changes
 =======
@@ -552,6 +667,8 @@ Changes
 The changes of every release of this module can be obtained from the ngx_openresty bundle's change logs:
 
 <http://openresty.org/#Changes>
+
+[Back to TOC](#table-of-contents)
 
 Test Suite
 ==========
@@ -575,16 +692,22 @@ You should also keep a memcached server listening on the `11211` port at localho
 
 Some parts of the test suite requires modules [rewrite](http://nginx.org/en/docs/http/ngx_http_rewrite_module.html) and [echo](http://github.com/agentzh/echo-nginx-module) to be enabled as well when building Nginx.
 
+[Back to TOC](#table-of-contents)
+
 TODO
 ====
 
 * add support for the memcached commands `cas`, `gets` and `stats $memc_value`.
 * add support for the `noreply` option.
 
+[Back to TOC](#table-of-contents)
+
 Getting involved
 ================
 
 You'll be very welcomed to submit patches to the [author](#author) or just ask for a commit bit to the [source repository](#source-repository) on GitHub.
+
+[Back to TOC](#table-of-contents)
 
 Author
 ======
@@ -592,6 +715,8 @@ Author
 Yichun "agentzh" Zhang (章亦春) *&lt;agentzh@gmail.com&gt;*, CloudFlare Inc.
 
 This wiki page is also maintained by the author himself, and everybody is encouraged to improve this page as well.
+
+[Back to TOC](#table-of-contents)
 
 Copyright & License
 ===================
@@ -620,6 +745,8 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+[Back to TOC](#table-of-contents)
 
 See Also
 ========
