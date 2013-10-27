@@ -65,6 +65,7 @@ This document describes memc-nginx-module [v0.13](http://github.com/agentzh/memc
 Synopsis
 ========
 
+```nginx
 
     # GET /foo?key=dog
     #
@@ -84,8 +85,9 @@ Synopsis
 
         memc_pass 127.0.0.1:11211;
     }
+```
 
-
+```nginx
 
     # GET /bar?cmd=get&key=cat
     #
@@ -102,8 +104,9 @@ Synopsis
 
         memc_pass 127.0.0.1:11211;
     }
+```
 
-
+```nginx
 
     # GET /bar?cmd=get&key=cat
     # GET /bar?cmd=set&key=dog&val=animal&flags=1234&exptime=2
@@ -120,8 +123,9 @@ Synopsis
 
         memc_pass 127.0.0.1:11211;
     }
+```
 
-
+```nginx
 
       http {
         ...
@@ -138,8 +142,9 @@ Synopsis
         }
       }
       ...
+```
 
-
+```nginx
 
     # read the memcached flags into the Last-Modified header
     # to respond 304 to conditional GET
@@ -150,8 +155,9 @@ Synopsis
 
         memc_flags_to_last_modified on;
     }
+```
 
-
+```nginx
 
     location /memc {
         set $memc_key foo;
@@ -160,7 +166,7 @@ Synopsis
         # access the unix domain socket listend by memcached
         memc_pass unix:/tmp/memcached.sock;
     }
-
+```
 
 Description
 ===========
@@ -184,6 +190,7 @@ You need [HttpUpstreamKeepaliveModule](http://wiki.nginx.org/HttpUpstreamKeepali
 
 Here's a sample configuration:
 
+```nginx
 
       http {
         upstream backend {
@@ -203,7 +210,7 @@ Here's a sample configuration:
             }
         }
       }
-
+```
 
 [Back to TOC](#table-of-contents)
 
@@ -233,6 +240,7 @@ get $memc_key
 
 Retrieves the value using a key.
 
+```nginx
 
       location /foo {
           set $memc_cmd 'get';
@@ -242,7 +250,7 @@ Retrieves the value using a key.
           
           add_header X-Memc-Flags $memc_flags;
       }
-
+```
 
 Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard [add_header directive](http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header).
 
@@ -255,6 +263,7 @@ set $memc_key $memc_flags $memc_exptime $memc_value
 
 To use the request body as the memcached value, just avoid setting the `$memc_value` variable:
 
+```nginx
 
       # POST /foo
       # my value...
@@ -266,10 +275,11 @@ To use the request body as the memcached value, just avoid setting the `$memc_va
           
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 Or let the `$memc_value` hold the value:
 
+```nginx
 
       location /foo {
           set $memc_cmd 'set';
@@ -280,7 +290,7 @@ Or let the `$memc_value` hold the value:
     
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 Returns `201 Created` if the upstream memcached server replies `STORED`, `200` for `NOT_STORED`, `404` for `NOT_FOUND`, `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
@@ -323,6 +333,7 @@ delete $memc_key
 
 Deletes the memcached entry using a key.
 
+```nginx
 
       location /foo
           set $memc_cmd delete;
@@ -330,7 +341,7 @@ Deletes the memcached entry using a key.
           
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 Returns `200 OK` if deleted successfully, `404 Not Found` for `NOT_FOUND`, or `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
@@ -352,13 +363,14 @@ incr $memc_key $memc_value
 
 Increments the existing value of `$memc_key` by the amount specified by `$memc_value`:
 
+```nginx
 
       location /foo {
           set $memc_key my_key;
           set $memc_value 2;
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 In the preceding example, every time we access `/foo` will cause the value of `my_key` increments by `2`.
 
@@ -380,12 +392,13 @@ flush_all
 
 Mark all the keys on the memcached server as expired:
 
+```nginx
 
       location /foo {
           set $memc_cmd flush_all;
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 [Back to TOC](#table-of-contents)
 
@@ -401,12 +414,13 @@ stats
 
 Causes the memcached server to output general-purpose statistics and settings
 
+```nginx
 
       location /foo {
           set $memc_cmd stats;
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
@@ -419,12 +433,13 @@ version
 
 Queries the memcached server's version number:
 
+```nginx
 
       location /foo {
           set $memc_cmd version;
           memc_pass 127.0.0.1:11211;
       }
-
+```
 
 Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
@@ -473,6 +488,7 @@ memc_cmds_allowed
 Lists memcached commands that are allowed to access. By default, all the memcached commands supported by this module are accessible.
 An example is
 
+```nginx
 
        location /foo {
            set $memc_cmd $arg_cmd;
@@ -483,7 +499,7 @@ An example is
             
            memc_cmds_allowed get;
        }
-
+```
 
 [Back to TOC](#table-of-contents)
 
@@ -574,6 +590,7 @@ Alternatively, you can compile this module into the standard Nginx source distri
 Grab the nginx source code from [nginx.org](http://nginx.org/), for example,
 the version 1.4.2 (see [nginx compatibility](#compatibility)), and then build the source with this module:
 
+```bash
 
     wget 'http://nginx.org/download/nginx-1.4.2.tar.gz'
     tar -xzvf nginx-1.4.2.tar.gz
@@ -585,7 +602,7 @@ the version 1.4.2 (see [nginx compatibility](#compatibility)), and then build th
      
     make -j2
     make install
-
+```
 
 Download the latest version of the release tarball of this module from [memc-nginx-module file list](http://github.com/agentzh/memc-nginx-module/tags).
 
@@ -597,9 +614,10 @@ For Developers
 The memached response parsers were generated by [Ragel](http://www.complang.org/ragel/). If you want to
 regenerate the parser's C file, i.e., [src/ngx_http_memc_response.c](http://github.com/agentzh/memc-nginx-module/blob/master/src/ngx_http_memc_response.c), use the following command from the root of the memc module's source tree:
 
+```bash
 
     $ ragel -G2 src/ngx_http_memc_response.rl
-
+```
 
 [Back to TOC](#table-of-contents)
 
@@ -678,9 +696,10 @@ This module comes with a Perl-driven test suite. The [test cases](http://github.
 
 To run it on your side:
 
+```bash
 
     $ PATH=/path/to/your/nginx-with-memc-module:$PATH prove -r t
-
+```
 
 You need to terminate any Nginx processes before running the test suite if you have changed the Nginx server binary.
 
