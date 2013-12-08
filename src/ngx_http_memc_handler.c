@@ -206,6 +206,10 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     u->conf = &mlcf->upstream;
 
+    if (memc_cmd != ngx_http_memc_cmd_get) {
+        u->conf->ignore_client_abort = 1;
+    }
+
     ctx = ngx_palloc(r->pool, sizeof(ngx_http_memc_ctx_t));
     if (ctx == NULL) {
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
