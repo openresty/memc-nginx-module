@@ -431,6 +431,15 @@ This buffer size is used for the memory buffer to hold
 
 This default size is the page size, may be <code>4k</code> or <code>8k</code>.
 
+== memc_ignore_client_abort ==
+'''syntax:''' ''memc_ignore_client_abort on|off''
+
+'''default:''' ''off''
+
+'''context:''' ''location''
+
+Determines whether the connection with a memcache server should be closed when a client closes a connection without waiting for a response. 
+
 = Installation =
 
 You're recommended to install this module (as well as the Nginx core and many other goodies) via the [http://openresty.org ngx_openresty bundle]. See the [http://openresty.org/#Installation installation steps] for <code>ngx_openresty</code>.
