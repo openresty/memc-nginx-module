@@ -374,7 +374,7 @@ ngx_http_memc_create_flush_all_cmd_request(ngx_http_request_t *r)
 
     len = ctx->cmd_str.len;
 
-    if ( ! exptime_vv->not_found && exptime_vv->len) {
+    if (!exptime_vv->not_found && exptime_vv->len) {
         dd("found exptime: %s", exptime_vv->data);
 
         len += sizeof(' ') + exptime_vv->len;
@@ -399,7 +399,7 @@ ngx_http_memc_create_flush_all_cmd_request(ngx_http_request_t *r)
 
     b->last = ngx_copy(b->last, ctx->cmd_str.data, ctx->cmd_str.len);
 
-    if ( ! exptime_vv->not_found && exptime_vv->len) {
+    if (!exptime_vv->not_found && exptime_vv->len) {
         *b->last++ = ' ';
         b->last = ngx_copy(b->last, exptime_vv->data, exptime_vv->len);
     }
@@ -446,7 +446,7 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
 
     len = ctx->cmd_str.len + sizeof(' ') + key_vv->len + escape;
 
-    if ( ! exptime_vv->not_found && exptime_vv->len) {
+    if (!exptime_vv->not_found && exptime_vv->len) {
         dd("found exptime: %s", exptime_vv->data);
 
         len += sizeof(' ') + exptime_vv->len;
@@ -481,7 +481,7 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
                                         NGX_ESCAPE_MEMCACHED);
     }
 
-    if ( ! exptime_vv->not_found && exptime_vv->len) {
+    if (!exptime_vv->not_found && exptime_vv->len) {
         *b->last++ = ' ';
         b->last = ngx_copy(b->last, exptime_vv->data, exptime_vv->len);
     }
