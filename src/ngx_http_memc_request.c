@@ -1,7 +1,14 @@
+
+/*
+ * Copyright (c) Yichun Zhang (agentzh)
+ */
+
+
 #ifndef DDEBUG
 #define DDEBUG 0
 #endif
 #include "ddebug.h"
+
 
 #include "ngx_http_memc_request.h"
 #include "ngx_http_memc_module.h"
@@ -478,7 +485,7 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
 
     } else {
         b->last = (u_char *) ngx_escape_uri(b->last, key_vv->data, key_vv->len,
-                                        NGX_ESCAPE_MEMCACHED);
+                                            NGX_ESCAPE_MEMCACHED);
     }
 
     if (!exptime_vv->not_found && exptime_vv->len) {
@@ -551,7 +558,7 @@ ngx_http_memc_create_incr_decr_cmd_request(ngx_http_request_t *r)
 
     } else {
         b->last = (u_char *) ngx_escape_uri(b->last, key_vv->data, key_vv->len,
-                                        NGX_ESCAPE_MEMCACHED);
+                                            NGX_ESCAPE_MEMCACHED);
     }
 
     *b->last++ = ' ';
@@ -562,4 +569,3 @@ ngx_http_memc_create_incr_decr_cmd_request(ngx_http_request_t *r)
 
     return NGX_OK;
 }
-
