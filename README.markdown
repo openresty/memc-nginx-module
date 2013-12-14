@@ -67,105 +67,105 @@ Synopsis
 
 ```nginx
 
-    # GET /foo?key=dog
-    #
-    # POST /foo?key=cat
-    # Cat's value...
-    #
-    # PUT /foo?key=bird
-    # Bird's value...
-    #
-    # DELETE /foo?key=Tiger
-    location /foo {
-        set $memc_key $arg_key;
+# GET /foo?key=dog
+#
+# POST /foo?key=cat
+# Cat's value...
+#
+# PUT /foo?key=bird
+# Bird's value...
+#
+# DELETE /foo?key=Tiger
+location /foo {
+    set $memc_key $arg_key;
 
-        # $memc_cmd defaults to get for GET,
-        #   add for POST, set for PUT, and
-        #   delete for the DELETE request method.
+    # $memc_cmd defaults to get for GET,
+    #   add for POST, set for PUT, and
+    #   delete for the DELETE request method.
 
-        memc_pass 127.0.0.1:11211;
-    }
+    memc_pass 127.0.0.1:11211;
+}
 ```
 
 ```nginx
 
-    # GET /bar?cmd=get&key=cat
-    #
-    # POST /bar?cmd=set&key=dog
-    # My value for the "dog" key...
-    #
-    # DELETE /bar?cmd=delete&key=dog
-    # GET /bar?cmd=delete&key=dog
-    location /bar {
-        set $memc_cmd $arg_cmd;
-        set $memc_key $arg_key;
-        set $memc_flags $arg_flags; # defaults to 0
-        set $memc_exptime $arg_exptime; # defaults to 0
+# GET /bar?cmd=get&key=cat
+#
+# POST /bar?cmd=set&key=dog
+# My value for the "dog" key...
+#
+# DELETE /bar?cmd=delete&key=dog
+# GET /bar?cmd=delete&key=dog
+location /bar {
+    set $memc_cmd $arg_cmd;
+    set $memc_key $arg_key;
+    set $memc_flags $arg_flags; # defaults to 0
+    set $memc_exptime $arg_exptime; # defaults to 0
 
-        memc_pass 127.0.0.1:11211;
-    }
+    memc_pass 127.0.0.1:11211;
+}
 ```
 
 ```nginx
 
-    # GET /bar?cmd=get&key=cat
-    # GET /bar?cmd=set&key=dog&val=animal&flags=1234&exptime=2
-    # GET /bar?cmd=delete&key=dog
-    # GET /bar?cmd=flush_all
-    location /bar {
-        set $memc_cmd $arg_cmd;
-        set $memc_key $arg_key;
-        set $memc_value $arg_val;
-        set $memc_flags $arg_flags; # defaults to 0
-        set $memc_exptime $arg_exptime; # defaults to 0
+# GET /bar?cmd=get&key=cat
+# GET /bar?cmd=set&key=dog&val=animal&flags=1234&exptime=2
+# GET /bar?cmd=delete&key=dog
+# GET /bar?cmd=flush_all
+location /bar {
+    set $memc_cmd $arg_cmd;
+    set $memc_key $arg_key;
+    set $memc_value $arg_val;
+    set $memc_flags $arg_flags; # defaults to 0
+    set $memc_exptime $arg_exptime; # defaults to 0
 
-        memc_cmds_allowed get set add delete flush_all;
+    memc_cmds_allowed get set add delete flush_all;
 
-        memc_pass 127.0.0.1:11211;
-    }
+    memc_pass 127.0.0.1:11211;
+}
 ```
 
 ```nginx
 
-      http {
+  http {
+    ...
+    upstream backend {
+       server 127.0.0.1:11984;
+       server 127.0.0.1:11985;
+    }
+    server {
+        location /stats {
+            set $memc_cmd stats;
+            memc_pass backend;
+        }
         ...
-        upstream backend {
-           server 127.0.0.1:11984;
-           server 127.0.0.1:11985;
-        }
-        server {
-            location /stats {
-                set $memc_cmd stats;
-                memc_pass backend;
-            }
-            ...
-        }
-      }
-      ...
+    }
+  }
+  ...
 ```
 
 ```nginx
 
-    # read the memcached flags into the Last-Modified header
-    # to respond 304 to conditional GET
-    location /memc {
-        set $memc_key $arg_key;
+# read the memcached flags into the Last-Modified header
+# to respond 304 to conditional GET
+location /memc {
+    set $memc_key $arg_key;
 
-        memc_pass 127.0.0.1:11984;
+    memc_pass 127.0.0.1:11984;
 
-        memc_flags_to_last_modified on;
-    }
+    memc_flags_to_last_modified on;
+}
 ```
 
 ```nginx
 
-    location /memc {
-        set $memc_key foo;
-        set $memc_cmd get;
+location /memc {
+    set $memc_key foo;
+    set $memc_cmd get;
 
-        # access the unix domain socket listend by memcached
-        memc_pass unix:/tmp/memcached.sock;
-    }
+    # access the unix domain socket listend by memcached
+    memc_pass unix:/tmp/memcached.sock;
+}
 ```
 
 Description
@@ -192,24 +192,24 @@ Here's a sample configuration:
 
 ```nginx
 
-      http {
-        upstream backend {
-          server 127.0.0.1:11211;
-    
-          # a pool with at most 1024 connections
-          # and do not distinguish the servers:
-          keepalive 1024;
+  http {
+    upstream backend {
+      server 127.0.0.1:11211;
+
+      # a pool with at most 1024 connections
+      # and do not distinguish the servers:
+      keepalive 1024;
+    }
+
+    server {
+        ...
+        location /memc {
+            set $memc_cmd get;
+            set $memc_key $arg_key;
+            memc_pass backend;
         }
-    
-        server {
-            ...
-            location /memc {
-                set $memc_cmd get;
-                set $memc_key $arg_key;
-                memc_pass backend;
-            }
-        }
-      }
+    }
+  }
 ```
 
 [Back to TOC](#table-of-contents)
@@ -242,14 +242,14 @@ Retrieves the value using a key.
 
 ```nginx
 
-      location /foo {
-          set $memc_cmd 'get';
-          set $memc_key 'my_key';
-          
-          memc_pass 127.0.0.1:11211;
-          
-          add_header X-Memc-Flags $memc_flags;
-      }
+  location /foo {
+      set $memc_cmd 'get';
+      set $memc_key 'my_key';
+      
+      memc_pass 127.0.0.1:11211;
+      
+      add_header X-Memc-Flags $memc_flags;
+  }
 ```
 
 Returns `200 OK` with the value put into the response body if the key is found, or `404 Not Found` otherwise. The `flags` number will be set into the `$memc_flags` variable so it's often desired to put that info into the response headers by means of the standard [add_header directive](http://nginx.org/en/docs/http/ngx_http_headers_module.html#add_header).
@@ -265,31 +265,31 @@ To use the request body as the memcached value, just avoid setting the `$memc_va
 
 ```nginx
 
-      # POST /foo
-      # my value...
-      location /foo {
-          set $memc_cmd 'set';
-          set $memc_key 'my_key';
-          set $memc_flags 12345;
-          set $memc_exptime 24;
-          
-          memc_pass 127.0.0.1:11211;
-      }
+  # POST /foo
+  # my value...
+  location /foo {
+      set $memc_cmd 'set';
+      set $memc_key 'my_key';
+      set $memc_flags 12345;
+      set $memc_exptime 24;
+      
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 Or let the `$memc_value` hold the value:
 
 ```nginx
 
-      location /foo {
-          set $memc_cmd 'set';
-          set $memc_key 'my_key';
-          set $memc_flags 12345;
-          set $memc_exptime 24;
-          set $memc_value 'my_value';
-    
-          memc_pass 127.0.0.1:11211;
-      }
+  location /foo {
+      set $memc_cmd 'set';
+      set $memc_key 'my_key';
+      set $memc_flags 12345;
+      set $memc_exptime 24;
+      set $memc_value 'my_value';
+
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 Returns `201 Created` if the upstream memcached server replies `STORED`, `200` for `NOT_STORED`, `404` for `NOT_FOUND`, `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
@@ -335,12 +335,12 @@ Deletes the memcached entry using a key.
 
 ```nginx
 
-      location /foo
-          set $memc_cmd delete;
-          set $memc_key my_key;
-          
-          memc_pass 127.0.0.1:11211;
-      }
+  location /foo
+      set $memc_cmd delete;
+      set $memc_key my_key;
+      
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 Returns `200 OK` if deleted successfully, `404 Not Found` for `NOT_FOUND`, or `502` for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
@@ -365,11 +365,11 @@ Increments the existing value of `$memc_key` by the amount specified by `$memc_v
 
 ```nginx
 
-      location /foo {
-          set $memc_key my_key;
-          set $memc_value 2;
-          memc_pass 127.0.0.1:11211;
-      }
+  location /foo {
+      set $memc_key my_key;
+      set $memc_value 2;
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 In the preceding example, every time we access `/foo` will cause the value of `my_key` increments by `2`.
@@ -394,10 +394,10 @@ Mark all the keys on the memcached server as expired:
 
 ```nginx
 
-      location /foo {
-          set $memc_cmd flush_all;
-          memc_pass 127.0.0.1:11211;
-      }
+  location /foo {
+      set $memc_cmd flush_all;
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 [Back to TOC](#table-of-contents)
@@ -416,10 +416,10 @@ Causes the memcached server to output general-purpose statistics and settings
 
 ```nginx
 
-      location /foo {
-          set $memc_cmd stats;
-          memc_pass 127.0.0.1:11211;
-      }
+  location /foo {
+      set $memc_cmd stats;
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
@@ -435,10 +435,10 @@ Queries the memcached server's version number:
 
 ```nginx
 
-      location /foo {
-          set $memc_cmd version;
-          memc_pass 127.0.0.1:11211;
-      }
+  location /foo {
+      set $memc_cmd version;
+      memc_pass 127.0.0.1:11211;
+  }
 ```
 
 Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
@@ -490,15 +490,15 @@ An example is
 
 ```nginx
 
-       location /foo {
-           set $memc_cmd $arg_cmd;
-           set $memc_key $arg_key;
-           set $memc_value $arg_val;
-           
-           memc_pass 127.0.0.1:11211;
-            
-           memc_cmds_allowed get;
-       }
+   location /foo {
+       set $memc_cmd $arg_cmd;
+       set $memc_key $arg_key;
+       set $memc_value $arg_val;
+       
+       memc_pass 127.0.0.1:11211;
+        
+       memc_cmds_allowed get;
+   }
 ```
 
 [Back to TOC](#table-of-contents)
@@ -592,16 +592,16 @@ the version 1.4.2 (see [nginx compatibility](#compatibility)), and then build th
 
 ```bash
 
-    wget 'http://nginx.org/download/nginx-1.4.2.tar.gz'
-    tar -xzvf nginx-1.4.2.tar.gz
-    cd nginx-1.4.2/
-    
-    # Here we assume you would install you nginx under /opt/nginx/.
-    ./configure --prefix=/opt/nginx \
-        --add-module=/path/to/memc-nginx-module
-     
-    make -j2
-    make install
+wget 'http://nginx.org/download/nginx-1.4.2.tar.gz'
+tar -xzvf nginx-1.4.2.tar.gz
+cd nginx-1.4.2/
+
+# Here we assume you would install you nginx under /opt/nginx/.
+./configure --prefix=/opt/nginx \
+    --add-module=/path/to/memc-nginx-module
+ 
+make -j2
+make install
 ```
 
 Download the latest version of the release tarball of this module from [memc-nginx-module file list](http://github.com/agentzh/memc-nginx-module/tags).
@@ -616,7 +616,7 @@ regenerate the parser's C file, i.e., [src/ngx_http_memc_response.c](http://gith
 
 ```bash
 
-    $ ragel -G2 src/ngx_http_memc_response.rl
+$ ragel -G2 src/ngx_http_memc_response.rl
 ```
 
 [Back to TOC](#table-of-contents)
@@ -698,7 +698,7 @@ To run it on your side:
 
 ```bash
 
-    $ PATH=/path/to/your/nginx-with-memc-module:$PATH prove -r t
+$ PATH=/path/to/your/nginx-with-memc-module:$PATH prove -r t
 ```
 
 You need to terminate any Nginx processes before running the test suite if you have changed the Nginx server binary.
