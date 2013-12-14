@@ -117,6 +117,13 @@ static ngx_command_t  ngx_http_memc_commands[] = {
       offsetof(ngx_http_memc_loc_conf_t, flags_to_last_modified),
       NULL },
 
+    { ngx_string("memc_ignore_client_abort"),
+      NGX_HTTP_LOC_CONF|NGX_HTTP_LIF_CONF|NGX_CONF_FLAG,
+      ngx_conf_set_flag_slot,
+      NGX_HTTP_LOC_CONF_OFFSET,
+      offsetof(ngx_http_memc_loc_conf_t, upstream.ignore_client_abort),
+      NULL },
+
       ngx_null_command
 };
 
@@ -181,10 +188,11 @@ ngx_http_memc_create_loc_conf(ngx_conf_t *cf)
 
     conf->upstream.buffer_size = NGX_CONF_UNSET_SIZE;
 
+    conf->upstream.ignore_client_abort = NGX_CONF_UNSET;
+
     /* the hardcoded values */
     conf->upstream.cyclic_temp_file = 0;
     conf->upstream.buffering = 0;
-    conf->upstream.ignore_client_abort = 0;
     conf->upstream.send_lowat = 0;
     conf->upstream.bufs.num = 0;
     conf->upstream.busy_buffers_size = 0;
@@ -239,6 +247,9 @@ ngx_http_memc_merge_loc_conf(ngx_conf_t *cf, void *parent, void *child)
     if (conf->cmds_allowed == NULL) {
         conf->cmds_allowed = prev->cmds_allowed;
     }
+
+    ngx_conf_merge_value(conf->upstream.ignore_client_abort,
+                         prev->upstream.ignore_client_abort, 0);
 
     return NGX_CONF_OK;
 }

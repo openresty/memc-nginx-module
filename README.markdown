@@ -41,6 +41,7 @@ Table of Contents
     * [memc_send_timeout](#memc_send_timeout)
     * [memc_read_timeout](#memc_read_timeout)
     * [memc_buffer_size](#memc_buffer_size)
+    * [memc_ignore_client_abort](#memc_ignore_client_abort)
 * [Installation](#installation)
     * [For Developers](#for-developers)
 * [Compatibility](#compatibility)
@@ -577,6 +578,20 @@ This buffer size is used for the memory buffer to hold
 * the complete response header (i.e., the first line of the response) for the `get` memcached command.
 
 This default size is the page size, may be `4k` or `8k`.
+
+[Back to TOC](#table-of-contents)
+
+memc_ignore_client_abort
+------------------------
+**syntax:** *memc_ignore_client_abort on|off*
+
+**default:** *off*
+
+**context:** *location*
+
+Determines whether the connection with a memcache server should be closed when a client closes a connection without waiting for a response.
+
+This directive was first added in the `v0.14` release.
 
 [Back to TOC](#table-of-contents)
 
