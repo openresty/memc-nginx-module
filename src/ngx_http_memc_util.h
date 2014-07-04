@@ -1,3 +1,9 @@
+
+/*
+ * Copyright (C) Yichun Zhang (agentzh)
+ */
+
+
 #ifndef NGX_HTTP_MEMC_UTIL_H
 #define NGX_HTTP_MEMC_UTIL_H
 
