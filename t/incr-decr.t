@@ -3,7 +3,9 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
-plan tests => repeat_each() * 2 * blocks();
+repeat_each(2);
+
+plan tests => repeat_each() * (2 * blocks() + 1);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
@@ -44,6 +46,8 @@ __DATA__
     GET /memc?cmd=incr&key=foo&val=nice
 --- response_body_like: 400 Bad Request
 --- error_code: 400
+--- error_log
+variable "$memc_value" is invalid for incr/decr: nice,
 
 
 

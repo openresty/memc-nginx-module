@@ -3,7 +3,9 @@
 use lib 'lib';
 use Test::Nginx::Socket;
 
-plan tests => repeat_each() * 2 * blocks() + 4;
+repeat_each(2);
+
+plan tests => repeat_each() * (2 * blocks() + 5);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
@@ -165,6 +167,8 @@ BAR"
     GET /allow
 --- response_body_like: 400 Bad Request
 --- error_code: 400
+--- error_log
+variable "$memc_flags" takes invalid value: invalid,
 
 
 

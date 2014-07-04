@@ -306,6 +306,10 @@ ngx_http_memc_handler(ngx_http_request_t *r)
             && !ngx_http_memc_valid_uint32_str(exptime_vv->data,
                                                exptime_vv->len))
         {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "variable \"$memc_exptime\" takes invalid value: %v",
+                          exptime_vv);
+
             return NGX_HTTP_BAD_REQUEST;
         }
     }
@@ -323,6 +327,10 @@ ngx_http_memc_handler(ngx_http_request_t *r)
             && flags_vv->len
             && !ngx_http_memc_valid_uint32_str(flags_vv->data, flags_vv->len))
         {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "variable \"$memc_flags\" takes invalid value: %v",
+                          flags_vv);
+
             return NGX_HTTP_BAD_REQUEST;
         }
     }
@@ -350,6 +358,10 @@ ngx_http_memc_handler(ngx_http_request_t *r)
             if (!ngx_http_memc_valid_uint64_str(value_vv->data,
                                                 value_vv->len))
             {
+                ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                              "variable \"$memc_value\" is invalid for "
+                              "incr/decr: %v", value_vv);
+
                 return NGX_HTTP_BAD_REQUEST;
             }
         }

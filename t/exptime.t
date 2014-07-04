@@ -5,7 +5,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * 2 * blocks();
+plan tests => repeat_each() * (2 * blocks() + 1);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
@@ -106,13 +106,15 @@ BAR"
         set $memc_cmd 'set';
         set $memc_key 'foo';
         set $memc_value 'nice';
-        set $memc_exptime 'invalid';
+        set $memc_exptime 'my invalid';
         memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
     }
 --- request
     GET /allow
 --- response_body_like: 400 Bad Request
 --- error_code: 400
+--- error_log
+variable "$memc_exptime" takes invalid value: my invalid,
 
 
 
