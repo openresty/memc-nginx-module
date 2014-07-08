@@ -61,7 +61,7 @@ Table of Contents
 Version
 =======
 
-This document describes ngx_memc [v0.14](http://github.com/openresty/memc-nginx-module/tags) released on 14 December 2013.
+This document describes ngx_memc [v0.15](http://github.com/openresty/memc-nginx-module/tags) released on 8 July 2014.
 
 Synopsis
 ========
@@ -187,7 +187,7 @@ When used in conjunction with [lua-nginx-module](http://github.com/openresty/lua
 Keep-alive connections to memcached servers
 -------------------------------------------
 
-You need [HttpUpstreamKeepaliveModule](http://wiki.nginx.org/HttpUpstreamKeepaliveModule) together with this module for keep-alive TCP connections to your backend memcached servers.
+You need the (now standard) [HttpUpstreamKeepaliveModule](http://wiki.nginx.org/HttpUpstreamKeepaliveModule) together with this module for keep-alive TCP connections to your backend memcached servers.
 
 Here's a sample configuration:
 
@@ -603,13 +603,13 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [nginx.org](http://nginx.org/), for example,
-the version 1.4.4 (see [nginx compatibility](#compatibility)), and then build the source with this module:
+the version 1.7.2 (see [nginx compatibility](#compatibility)), and then build the source with this module:
 
 ```bash
 
-wget 'http://nginx.org/download/nginx-1.4.4.tar.gz'
-tar -xzvf nginx-1.4.4.tar.gz
-cd nginx-1.4.4/
+wget 'http://nginx.org/download/nginx-1.7.2.tar.gz'
+tar -xzvf nginx-1.7.2.tar.gz
+cd nginx-1.7.2/
 
 # Here we assume you would install you nginx under /opt/nginx/.
 ./configure --prefix=/opt/nginx \
@@ -641,7 +641,8 @@ Compatibility
 
 The following versions of Nginx should work with this module:
 
-* **1.5.x**                       (last tested: 1.5.4)
+* **1.7.x**                       (last tested: 1.7.2)
+* **1.5.x**                       (last tested: 1.5.12)
 * **1.4.x**                       (last tested: 1.4.4)
 * **1.2.x**                       (last tested: 1.2.9)
 * **1.1.x**                       (last tested: 1.1.5)
@@ -793,3 +794,4 @@ See Also
 * The standard [memcached](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) module.
 * The [echo module](http://github.com/openresty/echo-nginx-module) for Nginx module's automated testing.
 * The standard [headers](http://nginx.org/en/docs/http/ngx_http_headers_module.html) module and the 3rd-parth [headers-more](http://github.com/openresty/headers-more-nginx-module) module.
+

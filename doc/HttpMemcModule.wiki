@@ -6,7 +6,7 @@
 
 = Version =
 
-This document describes ngx_memc [http://github.com/openresty/memc-nginx-module/tags v0.14] released on 14 December 2013.
+This document describes ngx_memc [http://github.com/openresty/memc-nginx-module/tags v0.15] released on 8 July 2014.
 
 = Synopsis =
 
@@ -121,7 +121,7 @@ When used in conjunction with [[HttpLuaModule]], it is recommended to use the [h
 
 == Keep-alive connections to memcached servers ==
 
-You need [[HttpUpstreamKeepaliveModule]] together with this module for keep-alive TCP connections to your backend memcached servers.
+You need the (now standard) [[HttpUpstreamKeepaliveModule]] together with this module for keep-alive TCP connections to your backend memcached servers.
 
 Here's a sample configuration:
 
@@ -449,12 +449,12 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [http://nginx.org/ nginx.org], for example,
-the version 1.4.4 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
+the version 1.7.2 (see [[#Compatibility|nginx compatibility]]), and then build the source with this module:
 
 <geshi lang="bash">
-    wget 'http://nginx.org/download/nginx-1.4.4.tar.gz'
-    tar -xzvf nginx-1.4.4.tar.gz
-    cd nginx-1.4.4/
+    wget 'http://nginx.org/download/nginx-1.7.2.tar.gz'
+    tar -xzvf nginx-1.7.2.tar.gz
+    cd nginx-1.7.2/
     
     # Here we assume you would install you nginx under /opt/nginx/.
     ./configure --prefix=/opt/nginx \
@@ -479,7 +479,8 @@ regenerate the parser's C file, i.e., [http://github.com/openresty/memc-nginx-mo
 
 The following versions of Nginx should work with this module:
 
-* '''1.5.x'''                       (last tested: 1.5.4)
+* '''1.7.x'''                       (last tested: 1.7.2)
+* '''1.5.x'''                       (last tested: 1.5.12)
 * '''1.4.x'''                       (last tested: 1.4.4)
 * '''1.2.x'''                       (last tested: 1.2.9)
 * '''1.1.x'''                       (last tested: 1.1.5)
@@ -594,3 +595,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * The standard [[HttpMemcachedModule|memcached]] module.
 * The [[HttpEchoModule|echo module]] for Nginx module's automated testing.
 * The standard [[HttpHeadersModule|headers]] module and the 3rd-parth [[HttpHeadersMoreModule|headers-more]] module.
+
