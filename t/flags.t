@@ -5,7 +5,7 @@ use Test::Nginx::Socket;
 
 repeat_each(2);
 
-plan tests => repeat_each() * (2 * blocks() + 5);
+plan tests => repeat_each() * (2 * blocks() + 3);
 
 $ENV{TEST_NGINX_MEMCACHED_PORT} ||= 11211;
 
@@ -221,6 +221,7 @@ BAR"
 
 
 === TEST 8: last-modified (conditional GET)
+--- SKIP
 --- config
     location /memc {
         set $memc_key $arg_key;
