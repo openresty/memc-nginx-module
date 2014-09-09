@@ -38,6 +38,9 @@
 %% machine memc_incr_decr;
 %% write data;
 
+%% machine memc_touch;
+%% write data;
+
 
 u_char  ngx_http_memc_end[] = CRLF "END" CRLF;
 
@@ -53,6 +56,8 @@ static u_char * parse_memc_stats(int *cs_addr, u_char *p, u_char *pe,
 static u_char * parse_memc_delete(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, unsigned *done_addr);
 static u_char * parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
+        ngx_uint_t *status_addr, unsigned *done_addr);
+static u_char * parse_memc_touch(int *cs_addr, u_char *p, u_char *pe,
         ngx_uint_t *status_addr, unsigned *done_addr);
 static ngx_int_t ngx_http_memc_write_simple_response(ngx_http_request_t *r,
         ngx_http_upstream_t *u, ngx_http_memc_ctx_t *ctx,
@@ -122,6 +127,12 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
             %% machine memc_incr_decr;
             %% write init;
 
+        } else if (ctx->cmd == ngx_http_memc_cmd_touch) {
+            dd("init memc_touch machine...");
+
+            %% machine memc_touch;
+            %% write init;
+
         } else {
             ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
               "unrecognized memcached command in "
@@ -186,6 +197,13 @@ ngx_http_memc_process_simple_header(ngx_http_request_t *r)
         final_state = memc_incr_decr_first_final;
 
         p = (s_char *) parse_memc_incr_decr(&cs, (u_char *) p, (u_char *) pe,
+                &status, &done);
+
+    } else if (ctx->cmd == ngx_http_memc_cmd_touch) {
+        error_state = memc_touch_error;
+        final_state = memc_touch_first_final;
+
+        p = (s_char *) parse_memc_touch(&cs, (u_char *) p, (u_char *) pe,
                 &status, &done);
 
     } else {
@@ -655,6 +673,22 @@ parse_memc_incr_decr(int *cs_addr, u_char *p, u_char *pe,
 
     %% machine memc_incr_decr;
     %% include "memc_incr_decr.rl";
+    %% write exec;
+
+    *cs_addr = cs;
+
+    return p;
+}
+
+
+static u_char *
+parse_memc_touch(int *cs_addr, u_char *p, u_char *pe, ngx_uint_t *status_addr,
+    unsigned *done_addr)
+{
+    int cs = *cs_addr;
+
+    %% machine memc_touch;
+    %% include "memc_touch.rl";
     %% write exec;
 
     *cs_addr = cs;

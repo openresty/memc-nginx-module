@@ -61,6 +61,10 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
                 return ngx_http_memc_cmd_stats;
             }
 
+            if (ngx_http_memc_strcmp_const(data, "touch") == 0) {
+                return ngx_http_memc_cmd_touch;
+            }
+
             break;
 
         case 6:
