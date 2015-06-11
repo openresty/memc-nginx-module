@@ -3,6 +3,7 @@
 # this file is mostly meant to be used by the author himself.
 
 ragel -I src -G2 src/ngx_http_memc_response.rl
+util/fix-clang-warnings
 
 if [ $? != 0 ]; then
     echo 'Failed to generate the memcached response parser.' 1>&2

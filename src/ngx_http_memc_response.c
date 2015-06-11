@@ -30,7 +30,6 @@ static const int memc_storage_start = 1;
 static const int memc_storage_first_final = 54;
 static const int memc_storage_error = 0;
 
-static const int memc_storage_en_main = 1;
 
 
 #line 25 "src/ngx_http_memc_response.rl"
@@ -43,7 +42,6 @@ static const int memc_flush_all_start = 1;
 static const int memc_flush_all_first_final = 30;
 static const int memc_flush_all_error = 0;
 
-static const int memc_flush_all_en_main = 1;
 
 
 #line 28 "src/ngx_http_memc_response.rl"
@@ -56,7 +54,6 @@ static const int memc_version_start = 1;
 static const int memc_version_first_final = 39;
 static const int memc_version_error = 0;
 
-static const int memc_version_en_main = 1;
 
 
 #line 31 "src/ngx_http_memc_response.rl"
@@ -69,7 +66,6 @@ static const int memc_stats_start = 1;
 static const int memc_stats_first_final = 43;
 static const int memc_stats_error = 0;
 
-static const int memc_stats_en_main = 1;
 
 
 #line 34 "src/ngx_http_memc_response.rl"
@@ -82,7 +78,6 @@ static const int memc_delete_start = 1;
 static const int memc_delete_first_final = 45;
 static const int memc_delete_error = 0;
 
-static const int memc_delete_en_main = 1;
 
 
 #line 37 "src/ngx_http_memc_response.rl"
@@ -95,7 +90,6 @@ static const int memc_incr_decr_start = 1;
 static const int memc_incr_decr_first_final = 40;
 static const int memc_incr_decr_error = 0;
 
-static const int memc_incr_decr_en_main = 1;
 
 
 #line 40 "src/ngx_http_memc_response.rl"
