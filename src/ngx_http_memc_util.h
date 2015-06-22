@@ -25,7 +25,7 @@
 ngx_http_memc_cmd_t ngx_http_memc_parse_cmd(u_char *data, size_t len,
         ngx_flag_t *is_storage_cmd);
 
-ngx_http_upstream_srv_conf_t * ngx_http_memc_upstream_add(
+ngx_http_upstream_srv_conf_t *ngx_http_memc_upstream_add(
         ngx_http_request_t *r, ngx_url_t *url);
 
 
