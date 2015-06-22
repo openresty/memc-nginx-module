@@ -61,7 +61,7 @@ Table of Contents
 Version
 =======
 
-This document describes ngx_memc [v0.15](http://github.com/openresty/memc-nginx-module/tags) released on 8 July 2014.
+This document describes ngx_memc [v0.16](http://github.com/openresty/memc-nginx-module/tags) released on 22 June 2015.
 
 Synopsis
 ========
@@ -187,7 +187,7 @@ When used in conjunction with [lua-nginx-module](http://github.com/openresty/lua
 Keep-alive connections to memcached servers
 -------------------------------------------
 
-You need the (now standard) [HttpUpstreamKeepaliveModule](http://wiki.nginx.org/HttpUpstreamKeepaliveModule) together with this module for keep-alive TCP connections to your backend memcached servers.
+You need [HttpUpstreamKeepaliveModule](http://wiki.nginx.org/HttpUpstreamKeepaliveModule) together with this module for keep-alive TCP connections to your backend memcached servers.
 
 Here's a sample configuration:
 
@@ -603,13 +603,13 @@ You're recommended to install this module (as well as the Nginx core and many ot
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
 Grab the nginx source code from [nginx.org](http://nginx.org/), for example,
-the version 1.7.2 (see [nginx compatibility](#compatibility)), and then build the source with this module:
+the version 1.7.10 (see [nginx compatibility](#compatibility)), and then build the source with this module:
 
 ```bash
 
- wget 'http://nginx.org/download/nginx-1.7.2.tar.gz'
- tar -xzvf nginx-1.7.2.tar.gz
- cd nginx-1.7.2/
+ wget 'http://nginx.org/download/nginx-1.7.10.tar.gz'
+ tar -xzvf nginx-1.7.10.tar.gz
+ cd nginx-1.7.10/
 
  # Here we assume you would install you nginx under /opt/nginx/.
  ./configure --prefix=/opt/nginx \
@@ -641,7 +641,8 @@ Compatibility
 
 The following versions of Nginx should work with this module:
 
-* **1.7.x**                       (last tested: 1.7.2)
+* **1.7.x**                       (last tested: 1.7.10)
+* **1.6.x**
 * **1.5.x**                       (last tested: 1.5.12)
 * **1.4.x**                       (last tested: 1.4.4)
 * **1.2.x**                       (last tested: 1.2.9)
@@ -758,7 +759,7 @@ Copyright & License
 
 The code base is borrowed directly from the standard [memcached module](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) in the Nginx core. This part of code is copyrighted by Igor Sysoev and Nginx Inc.
 
-Copyright (c) 2009-2013, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
+Copyright (c) 2009-2015, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
 
 This module is licensed under the terms of the BSD license.
 
