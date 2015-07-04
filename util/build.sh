@@ -37,7 +37,6 @@ ngx-build $force $version \
     --add-module=$home/work/nginx/ngx_http_upstream_keepalive-0.7 \
           --with-select_module \
           --with-poll_module \
-          --with-rtsig_module \
     --with-debug
     #--add-module=$home/work/nginx/nginx_upstream_hash-0.3 \
   #--without-http_ssi_module  # we cannot disable ssi because echo_location_async depends on it (i dunno why?!)
