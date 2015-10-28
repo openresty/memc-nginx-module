@@ -1,8 +1,3 @@
-<!---
-Don't edit this file manually! Instead you should generate it by using:
-    wiki2markdown.pl doc/HttpMemcModule.wiki
--->
-
 Name
 ====
 
@@ -542,7 +537,7 @@ memc_send_timeout
 
 The timeout for sending TCP requests to the memcached server, in seconds by default.
 
-It's wise to always explicitly specify the time unit to avoid confusion. Time units supported are "s"(seconds), "ms"(milliseconds), "y"(years), "M"(months), "w"(weeks), "d"(days), "h"(hours), and "m"(minutes).
+It is wise to always explicitly specify the time unit to avoid confusion. Time units supported are "s"(seconds), "ms"(milliseconds), "y"(years), "M"(months), "w"(weeks), "d"(days), "h"(hours), and "m"(minutes).
 
 This time must be less than 597 hours.
 
