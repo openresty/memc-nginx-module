@@ -1,8 +1,10 @@
 #ifndef DDEBUG_H
 #define DDEBUG_H
 
+
 #include <ngx_config.h>
 #include <ngx_core.h>
+
 
 #if defined(DDEBUG) && (DDEBUG)
 
@@ -19,7 +21,8 @@
 
 #include <stdarg.h>
 
-static void dd(const char* fmt, ...) {
+static ngx_inline void
+dd(const char* fmt, ...) {
 }
 
 #    endif
@@ -34,7 +37,8 @@ static void dd(const char* fmt, ...) {
 
 #include <stdarg.h>
 
-static void dd(const char* fmt, ...) {
+static ngx_inline void
+dd(const char* fmt, ...) {
 }
 
 #   endif
@@ -69,4 +73,3 @@ static void dd(const char* fmt, ...) {
 #endif
 
 #endif /* DDEBUG_H */
-
