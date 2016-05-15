@@ -644,7 +644,7 @@ Compatibility
 
 The following versions of Nginx should work with this module:
 
-* **1.9.x**                       (last tested: 1.9.7)
+* **1.9.x**                       (last tested: 1.9.15)
 * **1.8.x**
 * **1.7.x**                       (last tested: 1.7.10)
 * **1.6.x**
