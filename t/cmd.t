@@ -68,7 +68,7 @@ ngx_memc: $memc_cmd variable not found for HTTP COPY requests
     }
 --- request
     GET /allow
---- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
+--- response_body_like: ^VERSION \d+(\.\d+)+.*?\r\n$
 
 
 
@@ -82,7 +82,7 @@ ngx_memc: $memc_cmd variable not found for HTTP COPY requests
     }
 --- request
     GET /allow
---- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
+--- response_body_like: ^VERSION \d+(\.\d+)+.*?\r\n$
 
 
 

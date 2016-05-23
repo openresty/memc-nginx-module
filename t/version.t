@@ -21,5 +21,5 @@ __DATA__
     }
 --- request
     GET /ver
---- response_body_like: ^VERSION \d+(\.\d+)+\S*?\r\n$
+--- response_body_like: ^VERSION \d+(\.\d+)+.*?\r\n$
 
