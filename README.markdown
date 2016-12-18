@@ -753,7 +753,7 @@ You'll be very welcomed to submit patches to the [author](#author) or just ask f
 Author
 ======
 
-Yichun "agentzh" Zhang (章亦春) *&lt;agentzh@gmail.com&gt;*, CloudFlare Inc.
+Yichun "agentzh" Zhang (章亦春) *&lt;agentzh@gmail.com&gt;*, OpenResty Inc.
 
 This wiki page is also maintained by the author himself, and everybody is encouraged to improve this page as well.
 
@@ -764,7 +764,7 @@ Copyright & License
 
 The code base is borrowed directly from the standard [memcached module](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) in the Nginx core. This part of code is copyrighted by Igor Sysoev and Nginx Inc.
 
-Copyright (c) 2009-2016, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, CloudFlare Inc.
+Copyright (c) 2009-2016, Yichun "agentzh" Zhang (章亦春) <agentzh@gmail.com>, OpenResty Inc.
 
 This module is licensed under the terms of the BSD license.
 
