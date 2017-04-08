@@ -56,7 +56,7 @@ Table of Contents
 Version
 =======
 
-This document describes ngx_memc [v0.17](http://github.com/openresty/memc-nginx-module/tags) released on 15 May 2016.
+This document describes ngx_memc [v0.18](http://github.com/openresty/memc-nginx-module/tags) released on 8 April 2017.
 
 Synopsis
 ========
