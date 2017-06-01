@@ -362,6 +362,7 @@ Increments the existing value of `$memc_key` by the amount specified by `$memc_v
 ```nginx
 
    location /foo {
+       set $memc_cmd incr;
        set $memc_key my_key;
        set $memc_value 2;
        memc_pass 127.0.0.1:11211;
