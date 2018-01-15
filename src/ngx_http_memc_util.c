@@ -15,99 +15,100 @@ ngx_http_memc_cmd_t
 ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
 {
     switch (len) {
-        case 3:
-            if (ngx_http_memc_strcmp_const(data, "set") == 0) {
-                *is_storage_cmd = 1;
-                return ngx_http_memc_cmd_set;
-            }
 
-            if (ngx_http_memc_strcmp_const(data, "add") == 0) {
-                *is_storage_cmd = 1;
-                return ngx_http_memc_cmd_add;
-            }
+    case 3:
+        if (ngx_http_memc_strcmp_const(data, "set") == 0) {
+            *is_storage_cmd = 1;
+            return ngx_http_memc_cmd_set;
+        }
 
-            /*
-            if (ngx_str3cmp(data, 'c', 'a', 's')) {
-                *is_storage_cmd = 1;
-                return ngx_http_memc_cmd_cas;
-            }
-            */
+        if (ngx_http_memc_strcmp_const(data, "add") == 0) {
+            *is_storage_cmd = 1;
+            return ngx_http_memc_cmd_add;
+        }
 
-            if (ngx_http_memc_strcmp_const(data, "get") == 0) {
-                return ngx_http_memc_cmd_get;
-            }
+        /*
+        if (ngx_str3cmp(data, 'c', 'a', 's')) {
+            *is_storage_cmd = 1;
+            return ngx_http_memc_cmd_cas;
+        }
+        */
 
-            break;
+        if (ngx_http_memc_strcmp_const(data, "get") == 0) {
+            return ngx_http_memc_cmd_get;
+        }
 
-        case 4:
-            /*
-            if (ngx_str4cmp(data, 'g', 'e', 't', 's')) {
-                return ngx_http_memc_cmd_gets;
-            }
-            */
+        break;
 
-            if (ngx_http_memc_strcmp_const(data, "incr") == 0) {
-                return ngx_http_memc_cmd_incr;
-            }
+    case 4:
+        /*
+        if (ngx_str4cmp(data, 'g', 'e', 't', 's')) {
+            return ngx_http_memc_cmd_gets;
+        }
+        */
 
-            if (ngx_http_memc_strcmp_const(data, "decr") == 0) {
-                return ngx_http_memc_cmd_decr;
-            }
+        if (ngx_http_memc_strcmp_const(data, "incr") == 0) {
+            return ngx_http_memc_cmd_incr;
+        }
 
-            break;
+        if (ngx_http_memc_strcmp_const(data, "decr") == 0) {
+            return ngx_http_memc_cmd_decr;
+        }
 
-        case 5:
-            if (ngx_http_memc_strcmp_const(data, "stats") == 0) {
-                return ngx_http_memc_cmd_stats;
-            }
+        break;
 
-            break;
+    case 5:
+        if (ngx_http_memc_strcmp_const(data, "stats") == 0) {
+            return ngx_http_memc_cmd_stats;
+        }
 
-        case 6:
-            if (ngx_http_memc_strcmp_const(data, "append") == 0) {
-                *is_storage_cmd = 1;
-                return ngx_http_memc_cmd_append;
-            }
+        break;
 
-            if (ngx_http_memc_strcmp_const(data, "delete") == 0) {
-                return ngx_http_memc_cmd_delete;
-            }
+    case 6:
+        if (ngx_http_memc_strcmp_const(data, "append") == 0) {
+            *is_storage_cmd = 1;
+            return ngx_http_memc_cmd_append;
+        }
 
-            break;
+        if (ngx_http_memc_strcmp_const(data, "delete") == 0) {
+            return ngx_http_memc_cmd_delete;
+        }
 
-        case 7:
-            if (ngx_http_memc_strcmp_const(data, "replace") == 0) {
-                *is_storage_cmd = 1;
-                return ngx_http_memc_cmd_replace;
-            }
+        break;
 
-            if (ngx_http_memc_strcmp_const(data, "prepend") == 0) {
-                *is_storage_cmd = 1;
-                return ngx_http_memc_cmd_prepend;
-            }
+    case 7:
+        if (ngx_http_memc_strcmp_const(data, "replace") == 0) {
+            *is_storage_cmd = 1;
+            return ngx_http_memc_cmd_replace;
+        }
 
-            if (ngx_http_memc_strcmp_const(data, "version") == 0) {
-                return ngx_http_memc_cmd_version;
-            }
+        if (ngx_http_memc_strcmp_const(data, "prepend") == 0) {
+            *is_storage_cmd = 1;
+            return ngx_http_memc_cmd_prepend;
+        }
 
-            break;
+        if (ngx_http_memc_strcmp_const(data, "version") == 0) {
+            return ngx_http_memc_cmd_version;
+        }
 
-        case 9:
-            if (ngx_http_memc_strcmp_const(data, "flush_all") == 0) {
-                return ngx_http_memc_cmd_flush_all;
-            }
+        break;
 
-            /*
-            if (ngx_str9cmp(data, 'v', 'e', 'r', 'b', 'o', 's', 'i', 't', 'y'))
-            {
-                return ngx_http_memc_cmd_verbosity;
-            }
-            */
+    case 9:
+        if (ngx_http_memc_strcmp_const(data, "flush_all") == 0) {
+            return ngx_http_memc_cmd_flush_all;
+        }
 
-            break;
+        /*
+        if (ngx_str9cmp(data, 'v', 'e', 'r', 'b', 'o', 's', 'i', 't', 'y'))
+        {
+            return ngx_http_memc_cmd_verbosity;
+        }
+        */
 
-        default:
-            break;
+        break;
+
+    default:
+        break;
     }
 
     return ngx_http_memc_cmd_unknown;
@@ -129,7 +130,7 @@ ngx_http_memc_upstream_add(ngx_http_request_t *r, ngx_url_t *url)
 
         if (uscfp[i]->host.len != url->host.len
             || ngx_strncasecmp(uscfp[i]->host.data, url->host.data,
-                url->host.len) != 0)
+                               url->host.len) != 0)
         {
             dd("upstream_add: host not match");
             continue;
@@ -137,7 +138,7 @@ ngx_http_memc_upstream_add(ngx_http_request_t *r, ngx_url_t *url)
 
         if (uscfp[i]->port != url->port) {
             dd("upstream_add: port not match: %d != %d",
-                    (int) uscfp[i]->port, (int) url->port);
+               (int) uscfp[i]->port, (int) url->port);
             continue;
         }
 

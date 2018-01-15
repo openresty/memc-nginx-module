@@ -94,24 +94,24 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
         if (r->method & (NGX_HTTP_GET|NGX_HTTP_HEAD)) {
             cmd_vv->len = sizeof("get") - 1;
-            cmd_vv->data = (u_char*) "get";
+            cmd_vv->data = (u_char *) "get";
             memc_cmd = ngx_http_memc_cmd_get;
 
         } else if (r->method == NGX_HTTP_POST) {
             cmd_vv->len = sizeof("add") - 1;
-            cmd_vv->data = (u_char*) "add";
+            cmd_vv->data = (u_char *) "add";
             memc_cmd = ngx_http_memc_cmd_add;
             is_storage_cmd = 1;
 
         } else if (r->method == NGX_HTTP_PUT) {
             cmd_vv->len = sizeof("set") - 1;
-            cmd_vv->data = (u_char*) "set";
+            cmd_vv->data = (u_char *) "set";
             memc_cmd = ngx_http_memc_cmd_set;
             is_storage_cmd = 1;
 
         } else if (r->method == NGX_HTTP_DELETE) {
             cmd_vv->len = sizeof("delete") - 1;
-            cmd_vv->data = (u_char*) "delete";
+            cmd_vv->data = (u_char *) "delete";
             memc_cmd = ngx_http_memc_cmd_delete;
 
         } else {
@@ -258,7 +258,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         u->input_filter = ngx_http_memc_empty_filter;
 
     } else if (memc_cmd == ngx_http_memc_cmd_version
-            || memc_cmd == ngx_http_memc_cmd_stats)
+               || memc_cmd == ngx_http_memc_cmd_stats)
     {
         u->create_request = ngx_http_memc_create_noarg_cmd_request;
         u->process_header = ngx_http_memc_process_simple_header;
@@ -274,7 +274,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         u->input_filter = ngx_http_memc_empty_filter;
 
     } else if (memc_cmd == ngx_http_memc_cmd_incr
-            || memc_cmd == ngx_http_memc_cmd_decr) {
+               || memc_cmd == ngx_http_memc_cmd_decr)
+    {
         u->create_request = ngx_http_memc_create_incr_decr_cmd_request;
         u->process_header = ngx_http_memc_process_simple_header;
 
@@ -283,8 +284,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     } else {
         ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
-            "assertion failed: command \"%v\" does not have proper "
-            "handlers.", cmd_vv);
+                      "assertion failed: command \"%v\" does not have proper "
+                      "handlers.", cmd_vv);
 
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
@@ -296,8 +297,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     u->input_filter_ctx = ctx;
 
     if (is_storage_cmd
-            || memc_cmd == ngx_http_memc_cmd_flush_all
-            || memc_cmd == ngx_http_memc_cmd_delete)
+        || memc_cmd == ngx_http_memc_cmd_flush_all
+        || memc_cmd == ngx_http_memc_cmd_delete)
     {
         exptime_vv = ngx_http_get_indexed_variable(r, mmcf->exptime_index);
 

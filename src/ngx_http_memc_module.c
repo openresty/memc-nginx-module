@@ -354,7 +354,7 @@ ngx_http_memc_cmds_allowed(ngx_conf_t *cf, ngx_command_t *cmd, void *conf)
     ngx_uint_t                 i;
     ngx_str_t                 *value;
     ngx_http_memc_cmd_t        memc_cmd;
-    ngx_http_memc_cmd_t        *c;
+    ngx_http_memc_cmd_t       *c;
     ngx_flag_t                 is_storage_cmd;
 
     value = cf->args->elts;
