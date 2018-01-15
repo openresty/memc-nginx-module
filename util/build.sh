@@ -2,7 +2,7 @@
 
 # this file is mostly meant to be used by the author himself.
 
-ragel -I src -G2 src/ngx_http_memc_response.rl
+ragel -I src -T1 src/ngx_http_memc_response.rl || exit 1
 util/fix-clang-warnings
 
 if [ $? != 0 ]; then
