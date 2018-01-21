@@ -150,8 +150,8 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-#if defined(nginx_version) && \
-    ((nginx_version >= 7063 && nginx_version < 8000) \
+#if defined(nginx_version) &&                                                \
+    ((nginx_version >= 7063 && nginx_version < 8000)                         \
      || nginx_version >= 8007)
 
     if (ngx_http_upstream_create(r) != NGX_OK) {

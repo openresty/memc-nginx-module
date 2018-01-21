@@ -19,7 +19,7 @@
 #define NGX_UINT64_LEN (NGX_INT64_LEN - 1)
 #endif
 
-#define ngx_http_memc_strcmp_const(a, b) \
+#define ngx_http_memc_strcmp_const(a, b)                                     \
     ngx_strncmp(a, b, sizeof(b) - 1)
 
 ngx_http_memc_cmd_t ngx_http_memc_parse_cmd(u_char *data, size_t len,
