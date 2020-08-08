@@ -142,3 +142,69 @@ STORED\r
 get big2
 nice to meet you!"
 
+
+
+=== TEST 9: cas cmd $memc_unique_token variable dont't set
+--- config
+    location /foo {
+        set $memc_cmd "cas";
+        set $memc_key "test";
+        set $memc_value "value";
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+    GET /foo
+--- response_body_like: 400 Bad Request
+--- error_code: 400
+
+
+
+=== TEST 10: cas cmd key not exists. memc response NOT_FOUND
+--- config
+    location /main {
+        echo 'flush all';
+        echo_location '/foo?cmd=flush_all';
+
+        echo 'cas foo new value';
+        echo_location '/foo?key=foo&cmd=cas&val=newvalue&token=123';
+    }
+    location /foo {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        set $memc_unique_token $arg_token;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+    GET /main
+--- response_body_like
+^flush all
+OK\r
+cas foo new value
+<html>.*?404 Not Found.*$
+
+
+
+=== TEST 10: cas cmd key exists. memc response EXISTS
+--- config
+    location /main {
+        echo 'set foo val ok';
+        echo_location '/foo?cmd=set&val=value&key=foo';
+
+        echo 'cas foo new value';
+        echo_location '/foo?key=foo&cmd=cas&val=newvalue&token=123';
+    }
+    location /foo {
+        set $memc_cmd $arg_cmd;
+        set $memc_key $arg_key;
+        set $memc_value $arg_val;
+        set $memc_unique_token $arg_token;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+    GET /main
+--- response_body eval
+"set foo val ok
+STORED\r
+cas foo new value
+EXISTS\r\n"
