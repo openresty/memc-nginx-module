@@ -125,7 +125,6 @@ ngx_http_memc_create_storage_cmd_request(ngx_http_request_t *r)
         + bytes_len
         + sizeof(CRLF) - 1;
 
-
     unique_token_vv = ctx->memc_unique_token_vv;
     if (ctx->cmd == ngx_http_memc_cmd_cas) {
         len += unique_token_vv->len + sizeof(" ") - 1;
