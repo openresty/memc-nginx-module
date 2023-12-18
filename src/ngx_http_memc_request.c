@@ -384,7 +384,7 @@ ngx_http_memc_create_flush_all_cmd_request(ngx_http_request_t *r)
     if (!exptime_vv->not_found && exptime_vv->len) {
         dd("found exptime: %s", exptime_vv->data);
 
-        len += sizeof(' ') + exptime_vv->len;
+        len += sizeof(" ") - 1 + exptime_vv->len;
     }
 
     len += sizeof(CRLF) - 1;
@@ -451,12 +451,12 @@ ngx_http_memc_create_delete_cmd_request(ngx_http_request_t *r)
         return NGX_HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    len = ctx->cmd_str.len + sizeof(' ') + key_vv->len + escape;
+    len = ctx->cmd_str.len + sizeof(" ") - 1 + key_vv->len + escape;
 
     if (!exptime_vv->not_found && exptime_vv->len) {
         dd("found exptime: %s", exptime_vv->data);
 
-        len += sizeof(' ') + exptime_vv->len;
+        len += sizeof(" ") - 1 + exptime_vv->len;
     }
 
     len += sizeof(CRLF) - 1;
@@ -531,8 +531,8 @@ ngx_http_memc_create_incr_decr_cmd_request(ngx_http_request_t *r)
 
     /* XXX validate if $memc_value_vv is a valid uint64 string */
 
-    len = ctx->cmd_str.len + sizeof(' ') + key_vv->len + escape
-        + sizeof(' ') + value_vv->len + sizeof(CRLF) - 1;
+    len = ctx->cmd_str.len + sizeof(" ") - 1 + key_vv->len + escape
+        + sizeof(" ") - 1 + value_vv->len + sizeof(CRLF) - 1;
 
     b = ngx_create_temp_buf(r->pool, len);
     if (b == NULL) {
