@@ -35,7 +35,7 @@ __DATA__
     memc_send_timeout 10ms;
     location /stats {
         set $memc_cmd stats;
-        memc_pass www.taobao.com:12345;
+        memc_pass 127.0.0.2:12345;
     }
 --- request
     GET /stats
