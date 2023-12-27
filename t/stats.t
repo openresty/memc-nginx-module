@@ -43,3 +43,16 @@ __DATA__
 --- timeout: 1
 --- error_code: 504
 
+
+
+=== TEST 3: stats slabs
+--- timeout: 5
+--- config
+    location /stats {
+        set $memc_cmd stats;
+        set $memc_value slabs;
+        memc_pass 127.0.0.1:$TEST_NGINX_MEMCACHED_PORT;
+    }
+--- request
+    GET /stats
+--- response_body_like: ^(?:STAT [^\r]*\r\n)*END\r\n$
