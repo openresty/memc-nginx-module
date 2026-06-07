@@ -569,6 +569,10 @@ ngx_http_memc_flags_as_http_time_variable(
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_memc_module);
 
+    if (ctx == NULL) {
+        goto not_found;
+    }
+
     flags_vv = ctx->memc_flags_vv;
     if (flags_vv == NULL) {
         goto not_found;
