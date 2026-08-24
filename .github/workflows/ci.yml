@@ -35,6 +35,7 @@ jobs:
             liburi-perl \
             libwww-perl \
             memcached \
+            ragel \
             wget
           sudo systemctl start memcached
 
@@ -72,7 +73,7 @@ jobs:
           sudo make install PREFIX=$LUAJIT_PREFIX > build.log 2>&1 || (cat build.log && exit 1)
           cd ..
           cpanm --sudo --notest Test::Nginx IPC::Run Test2::Util > build.log 2>&1 || (cat build.log && exit 1)
-          perlbrew off && cd test-nginx && sudo cpanm . && cd ..
+          cd test-nginx && sudo cpanm . && cd ..
           export PATH=$PWD/work/nginx/sbin:$PWD/nginx-devel-utils:$PATH
           export NGX_BUILD_CC=$CC
           sh util/build.sh $NGINX_VERSION > build.log 2>&1 || (cat build.log && exit 1)
