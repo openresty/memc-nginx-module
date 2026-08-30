@@ -19,7 +19,7 @@ typedef enum {
     ngx_http_memc_cmd_replace,
     ngx_http_memc_cmd_append,
     ngx_http_memc_cmd_prepend,
-    /* ngx_http_memc_cmd_cas, */
+    ngx_http_memc_cmd_cas,
 
     ngx_http_memc_cmd_get,
     /* ngx_http_memc_cmd_gets, */
@@ -57,6 +57,7 @@ typedef struct {
     ngx_int_t       value_index;
     ngx_int_t       flags_index;
     ngx_int_t       exptime_index;
+    ngx_int_t       unique_token_index;
     ngx_int_t       module_used;
 } ngx_http_memc_main_conf_t;
 
@@ -78,6 +79,7 @@ typedef struct {
     ngx_http_variable_value_t  *memc_key_vv;
     ngx_http_variable_value_t  *memc_flags_vv;
     ngx_http_variable_value_t  *memc_exptime_vv;
+    ngx_http_variable_value_t  *memc_unique_token_vv;
 
     ngx_flag_t                 is_storage_cmd;
 

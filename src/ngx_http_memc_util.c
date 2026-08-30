@@ -27,12 +27,10 @@ ngx_http_memc_parse_cmd(u_char *data, size_t len, ngx_flag_t *is_storage_cmd)
             return ngx_http_memc_cmd_add;
         }
 
-        /*
-        if (ngx_str3cmp(data, 'c', 'a', 's')) {
+        if (ngx_http_memc_strcmp_const(data, "cas") == 0) {
             *is_storage_cmd = 1;
             return ngx_http_memc_cmd_cas;
         }
-        */
 
         if (ngx_http_memc_strcmp_const(data, "get") == 0) {
             return ngx_http_memc_cmd_get;

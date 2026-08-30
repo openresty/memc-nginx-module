@@ -20,6 +20,7 @@ Table of Contents
     * [replace $memc_key $memc_flags $memc_exptime $memc_value](#replace-memc_key-memc_flags-memc_exptime-memc_value)
     * [append $memc_key $memc_flags $memc_exptime $memc_value](#append-memc_key-memc_flags-memc_exptime-memc_value)
     * [prepend $memc_key $memc_flags $memc_exptime $memc_value](#prepend-memc_key-memc_flags-memc_exptime-memc_value)
+    * [cas $memc_key $memc_flags $memc_exptime $memc_value $memc_unique_token](#cas-memc_key-memc_flags-memc_exptime-memc_value-memc_unique_token)
     * [delete $memc_key](#delete-memc_key)
     * [delete $memc_key $memc_exptime](#delete-memc_key-memc_exptime)
     * [incr $memc_key $memc_value](#incr-memc_key-memc_value)
@@ -27,6 +28,7 @@ Table of Contents
     * [flush_all](#flush_all)
     * [flush_all $memc_exptime](#flush_all-memc_exptime)
     * [stats](#stats)
+    * [stats $memc_value](#stats-memc_value)
     * [version](#version)
 * [Directives](#directives)
     * [memc_pass](#memc_pass)
@@ -324,6 +326,13 @@ Similar to the [append command](#append-memc_key-memc_flags-memc_exptime-memc_va
 
 [Back to TOC](#table-of-contents)
 
+cas $memc_key $memc_flags $memc_exptime $memc_value $memc_unique_token
+-------------------------------------------------------
+
+Similar to the [set command](#set-memc_key-memc_flags-memc_exptime-memc_value).
+
+[Back to TOC](#table-of-contents)
+
 delete $memc_key
 ----------------
 
@@ -420,6 +429,28 @@ Causes the memcached server to output general-purpose statistics and settings
 ```
 
 Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
+
+The raw `stats` command output from the upstream memcached server will be put into the response body. 
+
+[Back to TOC](#table-of-contents)
+
+stats $memc_value
+-----
+
+Causes the memcached server to output general-purpose statistics and settings
+
+```nginx
+
+   location /foo {
+       set $memc_cmd stats;
+       set $memc_value items;
+       memc_pass 127.0.0.1:11211;
+   }
+```
+
+Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
+
+Possible `$memc_value` argument values are `items`, `sizes`, `slabs`, among others.
 
 The raw `stats` command output from the upstream memcached server will be put into the response body. 
 
@@ -748,7 +779,7 @@ Some parts of the test suite requires modules [rewrite](http://nginx.org/en/docs
 TODO
 ====
 
-* add support for the memcached commands `cas`, `gets` and `stats $memc_value`.
+* add support for the memcached commands `gets`.
 * add support for the `noreply` option.
 
 [Back to TOC](#table-of-contents)

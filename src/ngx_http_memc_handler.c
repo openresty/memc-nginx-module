@@ -36,6 +36,7 @@ static ngx_str_t  ngx_http_memc_cmd = ngx_string("memc_cmd");
 static ngx_str_t  ngx_http_memc_value = ngx_string("memc_value");
 static ngx_str_t  ngx_http_memc_flags = ngx_string("memc_flags");
 static ngx_str_t  ngx_http_memc_exptime = ngx_string("memc_exptime");
+static ngx_str_t  ngx_http_memc_unique_token = ngx_string("memc_unique_token");
 
 
 static ngx_int_t ngx_http_memc_add_more_variables(ngx_conf_t *cf);
@@ -68,6 +69,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
     ngx_http_variable_value_t      *value_vv;
     ngx_http_variable_value_t      *flags_vv;
     ngx_http_variable_value_t      *exptime_vv;
+    ngx_http_variable_value_t      *unique_token_vv;
 
     ngx_http_memc_cmd_t             memc_cmd;
     ngx_flag_t                      is_storage_cmd = 0;
@@ -257,9 +259,14 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         u->input_filter_init = ngx_http_memc_empty_filter_init;
         u->input_filter = ngx_http_memc_empty_filter;
 
-    } else if (memc_cmd == ngx_http_memc_cmd_version
-               || memc_cmd == ngx_http_memc_cmd_stats)
-    {
+    } else if (memc_cmd == ngx_http_memc_cmd_stats) {
+        u->create_request = ngx_http_memc_create_stats_cmd_request;
+        u->process_header = ngx_http_memc_process_simple_header;
+
+        u->input_filter_init = ngx_http_memc_empty_filter_init;
+        u->input_filter = ngx_http_memc_empty_filter;
+
+    } else if (memc_cmd == ngx_http_memc_cmd_version) {
         u->create_request = ngx_http_memc_create_noarg_cmd_request;
         u->process_header = ngx_http_memc_process_simple_header;
 
@@ -344,6 +351,7 @@ ngx_http_memc_handler(ngx_http_request_t *r)
 
     if (is_storage_cmd
         || memc_cmd == ngx_http_memc_cmd_incr
+        || memc_cmd == ngx_http_memc_cmd_stats
         || memc_cmd == ngx_http_memc_cmd_decr)
     {
         value_vv = ngx_http_get_indexed_variable(r, mmcf->value_index);
@@ -374,6 +382,33 @@ ngx_http_memc_handler(ngx_http_request_t *r)
         }
 
         ctx->memc_value_vv = value_vv;
+    }
+
+    if (memc_cmd == ngx_http_memc_cmd_cas) {
+        unique_token_vv = ngx_http_get_indexed_variable(r, mmcf->unique_token_index);
+        if (unique_token_vv == NULL) {
+            return NGX_HTTP_INTERNAL_SERVER_ERROR;
+        }
+
+        if (unique_token_vv->not_found || unique_token_vv->len == 0) {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "the \"$memc_unique_token\" variable is required for "
+                          "command \"%V\"", &ctx->cmd_str);
+
+            return NGX_HTTP_BAD_REQUEST;
+        }
+
+        if (!ngx_http_memc_valid_uint32_str(unique_token_vv->data, 
+                                            unique_token_vv->len)) 
+        {
+            ngx_log_error(NGX_LOG_ERR, r->connection->log, 0,
+                          "variable \"$memc_unique_token\" takes invalid value: %v",
+                          unique_token_vv);
+
+            return NGX_HTTP_BAD_REQUEST;
+        }
+
+        ctx->memc_unique_token_vv = unique_token_vv;
     }
 
     rc = ngx_http_read_client_request_body(r, ngx_http_upstream_init);
@@ -509,6 +544,11 @@ ngx_http_memc_init(ngx_conf_t *cf)
 
     mmcf->value_index = ngx_http_memc_add_variable(cf, &ngx_http_memc_value);
     if (mmcf->value_index == NGX_ERROR) {
+        return NGX_ERROR;
+    }
+
+    mmcf->unique_token_index = ngx_http_memc_add_variable(cf, &ngx_http_memc_unique_token);
+    if (mmcf->unique_token_index == NGX_ERROR) {
         return NGX_ERROR;
     }
 
