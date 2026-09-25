@@ -421,7 +421,7 @@ Causes the memcached server to output general-purpose statistics and settings
 
 Returns `200 OK` if the request succeeds, or 502 for `ERROR`, `CLIENT_ERROR`, or `SERVER_ERROR`.
 
-The raw `stats` command output from the upstream memcached server will be put into the response body. 
+The raw `stats` command output from the upstream memcached server will be put into the response body.
 
 [Back to TOC](#table-of-contents)
 
@@ -595,6 +595,25 @@ Installation
 ============
 
 You're recommended to install this module (as well as the Nginx core and many other goodies) via the [OpenResty bundle](http://openresty.org). See the [installation steps](http://openresty.org/#Installation) for `OpenResty`.
+
+Pre-built packages for this module are also freely available from the GetPageSpeed repository for Ubuntu and Debian:
+
+```bash
+# Install the repository keyring
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://extras.getpagespeed.com/deb-archive-keyring.gpg \
+  | sudo tee /etc/apt/keyrings/getpagespeed.gpg >/dev/null
+
+# Add the repository (Ubuntu example - replace 'ubuntu' and 'jammy' for your distro)
+echo "deb [signed-by=/etc/apt/keyrings/getpagespeed.gpg] https://extras.getpagespeed.com/ubuntu jammy main" \
+  | sudo tee /etc/apt/sources.list.d/getpagespeed-extras.list
+
+# Install nginx and the module
+sudo apt-get update
+sudo apt-get install nginx nginx-module-memc
+```
+
+The module is automatically enabled after installation. Supported distributions include Debian 12/13 and Ubuntu 20.04/22.04/24.04 (both amd64 and arm64). See [the complete setup instructions](https://apt-nginx-extras.getpagespeed.com/apt-setup/).
 
 Alternatively, you can compile this module into the standard Nginx source distribution by hand:
 
@@ -810,4 +829,3 @@ See Also
 * The standard [memcached](http://nginx.org/en/docs/http/ngx_http_memcached_module.html) module.
 * The [echo module](http://github.com/openresty/echo-nginx-module) for Nginx module's automated testing.
 * The standard [headers](http://nginx.org/en/docs/http/ngx_http_headers_module.html) module and the 3rd-parth [headers-more](http://github.com/openresty/headers-more-nginx-module) module.
-
